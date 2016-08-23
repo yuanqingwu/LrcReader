@@ -9,12 +9,10 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +51,7 @@ public class LrcListFragment extends Fragment {
     private RecyclerAdapter adapter;
 
     private static final int MESSAGE_LRC = 0;
+    private static final int MESSAGE_ERROR_TOAST=1;
 
     public Handler handler = new Handler() {
         @Override
@@ -64,7 +63,9 @@ public class LrcListFragment extends Fragment {
                     songsList.set(msg.arg1,song);
                     adapter.notifyDataSetChanged();
                     break;
-
+                case MESSAGE_ERROR_TOAST:
+                    Toast.makeText(getActivity(),msg.obj.toString(),Toast.LENGTH_SHORT).show();
+                    break;
                 default:
                     break;
             }
@@ -137,7 +138,8 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+             //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
             }
 
             @Override
@@ -168,7 +170,7 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
             }
 
             @Override
@@ -197,7 +199,7 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
             }
 
             @Override
@@ -225,7 +227,7 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
             }
 
             @Override
@@ -251,7 +253,7 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
             }
 
             @Override
@@ -266,7 +268,13 @@ public class LrcListFragment extends Fragment {
     private void analyzeAndShow(String res) {
         LrcResponse lrcResponse = new Gson().fromJson(res, LrcResponse.class);
         if (lrcResponse.getCode() != 0) {
-            Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
+           // Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
+            Message.obtain(handler,MESSAGE_ERROR_TOAST,"返回结果出错").sendToTarget();
+            return;
+        }
+        if (lrcResponse.getCount() == 0) {
+            // Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
+            Message.obtain(handler,MESSAGE_ERROR_TOAST,"抱歉，未搜索到结果").sendToTarget();
             return;
         }
         List<LrcResult> lrcResults = lrcResponse.getResult();
@@ -280,10 +288,7 @@ public class LrcListFragment extends Fragment {
             searchForArtist(lrcResults.get(count).getArtist_id(),count, song);
             searchForLrcText(lrcResults.get(count).getLrc(), count,song);
             searchForAlbumCover(lrcResults.get(count).getAid(),count, song);
-
-            //    Log.i("Test","song:"+ song.toString());
         }
-        //  Message.obtain(handler,MESSAGE_LRC,MESSAGE_SONGS,-1,songsList).sendToTarget();
 
     }
 
