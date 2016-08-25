@@ -45,7 +45,7 @@ public class LrcFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lrc_view, container, false);
         lrcView = (TextView) view.findViewById(R.id.fragment_lrc_view_text);
-        lrcView.setMovementMethod(ScrollingMovementMethod.getInstance());
+        //lrcView.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         lrcText = getArguments().getString("lrcText");
 
@@ -65,6 +65,7 @@ public class LrcFragment extends Fragment {
                 }
 
                 String lrcStr = "";
+                lrcStr=lrcStr+lrcInfo.getTitle()+"\n\n"+"演唱："+lrcInfo.getArtist()+"    专辑："+lrcInfo.getAlbum()+"\n\n";
                 for (String s : lrcInfo.getInfos().values()) {
                     lrcStr += (s + "\n\n");
                 }

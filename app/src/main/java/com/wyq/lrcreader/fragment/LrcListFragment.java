@@ -51,7 +51,7 @@ public class LrcListFragment extends Fragment {
     private RecyclerAdapter adapter;
 
     private static final int MESSAGE_LRC = 0;
-    private static final int MESSAGE_ERROR_TOAST=1;
+    private static final int MESSAGE_ERROR_TOAST = 1;
 
     public Handler handler = new Handler() {
         @Override
@@ -59,12 +59,14 @@ public class LrcListFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what) {
                 case MESSAGE_LRC:
-                    Song song=(Song) msg.obj;
-                    songsList.set(msg.arg1,song);
-                    adapter.notifyDataSetChanged();
+                    Song song = (Song) msg.obj;
+                    songsList.set(msg.arg1, song);
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
                     break;
                 case MESSAGE_ERROR_TOAST:
-                    Toast.makeText(getActivity(),msg.obj.toString(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -88,10 +90,10 @@ public class LrcListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.fragment_lrclist_recyclerview);
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setMessage("searching...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+//        progressDialog = new ProgressDialog(getActivity());
+//        progressDialog.setMessage("searching...");
+//        progressDialog.setCancelable(false);
+//        progressDialog.show();
 
         adapter = new RecyclerAdapter(getActivity(), songsList);
         adapter.notifyDataSetChanged();
@@ -108,7 +110,7 @@ public class LrcListFragment extends Fragment {
                 fragmentReplace(lrcFragment);
             }
         });
-        progressDialog.cancel();
+        //   progressDialog.cancel();
         return view;
     }
 
@@ -116,6 +118,7 @@ public class LrcListFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        //   outState.putParcelableArrayList("songsList", (ArrayList<? extends Parcelable>) songsList);
     }
 
     @Override
@@ -138,8 +141,8 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-             //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
-                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
+                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
@@ -170,7 +173,7 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
+                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
@@ -180,7 +183,7 @@ public class LrcListFragment extends Fragment {
                 ArtistResponse artistResponse = new Gson().fromJson(res, ArtistResponse.class);
                 Artist artist = artistResponse.getResult();
                 song.setArtist(artist.getName());
-                Message.obtain(handler, MESSAGE_LRC, count, -1,song).sendToTarget();
+                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
     }
@@ -199,13 +202,13 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
+                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
                 song.setLrc(response.body().string());
-                Message.obtain(handler, MESSAGE_LRC, count, -1,song).sendToTarget();
+                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
     }
@@ -227,13 +230,13 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
+                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
                 ThumbCoverResponse thumbCoverResponse = new Gson().fromJson(response.body().string(), ThumbCoverResponse.class);
-                searchForCoverImage(thumbCoverResponse.getResult().getCover(),count, song);
+                searchForCoverImage(thumbCoverResponse.getResult().getCover(), count, song);
             }
         });
     }
@@ -253,14 +256,14 @@ public class LrcListFragment extends Fragment {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Message.obtain(handler,MESSAGE_ERROR_TOAST,"请求失败").sendToTarget();
+                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
                 Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
                 song.setAlbumCover(bitmap);
-                Message.obtain(handler, MESSAGE_LRC, count, -1,song).sendToTarget();
+                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
     }
@@ -268,26 +271,26 @@ public class LrcListFragment extends Fragment {
     private void analyzeAndShow(String res) {
         LrcResponse lrcResponse = new Gson().fromJson(res, LrcResponse.class);
         if (lrcResponse.getCode() != 0) {
-           // Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
-            Message.obtain(handler,MESSAGE_ERROR_TOAST,"返回结果出错").sendToTarget();
+            // Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
+            Message.obtain(handler, MESSAGE_ERROR_TOAST, "返回结果出错").sendToTarget();
             return;
         }
         if (lrcResponse.getCount() == 0) {
             // Toast.makeText(getActivity(), "返回结果出错", Toast.LENGTH_SHORT).show();
-            Message.obtain(handler,MESSAGE_ERROR_TOAST,"抱歉，未搜索到结果").sendToTarget();
+            Message.obtain(handler, MESSAGE_ERROR_TOAST, "抱歉，未搜索到结果").sendToTarget();
             return;
         }
         List<LrcResult> lrcResults = lrcResponse.getResult();
         Log.i("Test", "lrcResponse:" + lrcResponse.toString());
-        for(int i=0;i<lrcResponse.getCount();i++) {
+        for (int i = 0; i < lrcResponse.getCount(); i++) {
             Song song = new Song();
             songsList.add(song);
         }
-        for (int count=0;count<lrcResults.size();count++) {
-            Song song=new Song();
-            searchForArtist(lrcResults.get(count).getArtist_id(),count, song);
-            searchForLrcText(lrcResults.get(count).getLrc(), count,song);
-            searchForAlbumCover(lrcResults.get(count).getAid(),count, song);
+        for (int count = 0; count < lrcResults.size(); count++) {
+            Song song = new Song();
+            searchForArtist(lrcResults.get(count).getArtist_id(), count, song);
+            searchForLrcText(lrcResults.get(count).getLrc(), count, song);
+            searchForAlbumCover(lrcResults.get(count).getAid(), count, song);
         }
 
     }

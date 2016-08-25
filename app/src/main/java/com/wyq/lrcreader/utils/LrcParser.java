@@ -107,7 +107,7 @@ public class LrcParser {
             //通过正则表达式取得每句歌词信息
             else{
                 //设置正则表达式
-                String reg ="\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2})\\]";
+                String reg ="\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,3})\\]";
                 Pattern pattern = Pattern.compile(reg);
                 Matcher matcher=pattern.matcher(line);
                 //如果存在匹配项则执行如下操作
@@ -129,7 +129,7 @@ public class LrcParser {
                         }
                     }
                     //得到时间点后的内容
-                    Log.i("Test","line:"+line);
+                 //   Log.i("Test","line:"+line);
                     String[] content = pattern.split(line);
                     //for(int index =0; index<content.length; index++){
          //           Log.i("","content="+content[content.length-1]);
