@@ -2,19 +2,18 @@ package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.squareup.okhttp.OkHttpClient;
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.cache.DiskLruCacheUtil;
+import com.wyq.lrcreader.fragment.LrcLikeFragment;
 import com.wyq.lrcreader.fragment.LrcListFragment;
-import com.wyq.lrcreader.model.Song;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Uni.W on 2016/8/18.
@@ -29,10 +28,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        searchBt = (Button) findViewById(R.id.fragment_lrclist_button);
+        searchBt = (Button) findViewById(R.id.activity_search_button);
         searchBt.setOnClickListener(this);
-        editText = (EditText) findViewById(R.id.fragment_lrclist_edittext);
-
+        editText = (EditText) findViewById(R.id.activity_search_edittext);
+        //显示喜欢的歌词列表
+       // fragmentReplace(new LrcLikeFragment());
     }
 
     @Override
@@ -50,8 +50,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-
     private void fragmentReplace(Fragment fragment) {
-        getFragmentManager().beginTransaction().replace(R.id.fragment_parent_view, fragment).commit();
+        FragmentManager manager = getFragmentManager();
+        manager.popBackStackImmediate();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.fragment_parent_view, fragment);
+        transaction.addToBackStack("LrcList");
+        transaction.commit();
     }
 }

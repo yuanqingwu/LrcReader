@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,12 +12,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -26,6 +29,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.activity.LrcActivity;
 import com.wyq.lrcreader.constants.UrlConstant;
 import com.wyq.lrcreader.model.Artist;
 import com.wyq.lrcreader.model.ArtistResponse;
@@ -35,6 +39,7 @@ import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.model.ThumbCoverResponse;
 import com.wyq.lrcreader.utils.RecyclerAdapter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,18 +101,28 @@ public class LrcListFragment extends Fragment {
 //        progressDialog.show();
 
         adapter = new RecyclerAdapter(getActivity(), songsList);
-        adapter.notifyDataSetChanged();
+//        adapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new RecyclerAdapter.OnRecyclerItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                LrcFragment lrcFragment = new LrcFragment();
+
                 Bundle bundle = new Bundle();
+                bundle.putString("artist",songsList.get(position).getArtist());
                 bundle.putString("lrcText", songsList.get(position).getLrc());
-                lrcFragment.setArguments(bundle);
-                fragmentReplace(lrcFragment);
+                ByteArrayOutputStream bos=new ByteArrayOutputStream();
+                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
+                bundle.putByteArray("albumCover",bos.toByteArray());
+//                LrcFragment lrcFragment = new LrcFragment();
+//                lrcFragment.setArguments(bundle);
+//                fragmentReplace(lrcFragment);
+
+                Intent intent=new Intent();
+                intent.putExtras(bundle);
+                intent.setClass(getActivity(),LrcActivity.class);
+                startActivity(intent,bundle);
             }
         });
         //   progressDialog.cancel();
@@ -297,9 +312,10 @@ public class LrcListFragment extends Fragment {
 
     private void fragmentReplace(Fragment fragment) {
         FragmentManager manager = getFragmentManager();
+       // manager.popBackStackImmediate();
         FragmentTransaction transition = manager.beginTransaction();
         transition.replace(R.id.fragment_parent_view, fragment);
-        transition.addToBackStack("LrcList");
+        transition.addToBackStack("Lrc");
         transition.commit();
     }
 }

@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+import com.wyq.lrcreader.utils.BitmapUtil;
+
 /**
  * Created by Uni.W on 2016/8/18.
  */
@@ -12,10 +15,10 @@ public class Song implements Parcelable {
     private String lrc;
     private Bitmap albumCover;
 
-    public Song(){
-        artist="artist";
-        lrc="lrc";
-        albumCover=Bitmap.createBitmap(74,64, Bitmap.Config.ARGB_8888);
+    public Song() {
+        artist = "artist";
+        lrc = "lrc";
+        albumCover = Bitmap.createBitmap(74, 64, Bitmap.Config.ARGB_8888);
     }
 
     protected Song(Parcel in) {
@@ -74,10 +77,12 @@ public class Song implements Parcelable {
 
     @Override
     public String toString() {
+
+        //   return new Gson().toJson(this);
         return "Song{" +
                 "artist='" + artist + '\'' +
                 ", lrc='" + lrc + '\'' +
-                ", albumCover=" + albumCover +
+                ", albumCover='" + BitmapUtil.convertIconToString(albumCover) + '\'' +
                 '}';
     }
 }
