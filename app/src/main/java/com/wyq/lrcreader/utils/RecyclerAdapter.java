@@ -22,7 +22,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         void onItemClick(View view, int position);
     }
 
+    public interface OnRecyclerItemLongClickListener {
+        void onItemLongClick(View view, int position);
+    }
+
     private OnRecyclerItemClickListener onRecyclerItemClickListener;
+    private OnRecyclerItemLongClickListener onRecyclerItemLongClickListener;
 
     private Context context;
     private List<Song> list;
@@ -36,6 +41,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         this.onRecyclerItemClickListener = onRecyclerItemClickListener;
     }
 
+    public void setOnItemLongClickListener(OnRecyclerItemLongClickListener onRecyclerItemLongClickListener) {
+        this.onRecyclerItemLongClickListener = onRecyclerItemLongClickListener;
+    }
+
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.fragment_lrclist_item, parent, false));
@@ -46,13 +55,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         holder.headImage.setImageBitmap(list.get(position).getAlbumCover());
         holder.nameText.setText(list.get(position).getArtist());
         holder.lrcText.setText(list.get(position).getLrc());
-     //   holder.lrcText.setSelected(true);
+        //   holder.lrcText.setSelected(true);
 
         if (onRecyclerItemClickListener != null) {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onRecyclerItemClickListener.onItemClick(holder.itemView, holder.getLayoutPosition());
+                }
+            });
+        }
+
+        if (onRecyclerItemLongClickListener != null) {
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    onRecyclerItemLongClickListener.onItemLongClick(holder.itemView, holder.getLayoutPosition());
+                    return true;
                 }
             });
         }

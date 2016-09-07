@@ -12,14 +12,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -54,6 +52,8 @@ public class LrcListFragment extends Fragment {
     private List<Song> songsList;
     private OkHttpClient client;
     private RecyclerAdapter adapter;
+
+    private float startX = 0, endX = 0;
 
     private static final int MESSAGE_LRC = 0;
     private static final int MESSAGE_ERROR_TOAST = 1;
@@ -95,10 +95,10 @@ public class LrcListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.fragment_lrclist_recyclerview);
-//        progressDialog = new ProgressDialog(getActivity());
-//        progressDialog.setMessage("searching...");
-//        progressDialog.setCancelable(false);
-//        progressDialog.show();
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage("searching...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
         adapter = new RecyclerAdapter(getActivity(), songsList);
 //        adapter.notifyDataSetChanged();
@@ -110,8 +110,9 @@ public class LrcListFragment extends Fragment {
             public void onItemClick(View view, int position) {
 
                 Bundle bundle = new Bundle();
-                bundle.putString("artist",songsList.get(position).getArtist());
-                bundle.putString("lrcText", songsList.get(position).getLrc());
+                bundle.putString("artist",songsList.get(position).getArtist().toString());
+                bundle.putString("lrcText", songsList.get(position).getLrc().toString());
+
                 ByteArrayOutputStream bos=new ByteArrayOutputStream();
                 songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
                 bundle.putByteArray("albumCover",bos.toByteArray());
@@ -163,7 +164,8 @@ public class LrcListFragment extends Fragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 String res = response.body().string();
-                Log.i("Test", res);
+//                Log.i("Test", res);
+                progressDialog.dismiss();
                 analyzeAndShow(res);
             }
         });
@@ -194,7 +196,7 @@ public class LrcListFragment extends Fragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 String res = response.body().string();
-                Log.i("Test", "artist:" + res);
+//                Log.i("Test", "artist:" + res);
                 ArtistResponse artistResponse = new Gson().fromJson(res, ArtistResponse.class);
                 Artist artist = artistResponse.getResult();
                 song.setArtist(artist.getName());
@@ -222,7 +224,8 @@ public class LrcListFragment extends Fragment {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                song.setLrc(response.body().string());
+                String originStr=response.body().string();
+                song.setLrc(originStr.replace("\r\n","\n"));
                 Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
@@ -296,7 +299,7 @@ public class LrcListFragment extends Fragment {
             return;
         }
         List<LrcResult> lrcResults = lrcResponse.getResult();
-        Log.i("Test", "lrcResponse:" + lrcResponse.toString());
+//        Log.i("Test", "lrcResponse:" + lrcResponse.toString());
         for (int i = 0; i < lrcResponse.getCount(); i++) {
             Song song = new Song();
             songsList.add(song);
@@ -318,4 +321,5 @@ public class LrcListFragment extends Fragment {
         transition.addToBackStack("Lrc");
         transition.commit();
     }
+
 }

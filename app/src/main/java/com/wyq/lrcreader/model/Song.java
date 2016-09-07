@@ -77,12 +77,9 @@ public class Song implements Parcelable {
 
     @Override
     public String toString() {
-
         //   return new Gson().toJson(this);
         return "Song{" +
-                "artist='" + artist + '\'' +
-                ", lrc='" + lrc + '\'' +
-                ", albumCover='" + BitmapUtil.convertIconToString(albumCover) + '\'' +
-                '}';
+                "artist=(%" + artist + "%)" +
+                ", lrc=(%" + lrc + "%)"+"}";
     }
 }

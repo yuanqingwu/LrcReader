@@ -53,10 +53,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     private BlurImageThread blurImageThread;
 
     private long firstClickTime = 0;
-    private boolean isMenuVisiblity = false, isLike = false;
+    private float startX = 0, endX = 0, startY = 0, endY = 0;
+    private boolean isMenuVisiblity = false;
+    private boolean isLike = false;
     private Animation showAnimation, hideAnimation;
 
-    private  DiskLruCacheUtil diskLruCacheUtil;
+    private DiskLruCacheUtil diskLruCacheUtil;
 
     private Handler handler = new Handler() {
         @Override
@@ -91,12 +93,19 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         artist = getIntent().getExtras().getString("artist");
         lrcText = getIntent().getExtras().getString("lrcText");
         albumCover = getIntent().getExtras().getByteArray("albumCover");
+        //isLike=getIntent().getExtras().getBoolean("isLike");
 
-        diskLruCacheUtil= DiskLruCacheUtil.getInstance(LrcActivity.this,"song");
-        song=new Song();
-        song.setArtist(artist);
-        song.setLrc(lrcText);
-        song.setAlbumCover(BitmapFactory.decodeByteArray(albumCover, 0, albumCover.length));
+        if (artist != null && lrcText != null && albumCover != null) {
+            Log.i("Test", artist + "\n歌手");
+            song = new Song();
+            song.setArtist(artist);
+            song.setLrc(lrcText);
+            song.setAlbumCover(BitmapFactory.decodeByteArray(albumCover, 0, albumCover.length));
+        } else {
+            finish();
+        }
+
+        diskLruCacheUtil = DiskLruCacheUtil.getInstance(this, "song");
 
         if (lrcParserThread == null) {
             lrcParserThread = new LrcParserThread();
@@ -152,6 +161,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         long secondClickTime = 0;
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // Toast.makeText(LrcActivity.this,"ckick"+event.getDownTime(),Toast.LENGTH_SHORT).show();
@@ -163,12 +173,24 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                     }
                 }
                 firstClickTime = event.getDownTime();
+
+                startX = event.getRawX();
+                startY = event.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
-
+                endX = event.getRawX();
+                endY = event.getRawY();
+                float distanceX = endX - startX;
+                //float diatanceY = Math.abs(endY - startX);
+                if (distanceX > 100 ) {
+                    finish();
+                }
                 break;
             case MotionEvent.ACTION_UP:
-
+                startX = 0;
+                startY = 0;
+                endX = 0;
+                endY = 0;
                 break;
         }
         return false;
@@ -216,11 +238,13 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 if (!isLike) {
                     menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
                     isLike = true;
-                  diskLruCacheUtil.addToDiskCache(song);
+                    diskLruCacheUtil.addToDiskCache(song);
+                    Log.i("Test", song.getArtist());
                 } else {
                     menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
                     isLike = false;
                     diskLruCacheUtil.removeFromDiskCache(song);
+                    Log.i("Test", song.getArtist());
                 }
                 break;
             default:
@@ -252,7 +276,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 e.printStackTrace();
             }
             if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
-                lrcText.replaceAll("\r\n|\r|\n", "\n\n");
+                lrcText.replace("\r\n", "\n\n");
                 handler.obtainMessage(0, lrcText).sendToTarget();
                 return;
             }

@@ -34,6 +34,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,12 +123,7 @@ public class DiskLruCacheUtil {
         return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
     }
 
-    /**
-     * 将URL转换成key
-     *
-     * @param url 图片的URL
-     * @return
-     */
+
     private String hashKeyFormUrl(String url) {
         String cacheKey;
         try {
@@ -140,12 +136,7 @@ public class DiskLruCacheUtil {
         return cacheKey;
     }
 
-    /**
-     * 将Url的字节数组转换成哈希字符串
-     *
-     * @param bytes URL的字节数组
-     * @return
-     */
+
     private String bytesToHexString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
@@ -158,13 +149,7 @@ public class DiskLruCacheUtil {
         return sb.toString();
     }
 
-    /**
-     * 将Bitmap写入缓存
-     *
-     * @param
-     * @return
-     * @throws IOException
-     */
+
     public boolean addToDiskCache(Song song) {
         //如果当前线程是在主线程 则异常
 //        if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -173,8 +158,6 @@ public class DiskLruCacheUtil {
         if (mDiskCache == null || song == null) {
             return false;
         }
-
-        //设置key，并根据URL保存输出流的返回值决定是否提交至缓存
         String key = hashKeyFormUrl(song.toString());
         //得到Editor对象
         DiskLruCache.Editor editor = null;
@@ -223,14 +206,17 @@ public class DiskLruCacheUtil {
     }
 
     public boolean removeFromDiskCache(Song song) {
+        if (mDiskCache == null || song == null) {
+            return false;
+        }
         String key = hashKeyFormUrl(song.toString());
         try {
-            mDiskCache.remove(key);
-            return true;
+            return mDiskCache.remove(key);
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+
     }
 
     /**
@@ -266,36 +252,53 @@ public class DiskLruCacheUtil {
                 File[] files = mDiskCache.getDirectory().listFiles();
                 List<String> allCacheString = new ArrayList<String>();
                 BufferedReader bufferedReader = null;
-                for (File file : files) {
-                    try {
-                        bufferedReader = new BufferedReader(new FileReader(file));
-                        String line, readStr = "";
-                        while ((line = bufferedReader.readLine()) != null) {
-                            readStr += line;
+                if (files.length > 0) {
+                    for (File file : files) {
+                        if (file.getName().equals("journal")) {
+                            continue;
                         }
-                        allCacheString.add(readStr);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (bufferedReader != null) {
-                            try {
-                                bufferedReader.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                        try {
+                            bufferedReader = new BufferedReader(new FileReader(file));
+                            String line, readStr = "";
+                            while ((line = bufferedReader.readLine()) != null) {
+                                readStr += (line+"\n");
+                            }
+                            allCacheString.add(readStr);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (bufferedReader != null) {
+                                try {
+                                    bufferedReader.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
+
                     }
-
                 }
-
                 //解析cacheString
-                List<Song> songs=new ArrayList<Song>();
-                for(String s : allCacheString) {
-                   //songs.add(new Gson().from);
+                List<Song> songs = new ArrayList<Song>();
+                for (String s : allCacheString) {
+                    Song song = new Song();
+                    Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
+                    Matcher matcher = pattern.matcher(s);
+                    String[] str = new String[2];
+                    for (int i = 0; i < 2; i++) {
+                        if (matcher.find()) {
+                            str[i] = matcher.group();
+                        }
+                    }
+                    song.setArtist(str[0]);
+                    song.setLrc(str[1]);
+                    songs.add(song);
+                    //              Log.i("Test",song.toString());
+
                 }
-                handler.obtainMessage(what,songs).sendToTarget();
+                handler.obtainMessage(what, songs).sendToTarget();
             }
         }).start();
     }
