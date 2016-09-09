@@ -9,8 +9,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.model.LrcInfo;
 import com.wyq.lrcreader.model.Song;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -53,8 +56,38 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         holder.headImage.setImageBitmap(list.get(position).getAlbumCover());
-        holder.nameText.setText(list.get(position).getArtist());
-        holder.lrcText.setText(list.get(position).getLrc());
+
+        //解析出歌名，歌手，专辑
+        LrcInfo lrcInfo = null;
+        try {
+            lrcInfo = new LrcParser().parser(new ByteArrayInputStream(list.get(position).getLrc().getBytes()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String lrcStr = "", title = "";
+        if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
+            //解析失败
+            title = list.get(position).getSongName();
+            lrcStr="演唱："+list.get(position).getArtist()+"      "+"专辑：未知";
+        } else {
+            if (lrcInfo.getArtist() != null && lrcInfo.getArtist().length() > 0) {
+                lrcStr = lrcStr + "演唱：" + lrcInfo.getArtist();
+            }else{
+                lrcStr = lrcStr + "演唱：未知";
+            }
+            if (lrcInfo.getAlbum() != null && lrcInfo.getAlbum().length() > 0) {
+                lrcStr += ("    专辑：" + lrcInfo.getAlbum());
+            }else{
+                lrcStr += ("    专辑：未知");
+            }
+            if (lrcInfo.getTitle() != null && lrcInfo.getTitle().length() > 0) {
+                title = lrcInfo.getTitle();
+            }else{
+                title="未知";
+            }
+        }
+        holder.lrcText.setText(lrcStr);
+        holder.nameText.setText(title);
         //   holder.lrcText.setSelected(true);
 
         if (onRecyclerItemClickListener != null) {

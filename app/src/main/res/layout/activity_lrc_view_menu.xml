@@ -94,21 +94,21 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginBottom="20dp"
-        android:orientation="horizontal"
-        android:paddingLeft="40dp"
-        android:paddingRight="40dp">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
-            android:layout_width="0dp"
+            android:id="@+id/menu_lrc_view_plain_bt"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:text="Plain"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/menu_lrc_view_like_bt"
-            android:layout_width="0dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="100dp"
-            android:layout_weight="1"
             android:background="@drawable/unlike_1_white" />
     </LinearLayout>
 </LinearLayout>

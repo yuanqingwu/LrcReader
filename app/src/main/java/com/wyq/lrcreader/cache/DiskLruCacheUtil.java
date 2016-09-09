@@ -17,6 +17,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.squareup.okhttp.internal.DiskLruCache;
 import com.wyq.lrcreader.model.Song;
+import com.wyq.lrcreader.utils.BitmapUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -244,13 +245,12 @@ public class DiskLruCacheUtil {
     }
 
 
-    public void getAllCacheSong(final Handler handler, final int what, int arg0, int arg1) {
+    public void getAllCacheSong(final Handler handler, final int what) {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 File[] files = mDiskCache.getDirectory().listFiles();
-                List<String> allCacheString = new ArrayList<String>();
                 BufferedReader bufferedReader = null;
                 if (files.length > 0) {
                     for (File file : files) {
@@ -263,7 +263,20 @@ public class DiskLruCacheUtil {
                             while ((line = bufferedReader.readLine()) != null) {
                                 readStr += (line+"\n");
                             }
-                            allCacheString.add(readStr);
+                            Song song = new Song();
+                            Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
+                            Matcher matcher = pattern.matcher(readStr);
+                            String[] str = new String[4];
+                            for (int i = 0; i < 4; i++) {
+                                if (matcher.find()) {
+                                    str[i] = matcher.group();
+                                }
+                            }
+                            song.setSongName(str[0]);
+                            song.setArtist(str[1]);
+                            song.setLrc(str[2]);
+                            song.setAlbumCover(BitmapUtil.convertStringToIcon(str[3]));
+                            handler.obtainMessage(what, song).sendToTarget();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
@@ -280,60 +293,9 @@ public class DiskLruCacheUtil {
 
                     }
                 }
-                //解析cacheString
-                List<Song> songs = new ArrayList<Song>();
-                for (String s : allCacheString) {
-                    Song song = new Song();
-                    Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
-                    Matcher matcher = pattern.matcher(s);
-                    String[] str = new String[2];
-                    for (int i = 0; i < 2; i++) {
-                        if (matcher.find()) {
-                            str[i] = matcher.group();
-                        }
-                    }
-                    song.setArtist(str[0]);
-                    song.setLrc(str[1]);
-                    songs.add(song);
-                    //              Log.i("Test",song.toString());
 
-                }
-                handler.obtainMessage(what, songs).sendToTarget();
             }
         }).start();
     }
-//    private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
-//        HttpURLConnection urlConnection = null;
-//        BufferedOutputStream out = null;
-//        BufferedInputStream in = null;
-//        try {
-//            final URL url = new URL(urlString);
-//            urlConnection = (HttpURLConnection) url.openConnection();
-//            in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
-//            out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
-//            int b;
-//            while ((b = in.read()) != -1) {
-//                out.write(b);
-//            }
-//            return true;
-//        } catch (final IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (urlConnection != null) {
-//                urlConnection.disconnect();
-//            }
-//            try {
-//                if (out != null) {
-//                    out.close();
-//                }
-//                if (in != null) {
-//                    in.close();
-//                }
-//            } catch (final IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return false;
-//    }
 
 }

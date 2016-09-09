@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -35,6 +36,7 @@ import com.wyq.lrcreader.model.LrcResponse;
 import com.wyq.lrcreader.model.LrcResult;
 import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.model.ThumbCoverResponse;
+import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.RecyclerAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -53,7 +55,6 @@ public class LrcListFragment extends Fragment {
     private OkHttpClient client;
     private RecyclerAdapter adapter;
 
-    private float startX = 0, endX = 0;
 
     private static final int MESSAGE_LRC = 0;
     private static final int MESSAGE_ERROR_TOAST = 1;
@@ -112,10 +113,11 @@ public class LrcListFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("artist",songsList.get(position).getArtist().toString());
                 bundle.putString("lrcText", songsList.get(position).getLrc().toString());
-
-                ByteArrayOutputStream bos=new ByteArrayOutputStream();
-                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
-                bundle.putByteArray("albumCover",bos.toByteArray());
+                bundle.putString("songName",songsList.get(position).getSongName().toString());
+                bundle.putString("albumCover", BitmapUtil.convertIconToString(songsList.get(position).getAlbumCover()));
+//                ByteArrayOutputStream bos=new ByteArrayOutputStream();
+//                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
+//                bundle.putByteArray("albumCover",bos.toByteArray());
 //                LrcFragment lrcFragment = new LrcFragment();
 //                lrcFragment.setArguments(bundle);
 //                fragmentReplace(lrcFragment);
@@ -126,7 +128,6 @@ public class LrcListFragment extends Fragment {
                 startActivity(intent,bundle);
             }
         });
-        //   progressDialog.cancel();
         return view;
     }
 
@@ -175,18 +176,6 @@ public class LrcListFragment extends Fragment {
         String url = UrlConstant.ARTIST_URL_ROOT + artistId;
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
-//        try {
-//            Response response=call.execute();
-//            if(response.isSuccessful()){
-//                String res = response.body().string();
-//                Log.i("Test", "artist:" + res);
-//                ArtistResponse artistResponse = new Gson().fromJson(res, ArtistResponse.class);
-//                Artist artist = artistResponse.getResult();
-//                song.setArtist(artist.getName());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -208,14 +197,6 @@ public class LrcListFragment extends Fragment {
     private void searchForLrcText(String url, final int count, final Song song) {
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
-//        try {
-//            Response response=call.execute();
-//            if(response.isSuccessful()){
-//                song.setLrc(response.body().string());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -236,15 +217,6 @@ public class LrcListFragment extends Fragment {
         String url = UrlConstant.AID_ALBUM_COVER_URL_ROOT + aid;
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
-//        try {
-//            Response response=call.execute();
-//            if(response.isSuccessful()){
-//                ThumbCoverResponse thumbCoverResponse=new Gson().fromJson(response.body().string(),ThumbCoverResponse.class);
-//                searchForCoverImage(thumbCoverResponse.getResult().getCover(), song);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -262,15 +234,6 @@ public class LrcListFragment extends Fragment {
     private void searchForCoverImage(String url, final int count, final Song song) {
         Request imageRequest = new Request.Builder().url(url).build();
         Call call = client.newCall(imageRequest);
-//        try {
-//            Response response=call.execute();
-//            if(response.isSuccessful()){
-//                Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-//                song.setAlbumCover(bitmap);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -306,6 +269,7 @@ public class LrcListFragment extends Fragment {
         }
         for (int count = 0; count < lrcResults.size(); count++) {
             Song song = new Song();
+            song.setSongName(lrcResponse.getResult().get(count).getSong());//设置歌名
             searchForArtist(lrcResults.get(count).getArtist_id(), count, song);
             searchForLrcText(lrcResults.get(count).getLrc(), count, song);
             searchForAlbumCover(lrcResults.get(count).getAid(), count, song);

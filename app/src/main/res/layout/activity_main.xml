@@ -1,36 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <FrameLayout
-        android:id="@+id/fragment_parent_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@android:color/darker_gray" />
-
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/activity_search_layout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:padding="5dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
         android:background="@android:color/darker_gray"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="5dp">
 
         <EditText
             android:id="@+id/activity_search_edittext"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:paddingTop="10dp" />
 
         <Button
             android:id="@+id/activity_search_button"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:text="@string/search" />
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/taiji_bt" />
     </LinearLayout>
-</LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fragment_parent_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/activity_search_layout"
+        android:background="@android:color/darker_gray" />
+
+    <GridView
+        android:id="@+id/activity_search_setting_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:numColumns="4"
+        android:layout_above="@id/activity_search_layout"
+        android:background="@color/colorPrimary"
+        android:visibility="gone"></GridView>
+</RelativeLayout>

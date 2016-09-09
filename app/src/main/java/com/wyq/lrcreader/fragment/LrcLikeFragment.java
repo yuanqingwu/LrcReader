@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,19 +20,22 @@ import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.activity.LrcActivity;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
 import com.wyq.lrcreader.model.Song;
+import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.RecyclerAdapter;
 
-import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Uni.W on 2016/8/31.
  */
-public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyclerItemLongClickListener,RecyclerAdapter.OnRecyclerItemClickListener{
+public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyclerItemLongClickListener, RecyclerAdapter.OnRecyclerItemClickListener {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
     private List<Song> songList;
+
+    private long cacheSize = 0;
 
     private static final int SHOW_LIKE_LRC = 0;
 
@@ -43,13 +45,12 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
             super.handleMessage(msg);
             switch (msg.what) {
                 case SHOW_LIKE_LRC:
-                    songList = (List<Song>) msg.obj;
-                    adapter = new RecyclerAdapter(getActivity(), songList);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    recyclerView.setItemAnimator(new DefaultItemAnimator());
-                    recyclerView.setAdapter(adapter);
-                    adapter.setOnItemLongClickListener(LrcLikeFragment.this);
-                    adapter.setOnItemClickListener(LrcLikeFragment.this);
+                    Song song = (Song) msg.obj;
+                    songList.add(song);
+                    //  songList=(List<Song>) msg.obj;
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
                     break;
                 default:
                     break;
@@ -57,19 +58,19 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         }
     };
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        Log.i("Test", "oncreate");
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.fragment_lrclist_recyclerview);
- //       Log.i("Test", "oncreateView");
-
+        //       Log.i("Test", "oncreateView");
+        songList = new ArrayList<>();
+        adapter = new RecyclerAdapter(getActivity(), songList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemLongClickListener(LrcLikeFragment.this);
+        adapter.setOnItemClickListener(LrcLikeFragment.this);
 
         return view;
     }
@@ -77,21 +78,28 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
     @Override
     public void onResume() {
         super.onResume();
-        DiskLruCacheUtil.getInstance(getActivity(), "song").getAllCacheSong(handler, SHOW_LIKE_LRC, 0, 0);
+        DiskLruCacheUtil diskLruCacheUtil = DiskLruCacheUtil.getInstance(getActivity(), "song");
+        if (cacheSize == 0 || cacheSize != diskLruCacheUtil.getSize()) {
+            songList.clear();
+            diskLruCacheUtil.getAllCacheSong(handler, SHOW_LIKE_LRC);
+            cacheSize = diskLruCacheUtil.getSize();
+        }
     }
 
     @Override
     public void onItemClick(View view, int position) {
         Bundle bundle = new Bundle();
-        bundle.putString("artist",songList.get(position).getArtist().toString());
+        bundle.putString("songName", songList.get(position).getSongName().toString());
+        bundle.putString("artist", songList.get(position).getArtist().toString());
         bundle.putString("lrcText", songList.get(position).getLrc().toString());
-        ByteArrayOutputStream bos=new ByteArrayOutputStream();
-        songList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
-        bundle.putByteArray("albumCover",bos.toByteArray());
-        Intent intent=new Intent();
+        bundle.putString("albumCover", BitmapUtil.convertIconToString(songList.get(position).getAlbumCover()));
+//        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+//        songList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
+//        bundle.putByteArray("albumCover",bos.toByteArray());
+        Intent intent = new Intent();
         intent.putExtras(bundle);
-        intent.setClass(getActivity(),LrcActivity.class);
-        startActivity(intent,bundle);
+        intent.setClass(getActivity(), LrcActivity.class);
+        startActivity(intent, bundle);
     }
 
     @Override
@@ -106,11 +114,11 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if( DiskLruCacheUtil.getInstance(getActivity(),"song").removeFromDiskCache(songList.get(position))) {
+                if (DiskLruCacheUtil.getInstance(getActivity(), "song").removeFromDiskCache(songList.get(position))) {
                     songList.remove(position);
                     adapter.notifyDataSetChanged();
-                }else{
-                    Toast.makeText(getActivity(),"未删除成功!",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "未删除成功!", Toast.LENGTH_SHORT).show();
                 }
 
             }
