@@ -2,13 +2,11 @@ package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -21,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
@@ -96,7 +93,10 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         lrcText = getIntent().getExtras().getString("lrcText");
         songName=getIntent().getExtras().getString("songName");
         albumCover =BitmapUtil.convertStringToIcon(getIntent().getExtras().getString("albumCover"));
-        //isLike=getIntent().getExtras().getBoolean("isLike");
+        isLike=getIntent().getExtras().getBoolean("isLike");
+        if(isLike){
+            menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
+        }
 
         if (artist != null && lrcText != null && albumCover != null) {
             song = new Song();

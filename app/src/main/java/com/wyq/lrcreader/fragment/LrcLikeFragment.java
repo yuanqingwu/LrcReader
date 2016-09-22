@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -87,12 +88,33 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
     }
 
     @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            songList = savedInstanceState.getParcelableArrayList("songList");
+            if (songList != null && songList.size() > 0) {
+                Toast.makeText(getActivity(),"恢复",Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (songList != null && songList.size() > 0) {
+            outState.putParcelableArrayList("songList", (ArrayList<? extends Parcelable>) songList);
+        }
+    }
+
+    @Override
     public void onItemClick(View view, int position) {
         Bundle bundle = new Bundle();
         bundle.putString("songName", songList.get(position).getSongName().toString());
         bundle.putString("artist", songList.get(position).getArtist().toString());
         bundle.putString("lrcText", songList.get(position).getLrc().toString());
         bundle.putString("albumCover", BitmapUtil.convertIconToString(songList.get(position).getAlbumCover()));
+        bundle.putBoolean("isLike",true);
 //        ByteArrayOutputStream bos=new ByteArrayOutputStream();
 //        songList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
 //        bundle.putByteArray("albumCover",bos.toByteArray());

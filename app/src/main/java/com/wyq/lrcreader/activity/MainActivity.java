@@ -1,18 +1,19 @@
 package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.wyq.lrcreader.R;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     private GridView settingGrid;
     private boolean isSetting;
     private float startX = 0, endX = 0, startY = 0, endY = 0;
+    private long exitTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         //显示喜欢的歌词列表
 
         if (savedInstanceState == null) {
+
             getFragmentManager().beginTransaction().setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).add(R.id.fragment_parent_view, new LrcLikeFragment(), "LrcLikeList").commit();
         } else {
             Log.i("Test", "savedInstanceState not null");
@@ -53,10 +56,28 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+
+            if (getFragmentManager().popBackStackImmediate()) {
+                return true;
+            }
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                finish();
+                System.exit(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-
 
     @Override
     public void onClick(View v) {
@@ -78,26 +99,17 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         }
         //隐藏软键盘
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(MainActivity.this.getCurrentFocus().getWindowToken(),0);
-    }
-
-    private void fragmentReplace(Fragment fragment, String name) {
-        FragmentManager manager = getFragmentManager();
-        manager.popBackStackImmediate();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fragment_parent_view, fragment);
-        transaction.addToBackStack(name);
-        transaction.commit();
+        imm.hideSoftInputFromWindow(MainActivity.this.getCurrentFocus().getWindowToken(), 0);
     }
 
     @Override
     public boolean onLongClick(View v) {
         if (!isSetting) {
             settingGrid.setVisibility(View.VISIBLE);
-            isSetting=true;
-        }else{
+            isSetting = true;
+        } else {
             settingGrid.setVisibility(View.GONE);
-            isSetting=false;
+            isSetting = false;
         }
         return true;
     }

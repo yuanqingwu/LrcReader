@@ -115,6 +115,7 @@ public class LrcListFragment extends Fragment {
                 bundle.putString("lrcText", songsList.get(position).getLrc().toString());
                 bundle.putString("songName",songsList.get(position).getSongName().toString());
                 bundle.putString("albumCover", BitmapUtil.convertIconToString(songsList.get(position).getAlbumCover()));
+                bundle.putBoolean("isLike",false);
 //                ByteArrayOutputStream bos=new ByteArrayOutputStream();
 //                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
 //                bundle.putByteArray("albumCover",bos.toByteArray());
@@ -159,6 +160,7 @@ public class LrcListFragment extends Fragment {
             @Override
             public void onFailure(Request request, IOException e) {
                 //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
                 Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
