@@ -2,6 +2,7 @@ package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -17,14 +18,20 @@ import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.SendMessageToWX;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
 import com.wyq.lrcreader.model.LrcInfo;
 import com.wyq.lrcreader.model.Song;
+import com.wyq.lrcreader.share.WeChatShare;
 import com.wyq.lrcreader.utils.BitmapUtil;
+import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcParser;
 
 import java.io.ByteArrayInputStream;
@@ -36,13 +43,15 @@ import java.io.IOException;
 public class LrcActivity extends Activity implements View.OnTouchListener, View.OnClickListener {
 
     private TextView lrcView;
+    private ScrollView scrollView;
     private RelativeLayout relativeLayout;
     private LinearLayout setMenuLayout;
 
     private Button menuBackBt, menuHideBt, menuLikeBt, menuPlainBt;
+    private Button menuQzoneBt, menuWeiboBt, menuWechatBt, menuMomentsBt;
     private SeekBar menuTextSizeSeek;
 
-    private String lrcText, artist,songName;
+    private String lrcText, artist, songName;
     private Bitmap albumCover;
     private Song song;
     private LrcInfo lrcInfo;
@@ -68,7 +77,9 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                     lrcView.setText(msg.obj.toString());
                     break;
                 case 1:
-                    relativeLayout.setBackground(new BitmapDrawable((Bitmap) msg.obj));
+                    scrollView.setBackground(new BitmapDrawable((Bitmap) msg.obj));
+                    setMenuLayout.setBackground(new BitmapDrawable(BitmapUtil.getTransparentBitmap((Bitmap) msg.obj, 100)));
+//                    relativeLayout.setBackground(new BitmapDrawable((Bitmap) msg.obj));
 //                        backImage.setAlpha(0.5f);
 //                        backImage.setImageBitmap((Bitmap) msg.obj);
                     break;
@@ -81,6 +92,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lrc_view);
 
+        scrollView = (ScrollView) findViewById(R.id.activity_lrc_view_scrollview);
         lrcView = (TextView) findViewById(R.id.activity_lrc_view_text);
         lrcView.setOnTouchListener(this);
 
@@ -91,10 +103,10 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
 
         artist = getIntent().getExtras().getString("artist");
         lrcText = getIntent().getExtras().getString("lrcText");
-        songName=getIntent().getExtras().getString("songName");
-        albumCover =BitmapUtil.convertStringToIcon(getIntent().getExtras().getString("albumCover"));
-        isLike=getIntent().getExtras().getBoolean("isLike");
-        if(isLike){
+        songName = getIntent().getExtras().getString("songName");
+        albumCover = BitmapUtil.convertStringToIcon(getIntent().getExtras().getString("albumCover"));
+        isLike = getIntent().getExtras().getBoolean("isLike");
+        if (isLike) {
             menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
         }
 
@@ -126,10 +138,18 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         menuHideBt = (Button) findViewById(R.id.menu_lrc_view_hide_bt);
         menuLikeBt = (Button) findViewById(R.id.menu_lrc_view_like_bt);
         menuPlainBt = (Button) findViewById(R.id.menu_lrc_view_plain_bt);
+        menuQzoneBt = (Button) findViewById(R.id.menu_lrc_view_qzone_bt);
+        menuWeiboBt = (Button) findViewById(R.id.menu_lrc_view_weibo_bt);
+        menuWechatBt = (Button) findViewById(R.id.menu_lrc_view_wechat_bt);
+        menuMomentsBt = (Button) findViewById(R.id.menu_lrc_view_moments_bt);
         menuBackBt.setOnClickListener(this);
         menuHideBt.setOnClickListener(this);
         menuLikeBt.setOnClickListener(this);
         menuPlainBt.setOnClickListener(this);
+        menuQzoneBt.setOnClickListener(this);
+        menuWeiboBt.setOnClickListener(this);
+        menuWechatBt.setOnClickListener(this);
+        menuMomentsBt.setOnClickListener(this);
         startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
         menuTextSizeSeek = (SeekBar) findViewById(R.id.menu_lrc_view_text_size_seek);
 
@@ -239,6 +259,19 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 setMenuLayout.setVisibility(View.GONE);
                 isMenuVisiblity = false;
                 break;
+
+            case R.id.menu_lrc_view_qzone_bt:
+
+                break;
+            case R.id.menu_lrc_view_weibo_bt:
+
+                break;
+            case R.id.menu_lrc_view_wechat_bt:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case R.id.menu_lrc_view_moments_bt:
+                shareToWX(SendMessageToWX.Req.WXSceneTimeline);
+                break;
             case R.id.menu_lrc_view_like_bt:
                 if (!isLike) {
                     menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
@@ -261,12 +294,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                     lrcView.setGravity(Gravity.CENTER);
                     if (lrcParserThread != null) {
                         lrcParserThread.run();
-                    }else{
-                        lrcParserThread=new LrcParserThread();
+                    } else {
+                        lrcParserThread = new LrcParserThread();
                         lrcParserThread.start();
                     }
                     menuPlainBt.setTextColor(Color.WHITE);
-                    isPlain=false;
+                    isPlain = false;
                 }
                 break;
             default:
@@ -274,16 +307,27 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         }
     }
 
+
+    public boolean shareToWX(int req) {
+        WeChatShare weChatShare = WeChatShare.getInstance(getApplicationContext());
+        boolean regB = weChatShare.regToWX();
+        LogUtil.i("regB" + (regB == true ? "true" : "false"));
+        // Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.send_img);
+        boolean flag = weChatShare.sendImgToWX(BitmapUtil.convertViewToBitmap(scrollView), req);
+        LogUtil.i("flag" + (flag == true ? "true" : "false"));
+        return flag;
+    }
+
     public class BlurImageThread extends Thread {
         @Override
         public void run() {
             super.run();
             Display display = getWindowManager().getDefaultDisplay();
-           // Bitmap orginalImage = BitmapFactory.decodeByteArray(albumCover, 0, albumCover.length);
+            // Bitmap orginalImage = BitmapFactory.decodeByteArray(albumCover, 0, albumCover.length);
             Bitmap smallImage = BitmapUtil.scaleBitmap(albumCover, 0.2f, 0.2f);
-            Bitmap blurImage = BitmapUtil.blur(smallImage, 60);
+            Bitmap blurImage = BitmapUtil.blur(smallImage, 20);
             Bitmap backImage = BitmapUtil.getSuitaleBitmap(blurImage, display.getWidth(), display.getHeight());
-            handler.obtainMessage(1, BitmapUtil.getTransparentBitmap(backImage, 60)).sendToTarget();
+            handler.obtainMessage(1, BitmapUtil.getTransparentBitmap(backImage, 90)).sendToTarget();
         }
     }
 
@@ -299,7 +343,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
             }
             if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
                 lrcText.replace("\r\n", "\n\n");
-                handler.obtainMessage(0,songName+"\n\n"+ lrcText).sendToTarget();
+                handler.obtainMessage(0, songName + "\n\n" + lrcText).sendToTarget();
                 return;
             }
 

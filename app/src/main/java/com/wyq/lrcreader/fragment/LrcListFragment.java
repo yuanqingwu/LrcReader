@@ -9,14 +9,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -37,12 +36,13 @@ import com.wyq.lrcreader.model.LrcResult;
 import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.model.ThumbCoverResponse;
 import com.wyq.lrcreader.utils.BitmapUtil;
+import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.RecyclerAdapter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by Uni.W on 2016/8/18.
@@ -59,7 +59,7 @@ public class LrcListFragment extends Fragment {
     private static final int MESSAGE_LRC = 0;
     private static final int MESSAGE_ERROR_TOAST = 1;
 
-    public Handler handler = new Handler() {
+    public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -72,7 +72,11 @@ public class LrcListFragment extends Fragment {
                     }
                     break;
                 case MESSAGE_ERROR_TOAST:
-                    Toast.makeText(getActivity(), msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    String s = msg.obj.toString();
+                    if (s == null || s.length() == 0) {
+                        s = "error!";
+                    }
+                    Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -85,6 +89,7 @@ public class LrcListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         client = new OkHttpClient();
+
         songsList = new ArrayList<>();
         String searchText = getArguments().getString("searchText");
         searchForLrc(searchText);
@@ -111,11 +116,11 @@ public class LrcListFragment extends Fragment {
             public void onItemClick(View view, int position) {
 
                 Bundle bundle = new Bundle();
-                bundle.putString("artist",songsList.get(position).getArtist().toString());
+                bundle.putString("artist", songsList.get(position).getArtist().toString());
                 bundle.putString("lrcText", songsList.get(position).getLrc().toString());
-                bundle.putString("songName",songsList.get(position).getSongName().toString());
+                bundle.putString("songName", songsList.get(position).getSongName().toString());
                 bundle.putString("albumCover", BitmapUtil.convertIconToString(songsList.get(position).getAlbumCover()));
-                bundle.putBoolean("isLike",false);
+                bundle.putBoolean("isLike", false);
 //                ByteArrayOutputStream bos=new ByteArrayOutputStream();
 //                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
 //                bundle.putByteArray("albumCover",bos.toByteArray());
@@ -123,10 +128,10 @@ public class LrcListFragment extends Fragment {
 //                lrcFragment.setArguments(bundle);
 //                fragmentReplace(lrcFragment);
 
-                Intent intent=new Intent();
+                Intent intent = new Intent();
                 intent.putExtras(bundle);
-                intent.setClass(getActivity(),LrcActivity.class);
-                startActivity(intent,bundle);
+                intent.setClass(getActivity(), LrcActivity.class);
+                startActivity(intent, bundle);
             }
         });
         return view;
@@ -144,8 +149,12 @@ public class LrcListFragment extends Fragment {
         super.onViewStateRestored(savedInstanceState);
     }
 
-    private void searchForLrc(String searchText) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
+    private void searchForLrc(String searchText) {
         //简单判断是否带有歌手名字；
         String url = "";
         String[] strings = searchText.split(" ");
@@ -157,30 +166,41 @@ public class LrcListFragment extends Fragment {
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
-                Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
-            }
+                         @Override
+                         public void onFailure(Request request, IOException e) {
+                             //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
 
-            @Override
-            public void onResponse(Response response) throws IOException {
-                String res = response.body().string();
+                             e.printStackTrace();
+                             progressDialog.dismiss();
+                             Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
+                         }
+
+                         @Override
+                         public void onResponse(Response response) throws IOException {
+                             String res = response.body().string();
 //                Log.i("Test", res);
-                progressDialog.dismiss();
-                analyzeAndShow(res);
-            }
-        });
+                             LogUtil.i("searchForLrc" + res);
+                             progressDialog.dismiss();
+                             analyzeAndShow(res);
+                         }
+                     }
+
+
+        );
     }
 
     private void searchForArtist(int artistId, final int count, final Song song) {
         String url = UrlConstant.ARTIST_URL_ROOT + artistId;
+        LogUtil.i("searchForArtist" + url);
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+
+                e.printStackTrace();
+                progressDialog.dismiss();
                 Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
@@ -191,37 +211,48 @@ public class LrcListFragment extends Fragment {
                 ArtistResponse artistResponse = new Gson().fromJson(res, ArtistResponse.class);
                 Artist artist = artistResponse.getResult();
                 song.setArtist(artist.getName());
+                LogUtil.i("searchForArtist" + res);
                 Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
     }
 
     private void searchForLrcText(String url, final int count, final Song song) {
+        LogUtil.i("searchForLrcText" + url);
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+
+                e.printStackTrace();
+                progressDialog.dismiss();
                 Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
-                String originStr=response.body().string();
-                song.setLrc(originStr.replace("\r\n","\n"));
+                String originStr = response.body().string();
+                song.setLrc(originStr.replace("\r\n", "\n"));
+                LogUtil.i("searchForLrcText" + originStr);
                 Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
     }
 
     private void searchForAlbumCover(int aid, final int count, final Song song) {
-
         String url = UrlConstant.AID_ALBUM_COVER_URL_ROOT + aid;
+        LogUtil.i("searchForAlbumCover" + url);
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+
+                e.printStackTrace();
+                progressDialog.dismiss();
                 Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
@@ -234,11 +265,16 @@ public class LrcListFragment extends Fragment {
     }
 
     private void searchForCoverImage(String url, final int count, final Song song) {
+        LogUtil.i("searchForCoverImage" + url);
         Request imageRequest = new Request.Builder().url(url).build();
         Call call = client.newCall(imageRequest);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                //   Toast.makeText(getActivity(), "请求失败", Toast.LENGTH_SHORT).show();
+
+                e.printStackTrace();
+                progressDialog.dismiss();
                 Message.obtain(handler, MESSAGE_ERROR_TOAST, "请求失败").sendToTarget();
             }
 
@@ -246,6 +282,7 @@ public class LrcListFragment extends Fragment {
             public void onResponse(Response response) throws IOException {
                 Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
                 song.setAlbumCover(bitmap);
+                LogUtil.i("CoverImage");
                 Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
             }
         });
@@ -269,6 +306,7 @@ public class LrcListFragment extends Fragment {
             Song song = new Song();
             songsList.add(song);
         }
+        adapter.notifyDataSetChanged();
         for (int count = 0; count < lrcResults.size(); count++) {
             Song song = new Song();
             song.setSongName(lrcResponse.getResult().get(count).getSong());//设置歌名
@@ -281,7 +319,7 @@ public class LrcListFragment extends Fragment {
 
     private void fragmentReplace(Fragment fragment) {
         FragmentManager manager = getFragmentManager();
-       // manager.popBackStackImmediate();
+        // manager.popBackStackImmediate();
         FragmentTransaction transition = manager.beginTransaction();
         transition.replace(R.id.fragment_parent_view, fragment);
         transition.addToBackStack("Lrc");

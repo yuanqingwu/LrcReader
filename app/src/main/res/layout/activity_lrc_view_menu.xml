@@ -59,34 +59,45 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp">
+        android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@string/textColor" />
+            android:text="@string/share" />
 
         <Button
+            android:id="@+id/menu_lrc_view_qzone_bt"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_marginLeft="25dp"
+            android:layout_weight="1"
+            android:background="@drawable/qzone" />
 
         <Button
+            android:id="@+id/menu_lrc_view_weibo_bt"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_marginLeft="25dp"
+            android:layout_weight="1"
+            android:background="@drawable/weibo" />
 
         <Button
+            android:id="@+id/menu_lrc_view_wechat_bt"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_marginLeft="25dp"
+            android:layout_weight="1"
+            android:background="@drawable/wechat" />
 
         <Button
+            android:id="@+id/menu_lrc_view_moments_bt"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_marginLeft="25dp"
+            android:layout_weight="1"
+            android:background="@drawable/moments" />
 
     </LinearLayout>
 

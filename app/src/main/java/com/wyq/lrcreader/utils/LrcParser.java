@@ -85,26 +85,26 @@ public class LrcParser {
         Pattern pattern1 = Pattern.compile("(?<=\\[ti:)([\\S\\s]+?)(?=\\])");
         Matcher matcher1 = pattern1.matcher(line);
         if (matcher1.find()) {
-            lrcinfo.setTitle(matcher1.group());
+            lrcinfo.setTitle(matcher1.group().trim());
         }
 
 
         Pattern pattern2 = Pattern.compile("(?<=\\[ar:)([\\S\\s]+?)(?=\\])");
         Matcher matcher2 = pattern2.matcher(line);
         if (matcher2.find()) {
-            lrcinfo.setArtist(matcher2.group());
+            lrcinfo.setArtist(matcher2.group().trim());
         }
 
         Pattern pattern3 = Pattern.compile("(?<=\\[al:)([\\S\\s]+?)(?=\\])");
         Matcher matcher3 = pattern3.matcher(line);
         if (matcher3.find()) {
-            lrcinfo.setAlbum(matcher3.group());
+            lrcinfo.setAlbum(matcher3.group().trim());
         }
 
         Pattern pattern4 = Pattern.compile("(?<=\\[by:)([\\S\\s]+?)(?=\\])");
         Matcher matcher4 = pattern4.matcher(line);
         if (matcher4.find()) {
-            lrcinfo.setBySomeBody(matcher4.group());
+            lrcinfo.setBySomeBody(matcher4.group().trim());
         }
 
 //            //获取歌曲名信息
@@ -163,7 +163,7 @@ public class LrcParser {
                 //if(index==content.length-1){
                 //将内容设置为当前内容
                 if (content.length >= 1) {
-                    currentContent = content[content.length - 1];
+                    currentContent = content[content.length - 1].trim();
                 } else {
                     currentContent = " ";
                 }

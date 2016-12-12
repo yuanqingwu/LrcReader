@@ -1,11 +1,19 @@
 package com.wyq.lrcreader.utils;
 
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.os.Build;
 import android.util.Base64;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
@@ -38,6 +46,101 @@ public class BitmapUtil {
         return sourceImg;
     }
 
+
+    /**
+     * 图片转成string
+     *
+     * @param bitmap
+     * @return
+     */
+    public static String convertIconToString(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();// outputstream
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] appicon = baos.toByteArray();// 转为byte数组
+        return Base64.encodeToString(appicon, Base64.DEFAULT);
+
+    }
+
+    /**
+     * string转成bitmap
+     *
+     * @param st
+     */
+    public static Bitmap convertStringToIcon(String st) {
+        // OutputStream out;
+        Bitmap bitmap = null;
+        try {
+            // out = new FileOutputStream("/sdcard/aa.jpg");
+            byte[] bitmapArray;
+            bitmapArray = Base64.decode(st, Base64.DEFAULT);
+            bitmap =
+                    BitmapFactory.decodeByteArray(bitmapArray, 0,
+                            bitmapArray.length);
+            // bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            return bitmap;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 将view转化为bitmap
+     *
+     * @param view
+     * @return
+     */
+
+    public static Bitmap convertViewToBitmap(View view) {
+//        view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+//        int layoutMargin = (view.getWidth() - view.getMeasuredWidth())/2;
+//        view.layout(layoutMargin, 0,width - layoutMargin, view.getMeasuredHeight());
+
+        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED));
+        view.layout((int) view.getX(), (int) view.getY(), (int) view.getX() + view.getMeasuredWidth(),
+                (int) view.getY() + view.getMeasuredHeight());
+        LogUtil.i("width:" + view.getWidth());
+        LogUtil.i("measurewidth:" + view.getMeasuredWidth());
+//       // view.setDrawingCacheEnabled(true);
+//        view.buildDrawingCache(true);
+//        //Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache(true));
+//        Bitmap bitmap = view.getDrawingCache();
+        //view.destroyDrawingCache();
+        // view.setDrawingCacheEnabled(false);
+//        if(bitmap.isRecycled()){
+//            LogUtil.i("bitmap has been recycled");
+//        }
+//        LogUtil.i("Byte count:"+bitmap.getByteCount());
+
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        return changeColor(bitmap);
+    }
+
+    /**
+     * 转换bitmap为数组
+     *
+     * @param bmp
+     * @param needRecycle
+     * @return
+     */
+    public static byte[] bmpToByteArray(final Bitmap bmp, final boolean needRecycle) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
+        if (needRecycle) {
+            bmp.recycle();
+        }
+
+        byte[] result = output.toByteArray();
+        try {
+            output.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     /**
      * 建立Bitmap防止Out Of Memery Crash
@@ -93,12 +196,11 @@ public class BitmapUtil {
         int inSampleSize = 1;
         if (height > reqHeight || width > reqWidth) {
             // 计算出实际宽高和目标宽高的比率
-            final int heightRatio = Math.round((float) height
-                    / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-            // 选择宽和高中最小的比率作为inSampleSize的值，这样可以保证最终图片的宽和高
-            // 一定都会大于等于目标的宽和高。
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
         }
         return inSampleSize;
     }
@@ -266,39 +368,56 @@ public class BitmapUtil {
         return newBitmap;
     }
 
+
     /**
-     * 图片转成string
+     * bitmap中的透明色用白色替换
      *
      * @param bitmap
      * @return
      */
-    public static String convertIconToString(Bitmap bitmap) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();// outputstream
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] appicon = baos.toByteArray();// 转为byte数组
-        return Base64.encodeToString(appicon, Base64.DEFAULT);
-
+    public static Bitmap changeColor(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int[] colorArray = new int[w * h];
+        int n = 0;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                int color = getMixtureWhite(bitmap.getPixel(j, i));
+                colorArray[n++] = color;
+            }
+        }
+        return Bitmap.createBitmap(colorArray, w, h, Bitmap.Config.ARGB_8888);
     }
 
     /**
-     * string转成bitmap
+     * 获取和白色混合颜色
      *
-     * @param st
+     * @return
      */
-    public static Bitmap convertStringToIcon(String st) {
-        // OutputStream out;
-        Bitmap bitmap = null;
-        try {
-            // out = new FileOutputStream("/sdcard/aa.jpg");
-            byte[] bitmapArray;
-            bitmapArray = Base64.decode(st, Base64.DEFAULT);
-            bitmap =
-                    BitmapFactory.decodeByteArray(bitmapArray, 0,
-                            bitmapArray.length);
-            // bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            return bitmap;
-        } catch (Exception e) {
-            return null;
-        }
+    private static int getMixtureWhite(int color) {
+        int alpha = Color.alpha(color);
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        return Color.rgb(getSingleMixtureWhite(red, alpha), getSingleMixtureWhite
+
+                        (green, alpha),
+                getSingleMixtureWhite(blue, alpha));
     }
+
+    /**
+     * 获取单色的混合值
+     *
+     * @param color
+     * @param alpha
+     * @return
+     */
+    private static int getSingleMixtureWhite(int color, int alpha) {
+        int newColor = color * alpha / 255 + 255 - alpha;
+        return newColor > 255 ? 255 : newColor;
+    }
+
 }

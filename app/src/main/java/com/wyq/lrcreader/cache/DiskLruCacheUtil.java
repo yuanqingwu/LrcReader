@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.gson.Gson;
+
 import com.squareup.okhttp.internal.DiskLruCache;
 import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.utils.BitmapUtil;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * Created by Uni.W on 2016/8/24.
