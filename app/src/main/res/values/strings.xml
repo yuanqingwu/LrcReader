@@ -3,4 +3,10 @@
     <string name="search">search</string>
     <string name="textSize">textSize</string>
     <string name="share">share</string>
+    <string name="local_search_list_text">本地歌词文件夹列表:</string>
+    <string name="local_search_progress_text_ing">正在搜索本地歌词...</string>
+    <string name="local_search_progress_text_ed">本地歌词搜索完成</string>
+    <string name="local_expand_progress_text_ing">正在加载本地歌词...</string>
+    <string name="local_expand_progress_text_ed">本地歌词加载完成</string>
+    <string name="local_search_expand_text">本地歌词列表</string>
 </resources>

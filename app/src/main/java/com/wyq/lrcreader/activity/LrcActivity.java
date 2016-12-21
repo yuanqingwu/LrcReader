@@ -122,11 +122,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
 
         diskLruCacheUtil = DiskLruCacheUtil.getInstance(this, "song");
 
-        if (lrcParserThread == null) {
+//        handler.obtainMessage(0, new LrcParser().parserAll(lrcText)).sendToTarget();
+        if (lrcText != null && lrcParserThread == null) {
             lrcParserThread = new LrcParserThread();
             lrcParserThread.start();
         }
-        if (blurImageThread == null) {
+        if (albumCover != null && blurImageThread == null) {
             blurImageThread = new BlurImageThread();
             blurImageThread.start();
         }

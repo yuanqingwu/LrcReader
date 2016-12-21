@@ -28,6 +28,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.activity.LrcActivity;
+import com.wyq.lrcreader.constants.LocalConstans;
 import com.wyq.lrcreader.constants.UrlConstant;
 import com.wyq.lrcreader.model.Artist;
 import com.wyq.lrcreader.model.ArtistResponse;
@@ -37,8 +38,11 @@ import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.model.ThumbCoverResponse;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.LogUtil;
-import com.wyq.lrcreader.utils.RecyclerAdapter;
+import com.wyq.lrcreader.adapter.RecyclerAdapter;
+import com.wyq.lrcreader.utils.LrcParser;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +62,8 @@ public class LrcListFragment extends Fragment {
 
     private static final int MESSAGE_LRC = 0;
     private static final int MESSAGE_ERROR_TOAST = 1;
+    private static final int MESSAGE_LRC_SONGLIST = -1;//已经是个完整的songList
+    private static final int MESSAGE_LRC_SONG = -2;//单个song
 
     public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -65,10 +71,15 @@ public class LrcListFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what) {
                 case MESSAGE_LRC:
-                    Song song = (Song) msg.obj;
-                    songsList.set(msg.arg1, song);
-                    if (adapter != null) {
+                    if (msg.arg2 == MESSAGE_LRC_SONGLIST) {//传入sonlist则直接显示
+                        songsList = (List<Song>) msg.obj;
                         adapter.notifyDataSetChanged();
+                    } else if (msg.arg2 == MESSAGE_LRC_SONG) {//传入song逐条替代
+                        Song song = (Song) msg.obj;
+                        songsList.set(msg.arg1, song);
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        }
                     }
                     break;
                 case MESSAGE_ERROR_TOAST:
@@ -76,7 +87,8 @@ public class LrcListFragment extends Fragment {
                     if (s == null || s.length() == 0) {
                         s = "error!";
                     }
-                    Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+                    if (getActivity() != null)
+                        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -91,8 +103,23 @@ public class LrcListFragment extends Fragment {
         client = new OkHttpClient();
 
         songsList = new ArrayList<>();
-        String searchText = getArguments().getString("searchText");
-        searchForLrc(searchText);
+        if (getArguments().getBoolean("isLocal")) {
+            //displaySongList(getArguments().<Song>getParcelableArrayList("songList"));
+            final List<String> songDirList = getArguments().getStringArrayList("localLyricDir");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    expandLocalLyricDir(songDirList);
+                }
+            }).start();
+        } else {
+            String searchText = getArguments().getString("searchText");
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage("searching...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            searchForLrc(searchText);
+        }
     }
 
     @Nullable
@@ -101,10 +128,6 @@ public class LrcListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.fragment_lrclist_recyclerview);
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setMessage("searching...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
 
         adapter = new RecyclerAdapter(getActivity(), songsList);
 //        adapter.notifyDataSetChanged();
@@ -121,12 +144,6 @@ public class LrcListFragment extends Fragment {
                 bundle.putString("songName", songsList.get(position).getSongName().toString());
                 bundle.putString("albumCover", BitmapUtil.convertIconToString(songsList.get(position).getAlbumCover()));
                 bundle.putBoolean("isLike", false);
-//                ByteArrayOutputStream bos=new ByteArrayOutputStream();
-//                songsList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
-//                bundle.putByteArray("albumCover",bos.toByteArray());
-//                LrcFragment lrcFragment = new LrcFragment();
-//                lrcFragment.setArguments(bundle);
-//                fragmentReplace(lrcFragment);
 
                 Intent intent = new Intent();
                 intent.putExtras(bundle);
@@ -211,15 +228,17 @@ public class LrcListFragment extends Fragment {
                 ArtistResponse artistResponse = new Gson().fromJson(res, ArtistResponse.class);
                 Artist artist = artistResponse.getResult();
                 song.setArtist(artist.getName());
-                LogUtil.i("searchForArtist" + res);
-                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
+                // LogUtil.i("searchForArtist" + res);
+                Message.obtain(handler, MESSAGE_LRC, count, MESSAGE_LRC_SONG, song).sendToTarget();
             }
         });
     }
 
     private void searchForLrcText(String url, final int count, final Song song) {
         LogUtil.i("searchForLrcText" + url);
-        Request request = new Request.Builder().url(url).build();
+        //服务器url变化！！！
+        String newUrl = url.replace("s.gecimi.com", "s.geci.me");
+        Request request = new Request.Builder().url(newUrl).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -235,8 +254,8 @@ public class LrcListFragment extends Fragment {
             public void onResponse(Response response) throws IOException {
                 String originStr = response.body().string();
                 song.setLrc(originStr.replace("\r\n", "\n"));
-                LogUtil.i("searchForLrcText" + originStr);
-                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
+                //LogUtil.i("searchForLrcText" + originStr);
+                Message.obtain(handler, MESSAGE_LRC, count, MESSAGE_LRC_SONG, song).sendToTarget();
             }
         });
     }
@@ -266,7 +285,9 @@ public class LrcListFragment extends Fragment {
 
     private void searchForCoverImage(String url, final int count, final Song song) {
         LogUtil.i("searchForCoverImage" + url);
-        Request imageRequest = new Request.Builder().url(url).build();
+        //服务器url变化！！！
+        String newUrl = url.replace("s.gecimi.com", "s.geci.me");
+        Request imageRequest = new Request.Builder().url(newUrl).build();
         Call call = client.newCall(imageRequest);
         call.enqueue(new Callback() {
             @Override
@@ -283,7 +304,7 @@ public class LrcListFragment extends Fragment {
                 Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
                 song.setAlbumCover(bitmap);
                 LogUtil.i("CoverImage");
-                Message.obtain(handler, MESSAGE_LRC, count, -1, song).sendToTarget();
+                Message.obtain(handler, MESSAGE_LRC, count, MESSAGE_LRC_SONG, song).sendToTarget();
             }
         });
     }
@@ -306,7 +327,6 @@ public class LrcListFragment extends Fragment {
             Song song = new Song();
             songsList.add(song);
         }
-        adapter.notifyDataSetChanged();
         for (int count = 0; count < lrcResults.size(); count++) {
             Song song = new Song();
             song.setSongName(lrcResponse.getResult().get(count).getSong());//设置歌名
@@ -315,6 +335,36 @@ public class LrcListFragment extends Fragment {
             searchForAlbumCover(lrcResults.get(count).getAid(), count, song);
         }
 
+    }
+
+
+    public void expandLocalLyricDir(List<String> localLyricDir) {
+        for (String dirStr : localLyricDir) {
+            File file = new File(dirStr);
+            if (file.isDirectory()) {
+                String[] files = file.list();
+                for (String fileNme : files) {
+                    Song song = new LrcParser().parserAll(fileNme, readLocalFile(LocalConstans.NETEASE_CLOUDMUSIC_DOWNLOAD_LYRIC + fileNme));
+                    songsList.add(song);
+                    Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
+                }
+            }
+        }
+    }
+
+    public String readLocalFile(String path) {
+        String lrcText = "";
+        try {
+            FileInputStream fis = new FileInputStream(path);
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            lrcText = new String(buffer);
+            LogUtil.i(lrcText);
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lrcText;
     }
 
     private void fragmentReplace(Fragment fragment) {

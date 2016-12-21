@@ -1,4 +1,4 @@
-package com.wyq.lrcreader.utils;
+package com.wyq.lrcreader.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.model.LrcInfo;
 import com.wyq.lrcreader.model.Song;
+import com.wyq.lrcreader.utils.LrcParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/darker_gray"
+        android:background="@color/lighter_gray"
         android:orientation="horizontal"
         android:padding="5dp">
 
@@ -37,9 +37,10 @@
     <GridView
         android:id="@+id/activity_search_setting_grid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:numColumns="4"
+        android:layout_height="wrap_content"
         android:layout_above="@id/activity_search_layout"
         android:background="@color/colorPrimary"
+        android:numColumns="2"
+        android:gravity="center"
         android:visibility="gone"></GridView>
 </RelativeLayout>

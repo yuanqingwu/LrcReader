@@ -3,6 +3,7 @@ package com.wyq.lrcreader.utils;
 import android.util.Log;
 
 import com.wyq.lrcreader.model.LrcInfo;
+import com.wyq.lrcreader.model.Song;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +20,8 @@ import java.util.regex.Pattern;
 
 /**
  * Created by Uni.W on 2016/8/23.
+ * <p>
+ * 1.分行的歌词，每句有可能多个时间戳； 2.连续的歌词，每句一个时间戳；
  */
 public class LrcParser {
 
@@ -74,6 +77,45 @@ public class LrcParser {
         return lrcinfo;
     }
 
+    public Song parserAll(String songId, String lrcText) {
+        Song song = new Song();
+
+        //匹配歌名
+        Pattern pattern1 = Pattern.compile("(?<=\\[ti:).*?(?=\\])");
+        Matcher matcher1 = pattern1.matcher(lrcText);
+        if (matcher1.find()) {
+            song.setSongName(matcher1.group());
+        } else {
+            song.setSongName(songId);
+        }
+
+        //匹配歌手
+        Pattern pattern2 = Pattern.compile("(?<=\\[ar:).*?(?=\\])");
+        Matcher matcher2 = pattern2.matcher(lrcText);
+        if (matcher2.find()) {
+            song.setArtist(matcher2.group());
+        }
+
+        //匹配专辑
+        Pattern pattern3 = Pattern.compile("(?<=\\[al:).*?(?=\\])");
+        Matcher matcher3 = pattern3.matcher(lrcText);
+        if (matcher3.find()) {
+            song.setAlbum(matcher3.group());
+        }
+
+        String lrc = "";
+        String reg = "(?<=\\])(?![\\[\\(]).*?(?=[\\n\\\\])";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher matcher = pattern.matcher(lrcText);
+        while (matcher.find()) {
+            String line = matcher.group();
+            lrc += (line + "\n\n");
+        }
+        song.setLrc(lrc);
+
+        return song;
+    }
+
     /**
      * 利用正则表达式解析每行具体语句
      * 并将解析完的信息保存到LrcInfo对象中
@@ -87,7 +129,6 @@ public class LrcParser {
         if (matcher1.find()) {
             lrcinfo.setTitle(matcher1.group().trim());
         }
-
 
         Pattern pattern2 = Pattern.compile("(?<=\\[ar:)([\\S\\s]+?)(?=\\])");
         Matcher matcher2 = pattern2.matcher(line);
@@ -107,74 +148,52 @@ public class LrcParser {
             lrcinfo.setBySomeBody(matcher4.group().trim());
         }
 
-//            //获取歌曲名信息
-//            if(line.startsWith("[ti:")){
-//                String title =line.substring(4,line.length()-1);
-//             //   Log.i("","title-->"+title);
-//                lrcinfo.setTitle(title);
-//            }
-//            //取得歌手信息
-//            else if(line.startsWith("[ar:")){
-//                String artist = line.substring(4, line.length()-1);
-//            //    Log.i("","artist-->"+artist);
-//                lrcinfo.setArtist(artist);
-//            }
-//            //取得专辑信息
-//            else if(line.startsWith("[al:")){
-//                String album =line.substring(4, line.length()-1);
-//            //    Log.i("","album-->"+album);
-//                lrcinfo.setAlbum(album);
-//            }
-//            //取得歌词制作者
-//            else if(line.startsWith("[by:")){
-//                String bysomebody=line.substring(4, line.length()-1);
-//            //    Log.i("","by-->"+bysomebody);
-//                lrcinfo.setBySomeBody(bysomebody);
-//            }
         //通过正则表达式取得每句歌词信息
-        else {
-            //设置正则表达式
-            String reg = "\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,3})\\]";
-            Pattern pattern = Pattern.compile(reg);
-            Matcher matcher = pattern.matcher(line);
-            //如果存在匹配项则执行如下操作
-            while (matcher.find()) {
-                //得到匹配的内容
-                String msg = matcher.group();
-                //得到这个匹配项开始的索引
-                int start = matcher.start();
-                //得到这个匹配项结束的索引
-                int end = matcher.end();
-                //得到这个匹配项中的数组
-                int groupCount = matcher.groupCount();
-                for (int index = 0; index < groupCount; index++) {
-                    String timeStr = matcher.group(index);
-                    //               Log.i("","time["+index+"]="+timeStr);
-                    if (index == 0) {
-                        //将第二组中的内容设置为当前的一个时间点
-                        currentTime = str2Long(timeStr.substring(1, timeStr.length() - 1));
-                    }
+        // else {
+        //设置正则表达式
+        String reg = "\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2})\\]|\\[(\\d{1,2}:\\d{1,2}\\.\\d{1,3})\\]";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher matcher = pattern.matcher(line);
+        //如果存在匹配项则执行如下操作
+        while (matcher.find()) {
+            //得到匹配的内容
+            String msg = matcher.group();
+            //LogUtil.i(msg);
+            //得到这个匹配项开始的索引
+            int start = matcher.start();
+            //得到这个匹配项结束的索引
+            int end = matcher.end();
+            //得到这个匹配项中的数组
+            int groupCount = matcher.groupCount();
+            for (int index = 0; index < groupCount; index++) {
+                String timeStr = matcher.group(index);
+                //Log.i("","time["+index+"]="+timeStr);
+                if (index == 0) {
+                    //将第二组中的内容设置为当前的一个时间点
+                    currentTime = str2Long(timeStr.substring(1, timeStr.length() - 1));
                 }
-                //得到时间点后的内容
-                //   Log.i("Test","line:"+line);
-                String[] content = pattern.split(line);
-                //for(int index =0; index<content.length; index++){
-                //           Log.i("","content="+content[content.length-1]);
-                //if(index==content.length-1){
-                //将内容设置为当前内容
-                if (content.length >= 1) {
-                    currentContent = content[content.length - 1].trim();
-                } else {
-                    currentContent = " ";
-                }
-                //}
-                //}
-                //设置时间点和内容的映射
-                maps.put(currentTime, currentContent);
-                //           Log.i("","currentTime--->"+currentTime+"   currentContent--->"+currentContent);
-                //遍历map
             }
+            //得到时间点后的内容
+            //   Log.i("Test","line:"+line);
+            String[] content = pattern.split(line);
+//                for(int index =0; index<content.length; index++) {
+//                    Log.i("", "content=" + content[content.length - 1]);
+//                }
+            //if(index==content.length-1){
+            //将内容设置为当前内容
+            if (content.length >= 1) {
+                currentContent = content[content.length - 1].trim();
+            } else {
+                currentContent = " ";
+            }
+            // }
+            // }
+            //设置时间点和内容的映射
+            maps.put(currentTime, currentContent);
+            //           Log.i("","currentTime--->"+currentTime+"   currentContent--->"+currentContent);
+            //遍历map
         }
+        //}
     }
 
     private long str2Long(String timeStr) {

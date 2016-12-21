@@ -1,24 +1,28 @@
 package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.constants.LocalConstans;
 import com.wyq.lrcreader.fragment.LrcLikeFragment;
 import com.wyq.lrcreader.fragment.LrcListFragment;
+import com.wyq.lrcreader.fragment.LocalLrcFragment;
+import com.wyq.lrcreader.utils.LogUtil;
+
+import java.io.File;
 
 /**
  * Created by Uni.W on 2016/8/18.
@@ -33,6 +37,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     private float startX = 0, endX = 0, startY = 0, endY = 0;
     private long exitTime = 0;
 
+    private String[] settingName = {"本地歌词", "语音搜索", "设置"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,15 +50,40 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         settingGrid = (GridView) findViewById(R.id.activity_search_setting_grid);
         searchBt.setOnLongClickListener(this);
 
+        initSettingGrid();
+
         //显示喜欢的歌词列表
 
-        if (savedInstanceState == null) {
-
-            getFragmentManager().beginTransaction().setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).add(R.id.fragment_parent_view, new LrcLikeFragment(), "LrcLikeList").commit();
-        } else {
-            Log.i("Test", "savedInstanceState not null");
-        }
+//        if (savedInstanceState == null) {
+        getFragmentManager().beginTransaction().setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
+                add(R.id.fragment_parent_view, new LrcLikeFragment(), "LrcLikeList").
+                commit();
+//        } else {
+//            Log.i("Test", "savedInstanceState not null");
+//        }
         // fragmentReplace(new LrcLikeFragment(),"LrcLikeList");
+    }
+
+    public void initSettingGrid() {
+        ArrayAdapter arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, settingName);
+        settingGrid.setAdapter(arrayAdapter);
+        settingGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        getFragmentManager().beginTransaction().setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
+                                hide(getFragmentManager().findFragmentByTag("LrcLikeList")).
+                                add(R.id.fragment_parent_view, new LocalLrcFragment(), "SearchLocal").
+                                addToBackStack("SearchLocal").
+                                commit();
+                        settingGrid.setVisibility(View.GONE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
     }
 
     @Override
@@ -91,6 +122,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             //    searchForLrc(searchText);
             LrcListFragment lrcListFragment = new LrcListFragment();
             Bundle bundle = new Bundle();
+            bundle.putBoolean("isLocal", false);
             bundle.putString("searchText", searchText);
             lrcListFragment.setArguments(bundle);
             // fragmentReplace(lrcListFragment,"LrcList");

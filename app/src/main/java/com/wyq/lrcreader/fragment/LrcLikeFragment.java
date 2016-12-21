@@ -22,7 +22,7 @@ import com.wyq.lrcreader.activity.LrcActivity;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
 import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.utils.BitmapUtil;
-import com.wyq.lrcreader.utils.RecyclerAdapter;
+import com.wyq.lrcreader.adapter.RecyclerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +81,8 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         super.onResume();
         DiskLruCacheUtil diskLruCacheUtil = DiskLruCacheUtil.getInstance(getActivity(), "song");
         if (cacheSize == 0 || cacheSize != diskLruCacheUtil.getSize()) {
-            songList.clear();
+            if (songList != null)
+                songList.clear();
             diskLruCacheUtil.getAllCacheSong(handler, SHOW_LIKE_LRC);
             cacheSize = diskLruCacheUtil.getSize();
         }
@@ -93,7 +94,7 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         if (savedInstanceState != null) {
             songList = savedInstanceState.getParcelableArrayList("songList");
             if (songList != null && songList.size() > 0) {
-                Toast.makeText(getActivity(),"恢复",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "恢复", Toast.LENGTH_SHORT).show();
                 adapter.notifyDataSetChanged();
             }
         }
@@ -114,7 +115,7 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         bundle.putString("artist", songList.get(position).getArtist().toString());
         bundle.putString("lrcText", songList.get(position).getLrc().toString());
         bundle.putString("albumCover", BitmapUtil.convertIconToString(songList.get(position).getAlbumCover()));
-        bundle.putBoolean("isLike",true);
+        bundle.putBoolean("isLike", true);
 //        ByteArrayOutputStream bos=new ByteArrayOutputStream();
 //        songList.get(position).getAlbumCover().compress(Bitmap.CompressFormat.PNG,100,bos);
 //        bundle.putByteArray("albumCover",bos.toByteArray());

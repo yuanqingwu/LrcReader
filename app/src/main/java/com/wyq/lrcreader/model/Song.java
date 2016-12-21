@@ -14,12 +14,16 @@ public class Song implements Parcelable {
     private String songName;
     private String artist;
     private String lrc;
+    private String album;
+
+
     private Bitmap albumCover;
 
     public Song() {
         songName = "songName";
         artist = "artist";
         lrc = "lrc";
+        album = "album";
         albumCover = Bitmap.createBitmap(74, 64, Bitmap.Config.ARGB_8888);
     }
 
@@ -66,6 +70,14 @@ public class Song implements Parcelable {
         this.lrc = lrc;
     }
 
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
     public Bitmap getAlbumCover() {
         return albumCover;
     }
@@ -84,6 +96,7 @@ public class Song implements Parcelable {
         dest.writeString(songName);
         dest.writeString(artist);
         dest.writeString(lrc);
+        dest.writeString(album);
         dest.writeParcelable(albumCover, flags);
     }
 
@@ -95,6 +108,7 @@ public class Song implements Parcelable {
                 "songName=(%" + songName + "%)" +
                 ",artist=(%" + artist + "%)" +
                 ",lrc=(%" + lrc + "%)" +
+                ",album=(%" + album + "%)" +
                 ",albumCover=(%" + albumCoverStr + "%)" +
                 "}";
     }

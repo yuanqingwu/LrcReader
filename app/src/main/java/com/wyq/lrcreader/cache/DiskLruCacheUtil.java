@@ -268,8 +268,8 @@ public class DiskLruCacheUtil {
                             Song song = new Song();
                             Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
                             Matcher matcher = pattern.matcher(readStr);
-                            String[] str = new String[4];
-                            for (int i = 0; i < 4; i++) {
+                            String[] str = new String[5];
+                            for (int i = 0; i < 5; i++) {
                                 if (matcher.find()) {
                                     str[i] = matcher.group();
                                 }
@@ -277,7 +277,8 @@ public class DiskLruCacheUtil {
                             song.setSongName(str[0]);
                             song.setArtist(str[1]);
                             song.setLrc(str[2]);
-                            song.setAlbumCover(BitmapUtil.convertStringToIcon(str[3]));
+                            song.setAlbum(str[3]);
+                            song.setAlbumCover(BitmapUtil.convertStringToIcon(str[4]));
                             handler.obtainMessage(what, song).sendToTarget();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
