@@ -54,7 +54,7 @@ public class WeChatShare {
         //Bitmap sendBitMap = Bitmap.createScaledBitmap(bitmap, 100, 300, true);
         Bitmap sendBitMap = bitmap;
         //bitmap.recycle();
-        while (sendBitMap.getByteCount() > (250 * 1024)) {
+        while (sendBitMap.getByteCount() > (200 * 1024)) {
             Matrix matrix = new Matrix();
             matrix.setScale(0.9f, 0.9f);
             LogUtil.i("send bitmap count:" + sendBitMap.getByteCount());

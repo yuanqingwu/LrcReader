@@ -77,6 +77,14 @@ public class LrcParser {
         return lrcinfo;
     }
 
+
+    /**
+     * 目前只测试过匹配网易云音乐的本地歌词
+     *
+     * @param songId
+     * @param lrcText
+     * @return
+     */
     public Song parserAll(String songId, String lrcText) {
         Song song = new Song();
 
@@ -104,7 +112,7 @@ public class LrcParser {
         }
 
         String lrc = "";
-        String reg = "(?<=\\])(?![\\[\\(]).*?(?=[\\n\\\\])";
+        String reg = "(?<=\\])(?![\\[\\(\\\\n]).*?(?=[\\n\\\\])";
         Pattern pattern = Pattern.compile(reg);
         Matcher matcher = pattern.matcher(lrcText);
         while (matcher.find()) {
