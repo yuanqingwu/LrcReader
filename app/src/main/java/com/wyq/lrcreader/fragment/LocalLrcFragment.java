@@ -33,6 +33,7 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
     private ProgressBar progressBar;
     private TextView progressText;
     private Button expandBt;
+    private SearchLocalLyricThread searchLocalLyricThread;
 
     private ListSelectAdapter listAdapter = null;
     private ArrayList<String> lrcList = null;
@@ -49,10 +50,15 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
                     if (msg.arg1 == 0) {//show
                         progressBar.setVisibility(View.VISIBLE);
                         progressText.setText((String) msg.obj);
+                        expandBt.setVisibility(View.GONE);
                     } else {          //hide
                         progressBar.setVisibility(View.GONE);
                         progressText.setText((String) msg.obj);
                         expandBt.setVisibility(View.VISIBLE);
+                        if (searchLocalLyricThread != null) {
+                            searchLocalLyricThread.interrupt();
+                            searchLocalLyricThread = null;
+                        }
                     }
                     break;
                 case MESSAGE_RESULT:
@@ -92,16 +98,10 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_local_lrc_search_ok_bt:
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        lrcList.clear();//清空之前的搜索结果
-                        handler.obtainMessage(MESSAGE_PROGRESS, 0, -1, getActivity().getText(R.string.local_search_progress_text_ing)).sendToTarget();
-                        ArrayList<File> list = sortFilesByType(Environment.getExternalStorageDirectory().getAbsolutePath(), "Lyric");
-                        handler.obtainMessage(MESSAGE_PROGRESS, 1, -1, getActivity().getText(R.string.local_search_progress_text_ed)).sendToTarget();
-                    }
-                }).start();
-
+                if (searchLocalLyricThread == null) {
+                    searchLocalLyricThread = new SearchLocalLyricThread();
+                    searchLocalLyricThread.start();
+                }
                 break;
             case R.id.fragment_local_lrc_search_expand_bt://将选中文件夹的歌词都显示在列表中
                 LrcListFragment lrcListFragment = new LrcListFragment();
@@ -116,6 +116,16 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    public class SearchLocalLyricThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            lrcList.clear();//清空之前的搜索结果
+            handler.obtainMessage(MESSAGE_PROGRESS, 0, -1, getActivity().getText(R.string.local_search_progress_text_ing)).sendToTarget();
+            ArrayList<File> list = sortFilesByType(Environment.getExternalStorageDirectory().getAbsolutePath(), "Lyric");
+            handler.obtainMessage(MESSAGE_PROGRESS, 1, -1, getActivity().getText(R.string.local_search_progress_text_ed)).sendToTarget();
+        }
+    }
 
     public ArrayList<File> sortFilesByType(String rootPath, String typeName) {
         ArrayList<File> filelist = new ArrayList<File>();

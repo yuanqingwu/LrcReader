@@ -24,6 +24,7 @@ import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.adapter.RecyclerAdapter;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,8 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
             switch (msg.what) {
                 case SHOW_LIKE_LRC:
                     Song song = (Song) msg.obj;
+                    song.setAlbumCover(BitmapUtil.getBitmapFromFile(getActivity().getExternalCacheDir() + "/albumCover/" + song.getAlbumCoverMD5()));
+
                     songList.add(song);
                     //  songList=(List<Song>) msg.obj;
                     if (adapter != null) {
@@ -138,6 +141,11 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (DiskLruCacheUtil.getInstance(getActivity(), "song").removeFromDiskCache(songList.get(position))) {
+                    try {
+                        BitmapUtil.deleteBitmapFromFile(getActivity().getExternalCacheDir() + "/albumCover", songList.get(position).getAlbumCoverMD5());
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     songList.remove(position);
                     adapter.notifyDataSetChanged();
                 } else {

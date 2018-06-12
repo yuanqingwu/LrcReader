@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.os.StatFs;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -55,9 +56,12 @@ public class DiskLruCacheUtil {
     //缓存个数
     private static final int DISK_CACHE_INDEX = 0;
 
+    private Context context;
+
     private static DiskLruCacheUtil diskLruCacheUtil;
 
     private DiskLruCacheUtil(Context context, String fileName) {
+        this.context = context;
         init(context, fileName);
     }
 
@@ -140,7 +144,7 @@ public class DiskLruCacheUtil {
     }
 
 
-    private String bytesToHexString(byte[] bytes) {
+    public String bytesToHexString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
             String hex = Integer.toHexString(0xFF & bytes[i]);
@@ -263,22 +267,28 @@ public class DiskLruCacheUtil {
                             bufferedReader = new BufferedReader(new FileReader(file));
                             String line, readStr = "";
                             while ((line = bufferedReader.readLine()) != null) {
-                                readStr += (line+"\n");
+                                readStr += (line + "\n");
                             }
                             Song song = new Song();
                             Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
                             Matcher matcher = pattern.matcher(readStr);
                             String[] str = new String[5];
-                            for (int i = 0; i < 5; i++) {
-                                if (matcher.find()) {
-                                    str[i] = matcher.group();
-                                }
+                            int i = 0;
+                            while (matcher.find()) {
+                                str[i] = matcher.group();
+                                i++;
                             }
+
                             song.setSongName(str[0]);
                             song.setArtist(str[1]);
                             song.setLrc(str[2]);
                             song.setAlbum(str[3]);
-                            song.setAlbumCover(BitmapUtil.convertStringToIcon(str[4]));
+                            //song.setAlbumCover(BitmapUtil.convertStringToIcon(str[4]));
+                            try {
+                                song.setAlbumCoverMD5(str[4]);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             handler.obtainMessage(what, song).sendToTarget();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();

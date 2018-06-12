@@ -91,37 +91,36 @@ public class LrcParser {
         //匹配歌名
         Pattern pattern1 = Pattern.compile("(?<=\\[ti:).*?(?=\\])");
         Matcher matcher1 = pattern1.matcher(lrcText);
-        if (matcher1.find()) {
+        if (matcher1.find()) { //有歌名才继续匹配
             song.setSongName(matcher1.group());
+            //匹配歌手
+            Pattern pattern2 = Pattern.compile("(?<=\\[ar:).*?(?=\\])");
+            Matcher matcher2 = pattern2.matcher(lrcText);
+            if (matcher2.find()) {
+                song.setArtist(matcher2.group());
+            }
+
+            //匹配专辑
+            Pattern pattern3 = Pattern.compile("(?<=\\[al:).*?(?=\\])");
+            Matcher matcher3 = pattern3.matcher(lrcText);
+            if (matcher3.find()) {
+                song.setAlbum(matcher3.group());
+            }
+
+            String lrc = "";
+            String reg = "(?<=\\])(?![\\[\\(\\\\n]).*?(?=[\\n\\\\])";
+            Pattern pattern = Pattern.compile(reg);
+            Matcher matcher = pattern.matcher(lrcText);
+            while (matcher.find()) {
+                String line = matcher.group();
+                lrc += (line + "\n\n");
+            }
+            song.setLrc(lrc);
+
+            return song;
         } else {
-            song.setSongName(songId);
+            return null;
         }
-
-        //匹配歌手
-        Pattern pattern2 = Pattern.compile("(?<=\\[ar:).*?(?=\\])");
-        Matcher matcher2 = pattern2.matcher(lrcText);
-        if (matcher2.find()) {
-            song.setArtist(matcher2.group());
-        }
-
-        //匹配专辑
-        Pattern pattern3 = Pattern.compile("(?<=\\[al:).*?(?=\\])");
-        Matcher matcher3 = pattern3.matcher(lrcText);
-        if (matcher3.find()) {
-            song.setAlbum(matcher3.group());
-        }
-
-        String lrc = "";
-        String reg = "(?<=\\])(?![\\[\\(\\\\n]).*?(?=[\\n\\\\])";
-        Pattern pattern = Pattern.compile(reg);
-        Matcher matcher = pattern.matcher(lrcText);
-        while (matcher.find()) {
-            String line = matcher.group();
-            lrc += (line + "\n\n");
-        }
-        song.setLrc(lrc);
-
-        return song;
     }
 
     /**

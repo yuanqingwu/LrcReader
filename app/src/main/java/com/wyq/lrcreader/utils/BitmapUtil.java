@@ -1,26 +1,79 @@
 package com.wyq.lrcreader.utils;
 
-import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.os.Build;
 import android.util.Base64;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Uni.W on 2016/8/29.
  */
 public class BitmapUtil {
+
+    /**
+     * 将图片写入文件
+     *
+     * @param bitmap
+     * @param fileName 文件名字
+     * @param filePath 文件夹的路径
+     */
+    public static void saveBitMapToFile(Bitmap bitmap, String fileName, String filePath) {
+        if (fileName == null || filePath == null) {
+            LogUtil.i("param is null");
+            return;
+        }
+
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                file.mkdir();
+            }
+
+            File albumFile = new File(file, fileName);
+            FileOutputStream fos = new FileOutputStream(albumFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public static Bitmap getBitmapFromFile(String filePath) {
+        if (new File(filePath).exists())
+            return BitmapFactory.decodeFile(filePath);
+        return null;
+    }
+
+    public static boolean deleteBitmapFromFile(String filePath, String fileName) throws FileNotFoundException {
+        if (fileName == null || filePath == null) {
+            throw new NullPointerException("param can't be null");
+        }
+        File file = new File(filePath, fileName);
+        if (file.exists()) {
+            return file.delete();
+        } else {
+            throw new FileNotFoundException("No such file!");
+        }
+    }
+
     /**
      * 改变Bitmap透明度
      *
@@ -83,6 +136,52 @@ public class BitmapUtil {
         }
     }
 
+    /**
+     * 对Bitmap 取MD5值
+     *
+     * @param bitmap
+     * @param <T>    传入bitmap 或者String
+     * @return
+     * @throws Exception
+     */
+    public static <T> String getBitmapMD5Hex(T bitmap) throws Exception {
+        if (bitmap == null) {
+            return null;
+        }
+        if (bitmap instanceof Bitmap) {
+            try {
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                md5.update(BitmapUtil.convertIconToString((Bitmap) bitmap).getBytes());
+                return bytesToHexString(md5.digest());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        } else if (bitmap instanceof String) {
+            try {
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
+                md5.update(((String) bitmap).getBytes());
+                return bytesToHexString(md5.digest());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new Exception("only except String or Bitmap para");
+        }
+
+        return null;
+    }
+
+    public static String bytesToHexString(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(hex);
+        }
+        return sb.toString();
+    }
     /**
      * 将view转化为bitmap
      *

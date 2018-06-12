@@ -2,7 +2,6 @@ package com.wyq.lrcreader.activity;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -22,9 +21,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
 import com.wyq.lrcreader.model.LrcInfo;
@@ -35,6 +32,7 @@ import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcParser;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -105,6 +103,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         lrcText = getIntent().getExtras().getString("lrcText");
         songName = getIntent().getExtras().getString("songName");
         albumCover = BitmapUtil.convertStringToIcon(getIntent().getExtras().getString("albumCover"));
+//        LogUtil.i("albumCover string:"+getIntent().getExtras().getString("albumCover"));
         isLike = getIntent().getExtras().getBoolean("isLike");
         if (isLike) {
             menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
@@ -274,14 +273,32 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                 break;
             case R.id.menu_lrc_view_like_bt:
+                String filePath = getExternalCacheDir() + "/albumCover";
+                LogUtil.i(filePath);
                 if (!isLike) {
                     menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
                     isLike = true;
                     diskLruCacheUtil.addToDiskCache(song);
+
+                    //以文件的MD5值为文件名,将封面图片另外存储在文件中
+                    if (albumCover == null)
+                        albumCover = song.getAlbumCover();
+                    try {
+                        BitmapUtil.saveBitMapToFile(albumCover, BitmapUtil.getBitmapMD5Hex(albumCover), filePath);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
                     isLike = false;
                     diskLruCacheUtil.removeFromDiskCache(song);
+                    try {
+                        BitmapUtil.deleteBitmapFromFile(filePath, BitmapUtil.getBitmapMD5Hex(albumCover));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case R.id.menu_lrc_view_plain_bt:
@@ -344,7 +361,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
             }
             if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
                 lrcText.replace("\r\n", "\n\n");
-                handler.obtainMessage(0, songName + "\n\n" + lrcText).sendToTarget();
+                handler.obtainMessage(0, songName + "\n\n\n" + lrcText).sendToTarget();
                 return;
             }
 

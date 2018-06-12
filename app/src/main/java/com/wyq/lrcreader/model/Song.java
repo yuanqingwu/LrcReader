@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.Gson;
 import com.wyq.lrcreader.utils.BitmapUtil;
 
 /**
@@ -15,9 +14,9 @@ public class Song implements Parcelable {
     private String artist;
     private String lrc;
     private String album;
-
-
     private Bitmap albumCover;
+    private String albumCoverMD5;
+
 
     public Song() {
         songName = "songName";
@@ -25,13 +24,16 @@ public class Song implements Parcelable {
         lrc = "lrc";
         album = "album";
         albumCover = Bitmap.createBitmap(74, 64, Bitmap.Config.ARGB_8888);
+        albumCoverMD5 = "";
     }
 
     protected Song(Parcel in) {
         songName = in.readString();
         artist = in.readString();
         lrc = in.readString();
+        album = in.readString();
         albumCover = in.readParcelable(Bitmap.class.getClassLoader());
+        albumCoverMD5 = in.readString();
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {
@@ -86,6 +88,15 @@ public class Song implements Parcelable {
         this.albumCover = albumCover;
     }
 
+    public String getAlbumCoverMD5() {
+        return albumCoverMD5;
+    }
+
+    public void setAlbumCoverMD5(String albumCoverMD5) {
+        this.albumCoverMD5 = albumCoverMD5;
+    }
+
+
     @Override
     public int describeContents() {
         return 0;
@@ -98,18 +109,24 @@ public class Song implements Parcelable {
         dest.writeString(lrc);
         dest.writeString(album);
         dest.writeParcelable(albumCover, flags);
+        dest.writeString(albumCoverMD5);
     }
 
     @Override
     public String toString() {
         //   return new Gson().toJson(this);
-        String albumCoverStr = BitmapUtil.convertIconToString(albumCover);
+        //String albumCoverStr = BitmapUtil.convertIconToString(albumCover);
+        try {
+            albumCoverMD5 = BitmapUtil.getBitmapMD5Hex(albumCover);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "Song{" +
                 "songName=(%" + songName + "%)" +
                 ",artist=(%" + artist + "%)" +
                 ",lrc=(%" + lrc + "%)" +
                 ",album=(%" + album + "%)" +
-                ",albumCover=(%" + albumCoverStr + "%)" +
+                ",albumCoverMD5=(%" + albumCoverMD5 + "%)" +
                 "}";
     }
 }

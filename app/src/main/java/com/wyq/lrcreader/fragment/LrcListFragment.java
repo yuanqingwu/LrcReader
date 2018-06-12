@@ -28,6 +28,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.activity.LrcActivity;
+import com.wyq.lrcreader.adapter.RecyclerAdapter;
 import com.wyq.lrcreader.constants.LocalConstans;
 import com.wyq.lrcreader.constants.UrlConstant;
 import com.wyq.lrcreader.model.Artist;
@@ -38,7 +39,6 @@ import com.wyq.lrcreader.model.Song;
 import com.wyq.lrcreader.model.ThumbCoverResponse;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.LogUtil;
-import com.wyq.lrcreader.adapter.RecyclerAdapter;
 import com.wyq.lrcreader.utils.LrcParser;
 
 import java.io.File;
@@ -58,6 +58,8 @@ public class LrcListFragment extends Fragment {
     private List<Song> songsList;
     private OkHttpClient client;
     private RecyclerAdapter adapter;
+
+    private boolean isLocal = false;
 
 
     private static final int MESSAGE_LRC = 0;
@@ -103,7 +105,8 @@ public class LrcListFragment extends Fragment {
         client = new OkHttpClient();
 
         songsList = new ArrayList<>();
-        if (getArguments().getBoolean("isLocal")) {
+        isLocal = getArguments().getBoolean("isLocal");
+        if (isLocal) {
             //displaySongList(getArguments().<Song>getParcelableArrayList("songList"));
             final List<String> songDirList = getArguments().getStringArrayList("localLyricDir");
             new Thread(new Runnable() {
@@ -138,11 +141,18 @@ public class LrcListFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
 
+                Bitmap bitmap = null;
+                if (isLocal || songsList.get(position).getAlbumCover().sameAs(BitmapFactory.decodeResource(getResources(), R.drawable.album))) {
+                    bitmap = Bitmap.createBitmap(74, 64, Bitmap.Config.ARGB_8888);
+                } else {
+                    bitmap = songsList.get(position).getAlbumCover();
+                }
+
                 Bundle bundle = new Bundle();
                 bundle.putString("artist", songsList.get(position).getArtist().toString());
                 bundle.putString("lrcText", songsList.get(position).getLrc().toString());
                 bundle.putString("songName", songsList.get(position).getSongName().toString());
-                bundle.putString("albumCover", BitmapUtil.convertIconToString(songsList.get(position).getAlbumCover()));
+                bundle.putString("albumCover", BitmapUtil.convertIconToString(BitmapUtil.changeColor(bitmap)));
                 bundle.putBoolean("isLike", false);
 
                 Intent intent = new Intent();
@@ -168,8 +178,10 @@ public class LrcListFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+        client.cancel("lrcList");
         super.onDestroy();
     }
+
 
     private void searchForLrc(String searchText) {
         //简单判断是否带有歌手名字；
@@ -180,7 +192,7 @@ public class LrcListFragment extends Fragment {
         } else {
             url = UrlConstant.NAME_LRC_URL_ROOT + strings[0] + "/" + strings[strings.length - 1];
         }
-        Request request = new Request.Builder().url(url).build();
+        Request request = new Request.Builder().tag("lrcList").url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
                          @Override
@@ -208,8 +220,8 @@ public class LrcListFragment extends Fragment {
 
     private void searchForArtist(int artistId, final int count, final Song song) {
         String url = UrlConstant.ARTIST_URL_ROOT + artistId;
-        LogUtil.i("searchForArtist" + url);
-        Request request = new Request.Builder().url(url).build();
+        LogUtil.i("searchForArtist:" + url);
+        Request request = new Request.Builder().tag("lrcList").url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -235,10 +247,10 @@ public class LrcListFragment extends Fragment {
     }
 
     private void searchForLrcText(String url, final int count, final Song song) {
-        LogUtil.i("searchForLrcText" + url);
+        LogUtil.i("searchForLrcText:" + url);
         //服务器url变化！！！
-        String newUrl = url.replace("s.gecimi.com", "s.geci.me");
-        Request request = new Request.Builder().url(newUrl).build();
+        //String newUrl = url.replace("s.gecimi.com", "s.geci.me");
+        Request request = new Request.Builder().tag("lrcList").url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -262,8 +274,8 @@ public class LrcListFragment extends Fragment {
 
     private void searchForAlbumCover(int aid, final int count, final Song song) {
         String url = UrlConstant.AID_ALBUM_COVER_URL_ROOT + aid;
-        LogUtil.i("searchForAlbumCover" + url);
-        Request request = new Request.Builder().url(url).build();
+        LogUtil.i("searchForAlbumCover:" + url);
+        Request request = new Request.Builder().tag("lrcList").url(url).build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -284,10 +296,11 @@ public class LrcListFragment extends Fragment {
     }
 
     private void searchForCoverImage(String url, final int count, final Song song) {
-        LogUtil.i("searchForCoverImage" + url);
+
         //服务器url变化！！！
-        String newUrl = url.replace("s.gecimi.com", "s.geci.me");
-        Request imageRequest = new Request.Builder().url(newUrl).build();
+        String newUrl = url.replace("cover", "album-cover");
+        LogUtil.i("searchForCoverImage:" + url + "  " + newUrl);
+        Request imageRequest = new Request.Builder().tag("lrcList").url(newUrl).build();
         Call call = client.newCall(imageRequest);
         call.enqueue(new Callback() {
             @Override
@@ -302,9 +315,13 @@ public class LrcListFragment extends Fragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                song.setAlbumCover(bitmap);
-                LogUtil.i("CoverImage");
-                Message.obtain(handler, MESSAGE_LRC, count, MESSAGE_LRC_SONG, song).sendToTarget();
+                if (bitmap != null) {
+                    song.setAlbumCover(bitmap);
+                    Message.obtain(handler, MESSAGE_LRC, count, MESSAGE_LRC_SONG, song).sendToTarget();
+                    LogUtil.d("albumCover is downLoaded");
+                } else {
+                    LogUtil.d("albumCover is null");
+                }
             }
         });
     }
@@ -325,10 +342,13 @@ public class LrcListFragment extends Fragment {
 //        Log.i("Test", "lrcResponse:" + lrcResponse.toString());
         for (int i = 0; i < lrcResponse.getCount(); i++) {
             Song song = new Song();
+            song.setAlbumCover(BitmapFactory.decodeResource(getResources(), R.drawable.album));
             songsList.add(song);
         }
+        Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
         for (int count = 0; count < lrcResults.size(); count++) {
             Song song = new Song();
+            song.setAlbumCover(BitmapFactory.decodeResource(getResources(), R.drawable.album));
             song.setSongName(lrcResponse.getResult().get(count).getSong());//设置歌名
             searchForArtist(lrcResults.get(count).getArtist_id(), count, song);
             searchForLrcText(lrcResults.get(count).getLrc(), count, song);
@@ -345,8 +365,11 @@ public class LrcListFragment extends Fragment {
                 String[] files = file.list();
                 for (String fileNme : files) {
                     Song song = new LrcParser().parserAll(fileNme, readLocalFile(LocalConstans.NETEASE_CLOUDMUSIC_DOWNLOAD_LYRIC + fileNme));
-                    songsList.add(song);
-                    Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
+                    if (song != null) {
+                        song.setAlbumCover(BitmapFactory.decodeResource(getResources(), R.drawable.album));
+                        songsList.add(song);
+                        Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
+                    }
                 }
             }
         }
