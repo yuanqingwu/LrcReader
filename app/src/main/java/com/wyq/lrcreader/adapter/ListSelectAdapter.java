@@ -13,10 +13,8 @@ import com.wyq.lrcreader.utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Inflater;
 
 /**
  * Created by Uni.W on 2016/12/20.
@@ -101,10 +99,11 @@ public class ListSelectAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+    class Holder {
+        TextView textView;
+        ImageView imageView;
+
+    }
 }
 
-class Holder {
-    TextView textView;
-    ImageView imageView;
-
-}

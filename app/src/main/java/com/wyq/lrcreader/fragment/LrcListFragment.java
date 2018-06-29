@@ -61,7 +61,6 @@ public class LrcListFragment extends Fragment {
 
     private boolean isLocal = false;
 
-
     private static final int MESSAGE_LRC = 0;
     private static final int MESSAGE_ERROR_TOAST = 1;
     private static final int MESSAGE_LRC_SONGLIST = -1;//已经是个完整的songList
