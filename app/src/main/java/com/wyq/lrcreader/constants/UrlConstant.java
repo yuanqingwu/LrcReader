@@ -26,4 +26,7 @@ public class UrlConstant {
      * 根据专辑编号获取专辑封面URL：'http://gecimi.com/api/cover/1573814'
      */
     public static final String AID_ALBUM_COVER_URL_ROOT = "http://gecimi.com/api/cover/";
+
+
+    public static final String URL_BASE_GECIME = "http://gecimi.com/api/";
 }

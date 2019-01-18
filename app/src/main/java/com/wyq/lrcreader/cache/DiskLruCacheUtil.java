@@ -4,41 +4,20 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.StatFs;
-import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-
-import com.google.gson.Gson;
 
 import com.squareup.okhttp.internal.DiskLruCache;
-import com.wyq.lrcreader.model.Song;
-import com.wyq.lrcreader.utils.BitmapUtil;
+import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,11 +102,7 @@ public class DiskLruCacheUtil {
      * @return
      */
     private long getUsableSpace(File path) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            return path.getUsableSpace();
-        }
-        final StatFs stats = new StatFs(path.getPath());
-        return (long) stats.getBlockSize() * (long) stats.getAvailableBlocks();
+        return path.getUsableSpace();
     }
 
 
@@ -146,8 +121,8 @@ public class DiskLruCacheUtil {
 
     public String bytesToHexString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
+        for (byte aByte : bytes) {
+            String hex = Integer.toHexString(0xFF & aByte);
             if (hex.length() == 1) {
                 sb.append('0');
             }
@@ -167,7 +142,7 @@ public class DiskLruCacheUtil {
         }
         String key = hashKeyFormUrl(song.toString());
         //得到Editor对象
-        DiskLruCache.Editor editor = null;
+        DiskLruCache.Editor editor;
         try {
             editor = mDiskCache.edit(key);
             if (editor != null) {
@@ -260,18 +235,19 @@ public class DiskLruCacheUtil {
                 BufferedReader bufferedReader = null;
                 if (files.length > 0) {
                     for (File file : files) {
-                        if (file.getName().equals("journal")) {
+                        if ("journal".equals(file.getName())) {
                             continue;
                         }
                         try {
                             bufferedReader = new BufferedReader(new FileReader(file));
-                            String line, readStr = "";
+                            String line;
+                            StringBuilder readStr = new StringBuilder();
                             while ((line = bufferedReader.readLine()) != null) {
-                                readStr += (line + "\n");
+                                readStr.append(line).append("\n");
                             }
                             Song song = new Song();
                             Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
-                            Matcher matcher = pattern.matcher(readStr);
+                            Matcher matcher = pattern.matcher(readStr.toString());
                             String[] str = new String[5];
                             int i = 0;
                             while (matcher.find()) {

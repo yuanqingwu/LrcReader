@@ -1,9 +1,7 @@
 package com.wyq.lrcreader.utils;
 
-import android.util.Log;
-
-import com.wyq.lrcreader.model.LrcInfo;
-import com.wyq.lrcreader.model.Song;
+import com.wyq.lrcreader.model.netmodel.gecimemodel.LrcInfo;
+import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -30,9 +27,25 @@ public class LrcParser {
     private long currentTime = 0;
     //存放临时歌词
     private String currentContent = null;
+    private static LrcParser lrcParser;
     //用于保存时间点和歌词之间的对应关系
     //private Map<Long,String> maps =new HashMap<Long,String>();
-    private Map<Long, String> maps = new TreeMap<Long, String>();
+    private Map<Long, String> maps = new TreeMap<>();
+
+    private LrcParser() {
+
+    }
+
+    public static LrcParser getInstance() {
+        if (lrcParser == null) {
+            synchronized (LrcParser.class) {
+                if (lrcParser == null) {
+                    lrcParser = new LrcParser();
+                }
+            }
+        }
+        return lrcParser;
+    }
 
     /*
      * 根据文件路径，读取文件，返回一个输入流
@@ -42,8 +55,7 @@ public class LrcParser {
      * */
     private InputStream readLrcFile(String path) throws FileNotFoundException {
         File f = new File(path);
-        InputStream ins = new FileInputStream(f);
-        return ins;
+        return new FileInputStream(f);
     }
 
     public LrcInfo parser(String path) throws Exception {
@@ -61,15 +73,13 @@ public class LrcParser {
         InputStreamReader inr = new InputStreamReader(inputStream);
         BufferedReader reader = new BufferedReader(inr);
         //一行一行的读，每读一行解析一行
-        String line = null;
+        String line;
         while ((line = reader.readLine()) != null) {
             parserLine(line);
         }
         //全部解析完后，设置info
         lrcinfo.setInfos(maps);
-        Iterator<Map.Entry<Long, String>> iter = maps.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<Long, String> entry = (Map.Entry<Long, String>) iter.next();
+        for (Map.Entry<Long, String> entry : maps.entrySet()) {
             Long key = entry.getKey();
             String val = entry.getValue();
             //        Log.e("---", "key="+key+"   val="+val);
@@ -107,15 +117,15 @@ public class LrcParser {
                 song.setAlbum(matcher3.group());
             }
 
-            String lrc = "";
+            StringBuilder lrc = new StringBuilder();
             String reg = "(?<=\\])(?![\\[\\(\\\\n]).*?(?=[\\n\\\\])";
             Pattern pattern = Pattern.compile(reg);
             Matcher matcher = pattern.matcher(lrcText);
             while (matcher.find()) {
                 String line = matcher.group();
-                lrc += (line + "\n\n");
+                lrc.append(line).append("\n\n");
             }
-            song.setLrc(lrc);
+            song.setLrc(lrc.toString());
 
             return song;
         } else {
