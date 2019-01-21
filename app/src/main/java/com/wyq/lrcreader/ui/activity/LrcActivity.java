@@ -101,7 +101,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lrc_view);
+        setContentView(R.layout.lrc_activity_view);
 
         scrollView = findViewById(R.id.activity_lrc_view_scrollview);
         lrcView = findViewById(R.id.activity_lrc_view_text);
@@ -171,7 +171,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         menuWechatBt.setOnClickListener(this);
         menuMomentsBt.setOnClickListener(this);
         startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
-        menuTextSizeSeek = (SeekBar) findViewById(R.id.menu_lrc_view_text_size_seek);
+        menuTextSizeSeek = findViewById(R.id.menu_lrc_view_text_size_seek);
 
         menuTextSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -197,12 +197,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Bitmap>() {
                     @Override
-                    public void accept(Bitmap bitmap) throws Exception {
+                    public void accept(Bitmap bitmap) {
                         lrcView.setBackground(new BitmapDrawable(getResources(), bitmap));
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });
@@ -216,12 +216,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(String s) throws Exception {
+                    public void accept(String s) {
                         lrcView.setText(s);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });

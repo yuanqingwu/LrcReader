@@ -1,6 +1,8 @@
 package com.wyq.lrcreader.adapter;
 
-import com.wyq.lrcreader.ui.fragment.LrcListFragment;
+import com.wyq.lrcreader.ui.fragment.LocalLrcFragment;
+import com.wyq.lrcreader.ui.fragment.LrcLikeFragment;
+import com.wyq.lrcreader.ui.fragment.SearchFragment;
 
 import java.util.List;
 
@@ -24,7 +26,24 @@ public class HomeViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int i) {
-        return LrcListFragment.newInstance(false, "海阔天空");
+
+        Fragment fragment = null;
+        switch (i) {
+            case 0:
+                fragment = new LrcLikeFragment();
+                break;
+            case 1:
+                fragment = new LocalLrcFragment();
+                break;
+            case 2:
+                fragment = SearchFragment.newInstance();
+                break;
+
+
+            default:
+                break;
+        }
+        return fragment;
     }
 
     @Override

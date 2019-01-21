@@ -42,33 +42,35 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     }
 
     public void refreshData(List<SongListModel> newList) {
-//        if(list != null && newList != null) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() {
-                return list == null ? 0 : list.size();
-            }
+        if (list == null) {
+            list = newList;
+            notifyItemRangeChanged(0, newList == null ? 0 : newList.size());
+        } else {
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return list == null ? 0 : list.size();
+                }
 
-            @Override
-            public int getNewListSize() {
-                return newList == null ? 0 : newList.size();
-            }
+                @Override
+                public int getNewListSize() {
+                    return newList == null ? 0 : newList.size();
+                }
 
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return list.get(oldItemPosition).getClass().equals(newList.get(newItemPosition).getClass());
-            }
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return list.get(oldItemPosition).getClass().equals(newList.get(newItemPosition).getClass());
+                }
 
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                return list.get(oldItemPosition).equals(newList.get(newItemPosition));
-            }
-        }, true);
-        diffResult.dispatchUpdatesTo(this);
-//        }
-        this.list = newList;
-//        this.list.clear();
-//        list.addAll(newList);
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    return list.get(oldItemPosition).equals(newList.get(newItemPosition));
+                }
+            }, true);
+            this.list = newList;
+            diffResult.dispatchUpdatesTo(this);
+        }
+
     }
 
     public void setOnRecyclerItemClickListener(OnRecyclerItemClickListener onRecyclerItemClickListener) {
@@ -89,38 +91,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         if (list == null) {
             return;
         }
-
-//        holder.headImage.setImageBitmap(list.get(position).getAlbumCover());
-
-//        //解析出歌名，歌手，专辑
-//        LrcInfo lrcInfo = null;
-//        try {
-//            lrcInfo = new LrcParser().parser(new ByteArrayInputStream(list.get(position).getLrc().getBytes()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        String lrcStr = "", title = "";
-//        if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
-//            //解析失败
-//            title = list.get(position).getSongName();
-//            lrcStr="演唱："+list.get(position).getArtist()+"      "+"专辑：未知";
-//        } else {
-//            if (lrcInfo.getArtist() != null && lrcInfo.getArtist().length() > 0) {
-//                lrcStr = lrcStr + "演唱：" + lrcInfo.getArtist();
-//            }else{
-//                lrcStr = lrcStr + "演唱：未知";
-//            }
-//            if (lrcInfo.getAlbum() != null && lrcInfo.getAlbum().length() > 0) {
-//                lrcStr += ("    专辑：" + lrcInfo.getAlbum());
-//            }else{
-//                lrcStr += ("    专辑：未知");
-//            }
-//            if (lrcInfo.getTitle() != null && lrcInfo.getTitle().length() > 0) {
-//                title = lrcInfo.getTitle();
-//            }else{
-//                title="未知";
-//            }
-//        }
 
         holder.nameText.setText(list.get(position).getSongName());
         holder.singerText.setText(list.get(position).getArtist());

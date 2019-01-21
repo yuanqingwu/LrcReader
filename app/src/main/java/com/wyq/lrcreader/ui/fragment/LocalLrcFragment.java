@@ -74,7 +74,7 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_local_lrc_search, container, false);
+        View view = inflater.inflate(R.layout.local_fragment_lrc_search, container, false);
         confirmBt = view.findViewById(R.id.fragment_local_lrc_search_ok_bt);
         listView = view.findViewById(R.id.fragment_local_lrc_search_list);
         progressBar = view.findViewById(R.id.fragment_local_lrc_search_progress);

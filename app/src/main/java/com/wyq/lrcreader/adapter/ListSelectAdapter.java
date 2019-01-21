@@ -74,9 +74,9 @@ public class ListSelectAdapter extends BaseAdapter {
         final Holder holder;
         if (convertView == null) {
             holder = new Holder();
-            convertView = LayoutInflater.from(context).inflate(R.layout.fragment_local_list_item, parent, false);
-            holder.textView = (TextView) convertView.findViewById(R.id.fragment_local_list_item_text);
-            holder.imageView = (ImageView) convertView.findViewById(R.id.fragment_local_list_item_select);
+            convertView = LayoutInflater.from(context).inflate(R.layout.local_fragment_list_item, parent, false);
+            holder.textView = convertView.findViewById(R.id.fragment_local_list_item_text);
+            holder.imageView = convertView.findViewById(R.id.fragment_local_list_item_select);
             convertView.setTag(holder);
         } else {
             holder = (Holder) convertView.getTag();

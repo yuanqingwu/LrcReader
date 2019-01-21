@@ -7,8 +7,8 @@
     <ScrollView
         android:id="@+id/activity_lrc_view_scrollview"
         android:layout_width="match_parent"
-        android:fillViewport="true"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <TextView
             android:id="@+id/activity_lrc_view_text"
@@ -16,8 +16,8 @@
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:paddingBottom="20dp"
             android:paddingTop="30dp"
+            android:paddingBottom="20dp"
             android:text="lrc"
             android:textIsSelectable="true"
             android:textSize="15sp" />
@@ -26,7 +26,7 @@
 
     <include
         android:id="@+id/activity_lrc_view_setmenu"
-        layout="@layout/activity_lrc_view_menu"
+        layout="@layout/lrc_menu_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

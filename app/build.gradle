@@ -9,6 +9,16 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     signingConfigs {
         release {
@@ -48,6 +58,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0-alpha01'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'junit:junit:4.12'
+
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'

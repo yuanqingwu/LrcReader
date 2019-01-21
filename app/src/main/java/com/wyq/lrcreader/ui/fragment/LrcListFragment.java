@@ -2,9 +2,7 @@ package com.wyq.lrcreader.ui.fragment;
 
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.RecyclerAdapter;
@@ -21,11 +19,11 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -37,13 +35,17 @@ import io.reactivex.schedulers.Schedulers;
 public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAdapter.OnRecyclerItemClickListener, SwipeRefreshLayout.OnRefreshListener {
 
 
-    private RecyclerView recyclerView;
+    @BindView(R.id.fragment_lrclist_recyclerview)
+    public RecyclerView recyclerView;
+    @BindView(R.id.fragment_lrclist_swiprefresh_layout)
+    public SwipeRefreshLayout swipeRefreshLayout;
+
     private RecyclerAdapter adapter;
     private static final String ARGUMENTS_IS_LOCAL = "IS_LOCAL";
 
     private boolean isLocal = false;
     private static final String ARGUMENTS_SEARCH_TEXT = "SEARCH_TEXT";
-    private SwipeRefreshLayout swipeRefreshLayout;
+
     private String searchText;
     private List<SongListModel> songListModels;
 
@@ -84,17 +86,14 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
         loadData(searchText);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
-        LogUtil.i("onCreateView:");
+    int attachLayoutRes() {
+        return R.layout.fragment_lrclist;
+    }
 
-        recyclerView = view.findViewById(R.id.fragment_lrclist_recyclerview);
-        swipeRefreshLayout = view.findViewById(R.id.fragment_lrclist_swiprefresh_layout);
-
+    @Override
+    void initData() {
         songListModels = new ArrayList<>();
-        initRecyclerView();
 
         assert getArguments() != null;
         isLocal = getArguments().getBoolean(ARGUMENTS_IS_LOCAL);
@@ -111,10 +110,14 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
         } else {
             searchText = getArguments().getString(ARGUMENTS_SEARCH_TEXT);
         }
+    }
+
+    @Override
+    void initView(View view) {
+
+        initRecyclerView();
 
         swipeRefreshLayout.setOnRefreshListener(this);
-
-        return view;
     }
 
 
@@ -154,7 +157,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<SongListModel>>() {
                     @Override
-                    public void accept(List<SongListModel> songs) throws Exception {
+                    public void accept(List<SongListModel> songs) {
                         songListModels = songs;
                         adapter.refreshData(songs);
                         LogUtil.i("成功" + songs.size());
@@ -162,7 +165,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                         LogUtil.i("出现异常" + throwable.getMessage());
                         hideRefresh();

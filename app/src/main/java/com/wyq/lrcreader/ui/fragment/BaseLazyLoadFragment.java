@@ -2,22 +2,34 @@ package com.wyq.lrcreader.ui.fragment;
 
 import android.os.Bundle;
 
+import com.wyq.lrcreader.utils.LogUtil;
+
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 /**
  * @author Uni.W
  * @date 2019/1/17 20:32
  */
-public abstract class BaseLazyLoadFragment extends Fragment {
+public abstract class BaseLazyLoadFragment extends BaseFragment {
 
     protected boolean isViewCreated;
     protected boolean isVisibleToUser;
 
     @Override
+    public void onStart() {
+        super.onStart();
+        LogUtil.i("lazyload onStart");
+        isVisibleToUser = getUserVisibleHint();
+        if (isVisibleToUser) {
+            lazyLoadData();
+        }
+    }
+
+    @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         this.isVisibleToUser = isVisibleToUser;
+        LogUtil.i("lazyload setUserVisibleHint" + isVisibleToUser);
         if (isVisibleToUser) {
             lazyLoadData();
         }
@@ -26,6 +38,7 @@ public abstract class BaseLazyLoadFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        LogUtil.i("lazyload onActivityCreated");
         isViewCreated = true;
         lazyLoadData();
     }

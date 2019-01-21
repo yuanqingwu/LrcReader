@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.request.RequestOptions;
 import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.datasource.net.gecimi.GecimeModel;
+import com.wyq.lrcreader.db.AppDatabase;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.AlbumCover;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Artist;
@@ -17,6 +18,7 @@ import org.reactivestreams.Publisher;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -65,19 +67,19 @@ public class DataRepository {
         return gecimeModel.getLrcResultList(searchtext)
                 .concatMap(new Function<List<LyricResult>, Publisher<List<SongListModel>>>() {
                                @Override
-                               public Publisher<List<SongListModel>> apply(List<LyricResult> lyricResults) throws Exception {
+                               public Publisher<List<SongListModel>> apply(List<LyricResult> lyricResults) {
 
                                    return Flowable.fromIterable(lyricResults)
                                            .concatMap(new Function<LyricResult, Publisher<SongListModel>>() {
                                                @Override
-                                               public Publisher<SongListModel> apply(LyricResult lyricResult) throws Exception {
+                                               public Publisher<SongListModel> apply(LyricResult lyricResult) {
 
                                                    return Flowable.zip(
                                                            gecimeModel.getArtist(lyricResult.getArtist_id()),
                                                            gecimeModel.getAlbumCover(lyricResult.getAid()),
                                                            new BiFunction<Artist, AlbumCover, SongListModel>() {
                                                                @Override
-                                                               public SongListModel apply(Artist artist, AlbumCover albumCover) throws Exception {
+                                                               public SongListModel apply(Artist artist, AlbumCover albumCover) {
                                                                    SongListModel songListModel = new SongListModel();
                                                                    songListModel.setSongName(lyricResult.getSong());
                                                                    songListModel.setArtist(artist.getName());
@@ -117,7 +119,7 @@ public class DataRepository {
                 .subscribeOn(Schedulers.computation())
                 .map(new Function<String, String>() {
                     @Override
-                    public String apply(String s) throws Exception {
+                    public String apply(String s) {
 
                         String res = LrcFactory.getInstance().reFormat(s);
 
@@ -147,9 +149,8 @@ public class DataRepository {
     }
 
 
-    public Flowable<List<SongEntity>> getLocalHistory() {
-
-
-        return null;
+    public LiveData<List<SongEntity>> getLocalSongList(AppDatabase appDatabase) {
+        LiveData<List<SongEntity>> localSongs = appDatabase.getSongDao().getLocalSongList();
+        return localSongs;
     }
 }

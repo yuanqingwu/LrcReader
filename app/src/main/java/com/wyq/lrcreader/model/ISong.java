@@ -1,6 +1,7 @@
 package com.wyq.lrcreader.model;
 
-import java.sql.Date;
+
+import java.util.Date;
 
 /**
  * @author Uni.W
@@ -21,6 +22,8 @@ public interface ISong {
     String getAlbumCover();
 
     boolean isLike();
+
+    int getLike();
 
     Date getSearchAt();
 

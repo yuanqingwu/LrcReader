@@ -2,21 +2,33 @@ package com.wyq.lrcreader.db;
 
 import android.content.Context;
 
+import com.wyq.lrcreader.db.converter.DateConverter;
+import com.wyq.lrcreader.db.dao.SongDao;
+import com.wyq.lrcreader.db.entity.SongEntity;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.MutableLiveData;
+import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 /**
  * @author Uni.W
  * @date 2019/1/16 20:35
  */
+@Database(entities = {SongEntity.class}, version = 1)
+@TypeConverters(DateConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 
-    private static final String DATABASE_NAME = "lrc.db";
+    @VisibleForTesting
+    private static final String DATABASE_NAME = "song.db";
 
     private static AppDatabase database;
+
+    public abstract SongDao getSongDao();
 
     private MutableLiveData<Boolean> mIsDatabaseCreated = new MutableLiveData<>();
 

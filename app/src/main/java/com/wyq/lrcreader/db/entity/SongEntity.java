@@ -2,7 +2,7 @@ package com.wyq.lrcreader.db.entity;
 
 import com.wyq.lrcreader.model.ISong;
 
-import java.sql.Date;
+import java.util.Date;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -21,7 +21,7 @@ public class SongEntity implements ISong {
     private String lrc;
     private String album;//专辑
     private String albumCover;//专辑封面地址
-    private boolean isLike;//是否收藏
+    private int like;//是否收藏
     private String dataSource;//数据源
     private Date searchAt;//搜索时间，查看时间
 
@@ -55,6 +55,20 @@ public class SongEntity implements ISong {
     @Override
     public String getAlbumCover() {
         return albumCover;
+    }
+
+    @Override
+    public boolean isLike() {
+        return like > 0;
+    }
+
+    @Override
+    public int getLike() {
+        return like;
+    }
+
+    public void setLike(int like) {
+        this.like = like;
     }
 
     public void setAlbumCover(String albumCover) {
@@ -97,12 +111,5 @@ public class SongEntity implements ISong {
         this.artist = artist;
     }
 
-    @Override
-    public boolean isLike() {
-        return isLike;
-    }
 
-    public void setLike(boolean like) {
-        isLike = like;
-    }
 }
