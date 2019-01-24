@@ -26,7 +26,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.LrcActivity" />
-        <activity android:name=".ui.activity.SearchActivity">
+        <activity
+            android:name=".ui.activity.SearchActivity"
+            android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>

@@ -11,10 +11,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.HomeViewPagerAdapter;
+import com.wyq.lrcreader.ui.EHomePageType;
 import com.wyq.lrcreader.utils.LogUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.ViewPager;
@@ -34,7 +32,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.home_activity_float_action_button)
     public FloatingActionButton fractionBt;
 
-    private String[] tabName = {"喜欢", "本地", "搜索"};
+//    private String[] tabName = {"喜欢", "本地", "搜索"};
 
 
     public static void newInstance(Context context) {
@@ -55,13 +53,13 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         setSupportActionBar(bottomAppBar);
         bottomAppBar.replaceMenu(R.menu.home_appbar);
 
-        for (String name : tabName) {
-            tabLayout.addTab(tabLayout.newTab().setText(name));
+        for (EHomePageType type : EHomePageType.values()) {
+            tabLayout.addTab(tabLayout.newTab().setText(type.getPageName()));
         }
 
-        ArrayList tabNameList = new ArrayList();
-        Collections.addAll(tabNameList, tabName);
-        HomeViewPagerAdapter pagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), tabNameList);
+//        ArrayList tabNameList = new ArrayList();
+//        Collections.addAll(tabNameList, tabName);
+        HomeViewPagerAdapter pagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(3);
         tabLayout.setupWithViewPager(viewPager);
@@ -79,15 +77,15 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         switch (item.getItemId()) {
             case R.id.home_appbar_search:
                 LogUtil.i("search");
-                viewPager.setCurrentItem(2, true);
+                viewPager.setCurrentItem(EHomePageType.SEARCH_PAGE.getPosition(), true);
                 break;
             case R.id.home_appbar_favorite:
                 LogUtil.i("favourite");
-                viewPager.setCurrentItem(0, true);
+                viewPager.setCurrentItem(EHomePageType.LIKE_PAGE.getPosition(), true);
                 break;
             case R.id.home_appbar_local:
                 LogUtil.i("local");
-                viewPager.setCurrentItem(1, true);
+                viewPager.setCurrentItem(EHomePageType.LOCAL_PAGE.getPosition(), true);
                 break;
             default:
                 break;

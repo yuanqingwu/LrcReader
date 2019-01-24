@@ -3,7 +3,10 @@ package com.wyq.lrcreader.db;
 import android.content.Context;
 
 import com.wyq.lrcreader.db.converter.DateConverter;
+import com.wyq.lrcreader.db.dao.SearchResultDao;
 import com.wyq.lrcreader.db.dao.SongDao;
+import com.wyq.lrcreader.db.entity.SearchHistoryEntity;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.db.entity.SongEntity;
 
 import androidx.annotation.NonNull;
@@ -19,7 +22,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
  * @author Uni.W
  * @date 2019/1/16 20:35
  */
-@Database(entities = {SongEntity.class}, version = 1)
+@Database(entities = {SongEntity.class, SearchHistoryEntity.class, SearchResultEntity.class}, version = 1)
 @TypeConverters(DateConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -29,6 +32,8 @@ public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase database;
 
     public abstract SongDao getSongDao();
+
+    public abstract SearchResultDao getSearchResultDao();
 
     private MutableLiveData<Boolean> mIsDatabaseCreated = new MutableLiveData<>();
 

@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.base.GlideApp;
-import com.wyq.lrcreader.model.viewmodel.SongListModel;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import java.util.List;
@@ -34,14 +34,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     private OnRecyclerItemLongClickListener onRecyclerItemLongClickListener;
 
     private Context context;
-    private List<SongListModel> list;
+    private List<SearchResultEntity> list;
 
-    public RecyclerAdapter(Context context, List<SongListModel> list) {
+    public RecyclerAdapter(Context context, List<SearchResultEntity> list) {
         this.context = context;
         this.list = list;
     }
 
-    public void refreshData(List<SongListModel> newList) {
+    public List<SearchResultEntity> getDataList() {
+        return list;
+    }
+
+    public void refreshData(List<SearchResultEntity> newList) {
         if (list == null) {
             list = newList;
             notifyItemRangeChanged(0, newList == null ? 0 : newList.size());

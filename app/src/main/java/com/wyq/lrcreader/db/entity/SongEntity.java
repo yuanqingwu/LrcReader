@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "song")
 public class SongEntity implements ISong {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
     private String artist;

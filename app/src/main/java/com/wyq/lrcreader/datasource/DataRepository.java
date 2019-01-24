@@ -5,13 +5,14 @@ import android.graphics.Bitmap;
 
 import com.bumptech.glide.request.RequestOptions;
 import com.wyq.lrcreader.base.GlideApp;
+import com.wyq.lrcreader.datasource.local.gecimi.DbGecimiRepository;
 import com.wyq.lrcreader.datasource.net.gecimi.GecimeModel;
 import com.wyq.lrcreader.db.AppDatabase;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.AlbumCover;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Artist;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.LyricResult;
-import com.wyq.lrcreader.model.viewmodel.SongListModel;
 import com.wyq.lrcreader.utils.LrcFactory;
 
 import org.reactivestreams.Publisher;
@@ -41,19 +42,26 @@ public class DataRepository {
     private static DataRepository repository;
     private GecimeModel gecimeModel;
 
-    private DataRepository() {
+    private AppDatabase database;
+
+    private DataRepository(AppDatabase database) {
         gecimeModel = new GecimeModel();
+        this.database = database;
     }
 
-    public static DataRepository getInstance() {
+    public static DataRepository getInstance(AppDatabase appDatabase) {
         if (repository == null) {
             synchronized (DataRepository.class) {
                 if (repository == null) {
-                    repository = new DataRepository();
+                    repository = new DataRepository(appDatabase);
                 }
             }
         }
         return repository;
+    }
+
+    public DbGecimiRepository getDbGecimiRepository() {
+        return DbGecimiRepository.getInstance(database);
     }
 
 
@@ -63,29 +71,32 @@ public class DataRepository {
      * @param searchtext
      * @return
      */
-    public Flowable<List<SongListModel>> getSearchResult(String searchtext) {
+    public Flowable<List<SearchResultEntity>> getSearchResult(String searchtext) {
         return gecimeModel.getLrcResultList(searchtext)
-                .concatMap(new Function<List<LyricResult>, Publisher<List<SongListModel>>>() {
+                .concatMap(new Function<List<LyricResult>, Publisher<List<SearchResultEntity>>>() {
                                @Override
-                               public Publisher<List<SongListModel>> apply(List<LyricResult> lyricResults) {
+                               public Publisher<List<SearchResultEntity>> apply(List<LyricResult> lyricResults) {
 
                                    return Flowable.fromIterable(lyricResults)
-                                           .concatMap(new Function<LyricResult, Publisher<SongListModel>>() {
+                                           .concatMap(new Function<LyricResult, Publisher<SearchResultEntity>>() {
                                                @Override
-                                               public Publisher<SongListModel> apply(LyricResult lyricResult) {
+                                               public Publisher<SearchResultEntity> apply(LyricResult lyricResult) {
 
                                                    return Flowable.zip(
                                                            gecimeModel.getArtist(lyricResult.getArtist_id()),
                                                            gecimeModel.getAlbumCover(lyricResult.getAid()),
-                                                           new BiFunction<Artist, AlbumCover, SongListModel>() {
+                                                           new BiFunction<Artist, AlbumCover, SearchResultEntity>() {
                                                                @Override
-                                                               public SongListModel apply(Artist artist, AlbumCover albumCover) {
-                                                                   SongListModel songListModel = new SongListModel();
-                                                                   songListModel.setSongName(lyricResult.getSong());
-                                                                   songListModel.setArtist(artist.getName());
-                                                                   songListModel.setLrcUri(lyricResult.getLrc());
-                                                                   songListModel.setAlbumCoverUri(albumCover.getThumb());
-                                                                   return songListModel;
+                                                               public SearchResultEntity apply(Artist artist, AlbumCover albumCover) {
+                                                                   SearchResultEntity searchResultEntity = new SearchResultEntity();
+                                                                   searchResultEntity.setSongName(lyricResult.getSong());
+                                                                   searchResultEntity.setArtist(artist.getName());
+                                                                   searchResultEntity.setLrcUri(lyricResult.getLrc());
+                                                                   searchResultEntity.setAlbumCoverUri(albumCover.getThumb());
+
+                                                                   DbGecimiRepository.getInstance(database).insertSearchResult(searchResultEntity);
+
+                                                                   return searchResultEntity;
                                                                }
                                                            }
                                                    );

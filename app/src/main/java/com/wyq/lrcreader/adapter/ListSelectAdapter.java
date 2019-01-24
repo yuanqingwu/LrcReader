@@ -48,8 +48,9 @@ public class ListSelectAdapter extends BaseAdapter {
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
         for (String s : list) {
-            if (list.indexOf(s) >= selectMap.size())
+            if (list.indexOf(s) >= selectMap.size()) {
                 selectMap.put(list.indexOf(s), true);
+            }
         }
         LogUtil.i("seletMap size:" + selectMap.size());
     }

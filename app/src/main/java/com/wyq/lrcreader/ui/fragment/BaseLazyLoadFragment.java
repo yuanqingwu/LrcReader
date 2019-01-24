@@ -2,6 +2,7 @@ package com.wyq.lrcreader.ui.fragment;
 
 import android.os.Bundle;
 
+import com.wyq.lrcreader.ui.IRetryLoadCallback;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.annotation.Nullable;
@@ -10,7 +11,7 @@ import androidx.annotation.Nullable;
  * @author Uni.W
  * @date 2019/1/17 20:32
  */
-public abstract class BaseLazyLoadFragment extends BaseFragment {
+public abstract class BaseLazyLoadFragment extends BaseFragment implements IRetryLoadCallback {
 
     protected boolean isViewCreated;
     protected boolean isVisibleToUser;
@@ -56,9 +57,5 @@ public abstract class BaseLazyLoadFragment extends BaseFragment {
 
 
     abstract void loadData();
-
-    void onLoadFailed() {
-
-    }
 
 }

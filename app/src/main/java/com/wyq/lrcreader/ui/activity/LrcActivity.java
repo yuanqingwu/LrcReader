@@ -1,12 +1,10 @@
 package com.wyq.lrcreader.ui.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -22,8 +20,8 @@ import android.widget.TextView;
 
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
-import com.wyq.lrcreader.datasource.DataRepository;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.LrcInfo;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 import com.wyq.lrcreader.share.WeChatShare;
@@ -33,31 +31,54 @@ import com.wyq.lrcreader.utils.LogUtil;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
+import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Uni.W on 2016/8/30.
  */
-public class LrcActivity extends Activity implements View.OnTouchListener, View.OnClickListener {
+public class LrcActivity extends BaseActivity implements View.OnTouchListener, View.OnClickListener {
 
-    private TextView lrcView;
-    private ScrollView scrollView;
-    private RelativeLayout relativeLayout;
-    private LinearLayout setMenuLayout;
+    @BindView(R.id.activity_lrc_view_text)
+    public TextView lrcView;
+    @BindView(R.id.activity_lrc_view_scrollview)
+    public ScrollView scrollView;
+    @BindView(R.id.activity_lrc_view_relativelayout)
+    public RelativeLayout relativeLayout;
+    @BindView(R.id.activity_lrc_view_setmenu)
+    public LinearLayout setMenuLayout;
 
-    private Button menuBackBt, menuHideBt, menuLikeBt, menuPlainBt;
-    private Button menuQzoneBt, menuWeiboBt, menuWechatBt, menuMomentsBt;
-    private SeekBar menuTextSizeSeek;
+    @BindView(R.id.menu_lrc_view_back_bt)
+    public Button menuBackBt;
+    @BindView(R.id.menu_lrc_view_hide_bt)
+    public Button menuHideBt;
+    @BindView(R.id.menu_lrc_view_like_bt)
+    public Button menuLikeBt;
+    @BindView(R.id.menu_lrc_view_plain_bt)
+    public Button menuPlainBt;
+    @BindView(R.id.menu_lrc_view_qzone_bt)
+    public Button menuQzoneBt;
+    @BindView(R.id.menu_lrc_view_weibo_bt)
+    public Button menuWeiboBt;
+    @BindView(R.id.menu_lrc_view_wechat_bt)
+    public Button menuWechatBt;
+    @BindView(R.id.menu_lrc_view_moments_bt)
+    public Button menuMomentsBt;
+
+    @BindView(R.id.menu_lrc_view_text_size_seek)
+    public SeekBar menuTextSizeSeek;
+
+    private Disposable lrcDisposable;
+    private Disposable backgroundDisposable;
 
     private String lrcText, artist, songName;
     private Bitmap albumCover;
     private Song song;
     private LrcInfo lrcInfo;
     float startTextSize = 0;
-//    private LrcParserThread lrcParserThread;
-//    private BlurImageThread blurImageThread;
 
     private long firstClickTime = 0;
     private float startX = 0, endX = 0, startY = 0, endY = 0;
@@ -70,25 +91,6 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
 
     private static final String ARGUMENTS_LRC_URI = "LRC_URI";
     private static final String ARGUMENTS_LRC_COVER_URI = "LRC_COVER_URI";
-//
-//    private Handler handler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//            switch (msg.what) {
-//                case 0:
-//                    lrcView.setText(msg.obj.toString());
-//                    break;
-//                case 1:
-//                    scrollView.setBackground(new BitmapDrawable((Bitmap) msg.obj));
-//                    setMenuLayout.setBackground(new BitmapDrawable(BitmapUtil.getTransparentBitmap((Bitmap) msg.obj, 100)));
-////                    relativeLayout.setBackground(new BitmapDrawable((Bitmap) msg.obj));
-////                        backImage.setAlpha(0.5f);
-////                        backImage.setImageBitmap((Bitmap) msg.obj);
-//                    break;
-//            }
-//        }
-//    };
 
     public static void newInstance(Context context, String lrcUri, String lrcCoverUri) {
         Intent intent = new Intent();
@@ -99,16 +101,12 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.lrc_activity_view);
+    protected int attachLayoutRes() {
+        return R.layout.lrc_activity_view;
+    }
 
-        scrollView = findViewById(R.id.activity_lrc_view_scrollview);
-        lrcView = findViewById(R.id.activity_lrc_view_text);
-        lrcView.setOnTouchListener(this);
-
-        relativeLayout = findViewById(R.id.activity_lrc_view_relativelayout);
-        setMenuLayout = findViewById(R.id.activity_lrc_view_setmenu);
+    @Override
+    public void initView() {
 
         initMenu();
 
@@ -117,51 +115,10 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
 
         loadBackground(albumCoverUri);
         loadLrc(lrcUri);
-
-
-//        artist = getIntent().getExtras().getString("artist");
-//        lrcText = getIntent().getExtras().getString("lrcText");
-//        songName = getIntent().getExtras().getString("songName");
-//        albumCover = BitmapUtil.convertStringToIcon(getIntent().getExtras().getString("albumCover"));
-////        LogUtil.i("albumCover string:"+getIntent().getExtras().getString("albumCover"));
-//        isLike = getIntent().getExtras().getBoolean("isLike");
-//        if (isLike) {
-//            menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
-//        }
-//
-//        if (artist != null && lrcText != null && albumCover != null) {
-//            song = new Song();
-//            song.setArtist(artist);
-//            song.setLrc(lrcText);
-//            song.setSongName(songName);
-//            song.setAlbumCover(albumCover);
-//        } else {
-//            finish();
-//        }
-//
-//        diskLruCacheUtil = DiskLruCacheUtil.getInstance(this, "song");
-//
-////        handler.obtainMessage(0, new LrcParser().parserAll(lrcText)).sendToTarget();
-//        if (lrcText != null && lrcParserThread == null) {
-//            lrcParserThread = new LrcParserThread();
-//            lrcParserThread.start();
-//        }
-//        if (albumCover != null && blurImageThread == null) {
-//            blurImageThread = new BlurImageThread();
-//            blurImageThread.start();
-//        }
-
+        lrcView.setOnTouchListener(this);
     }
 
     private void initMenu() {
-        menuBackBt = findViewById(R.id.menu_lrc_view_back_bt);
-        menuHideBt = findViewById(R.id.menu_lrc_view_hide_bt);
-        menuLikeBt = findViewById(R.id.menu_lrc_view_like_bt);
-        menuPlainBt = findViewById(R.id.menu_lrc_view_plain_bt);
-        menuQzoneBt = findViewById(R.id.menu_lrc_view_qzone_bt);
-        menuWeiboBt = findViewById(R.id.menu_lrc_view_weibo_bt);
-        menuWechatBt = findViewById(R.id.menu_lrc_view_wechat_bt);
-        menuMomentsBt = findViewById(R.id.menu_lrc_view_moments_bt);
         menuBackBt.setOnClickListener(this);
         menuHideBt.setOnClickListener(this);
         menuLikeBt.setOnClickListener(this);
@@ -170,8 +127,8 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         menuWeiboBt.setOnClickListener(this);
         menuWechatBt.setOnClickListener(this);
         menuMomentsBt.setOnClickListener(this);
+
         startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
-        menuTextSizeSeek = findViewById(R.id.menu_lrc_view_text_size_seek);
 
         menuTextSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -191,7 +148,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     }
 
     private void loadBackground(String albumCoverUri) {
-        DataRepository.getInstance()
+        backgroundDisposable = ((BasicApp) getApplication()).getDataRepository()
                 .getLrcViewBackground(albumCoverUri, LrcActivity.this)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -211,7 +168,7 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
     }
 
     private void loadLrc(String lrcUri) {
-        DataRepository.getInstance().getLrc(lrcUri)
+        lrcDisposable = ((BasicApp) getApplication()).getDataRepository().getLrc(lrcUri)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
@@ -229,15 +186,13 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
 
     @Override
     protected void onDestroy() {
-//        if (lrcParserThread != null) {
-//            lrcParserThread.interrupt();
-//            lrcParserThread = null;
-//        }
-//        if (blurImageThread != null) {
-//            blurImageThread.interrupt();
-//            blurImageThread = null;
-//        }
         super.onDestroy();
+        if (lrcDisposable != null) {
+            lrcDisposable.dispose();
+        }
+        if (backgroundDisposable != null) {
+            backgroundDisposable.dispose();
+        }
     }
 
     @Override
@@ -273,6 +228,8 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
                 startY = 0;
                 endX = 0;
                 endY = 0;
+                break;
+            default:
                 break;
         }
         return false;
@@ -393,51 +350,4 @@ public class LrcActivity extends Activity implements View.OnTouchListener, View.
         LogUtil.i("flag" + (flag ? "true" : "false"));
         return flag;
     }
-
-//    public class BlurImageThread extends Thread {
-//        @Override
-//        public void run() {
-//            super.run();
-//            Display display = getWindowManager().getDefaultDisplay();
-//            // Bitmap orginalImage = BitmapFactory.decodeByteArray(albumCover, 0, albumCover.length);
-//            Bitmap smallImage = BitmapUtil.scaleBitmap(albumCover, 0.2f, 0.2f);
-//            Bitmap blurImage = BitmapUtil.blur(smallImage, 20);
-//            Bitmap backImage = BitmapUtil.getSuitaleBitmap(blurImage, display.getWidth(), display.getHeight());
-//            handler.obtainMessage(1, BitmapUtil.getTransparentBitmap(backImage, 90)).sendToTarget();
-//        }
-//    }
-//
-//    public class LrcParserThread extends Thread {
-//        @Override
-//        public void run() {
-//            super.run();
-//
-//            try {
-//                lrcInfo = LrcParser.getInstance().parser(new ByteArrayInputStream(lrcText.getBytes()));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            if (lrcInfo == null || lrcInfo.getInfos().size() == 0) {
-//                lrcText.replace("\r\n", "\n\n");
-//                handler.obtainMessage(0, songName + "\n\n\n" + lrcText).sendToTarget();
-//                return;
-//            }
-//
-//            String lrcStr = "";
-//            if (lrcInfo.getTitle() != null && lrcInfo.getTitle().length() > 0) {
-//                lrcStr = lrcStr + lrcInfo.getTitle();
-//            }
-//            if (lrcInfo.getArtist() != null && lrcInfo.getArtist().length() > 0) {
-//                lrcStr = lrcStr + "\n\n演唱：" + lrcInfo.getArtist();
-//            }
-//            if (lrcInfo.getAlbum() != null && lrcInfo.getAlbum().length() > 0) {
-//                lrcStr += ("    专辑：" + lrcInfo.getAlbum());
-//            }
-//            for (String s : lrcInfo.getInfos().values()) {
-//                lrcStr += ("\n\n" + s);
-//            }
-//
-//            handler.obtainMessage(0, lrcStr).sendToTarget();
-//        }
-//    }
 }

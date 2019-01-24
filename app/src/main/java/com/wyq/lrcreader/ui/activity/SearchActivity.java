@@ -6,20 +6,24 @@ import android.view.Menu;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.ui.IRetryLoadCallback;
 import com.wyq.lrcreader.ui.fragment.LrcListFragment;
 import com.wyq.lrcreader.ui.fragment.SearchFragment;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 
-public class SearchActivity extends BaseActivity implements SearchView.OnQueryTextListener {
+public class SearchActivity extends BaseActivity implements SearchView.OnQueryTextListener, IRetryLoadCallback {
 
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
 
     private SearchView searchView;
+
+    private String queryText;
 
     public static void newInstance(Context context) {
         Intent intent = new Intent();
@@ -64,13 +68,23 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
     @Override
     public boolean onQueryTextSubmit(String query) {
         LogUtil.i("query:" + query);
-        fragmentReplace(R.id.search_activity_content, LrcListFragment.newInstance(false, query));
+        queryText = query;
+        fragmentReplace(LrcListFragment.newInstance(false, query));
         return false;
+    }
+
+    public void fragmentReplace(Fragment fragment) {
+        fragmentReplace(R.id.search_activity_content, fragment);
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
 
         return false;
+    }
+
+    @Override
+    public void retry() {
+        onQueryTextSubmit(queryText);
     }
 }

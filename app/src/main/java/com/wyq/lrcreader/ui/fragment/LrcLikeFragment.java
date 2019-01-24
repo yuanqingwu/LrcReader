@@ -61,11 +61,15 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         }
     };
 
+    public static LrcLikeFragment newInstance() {
+        return new LrcLikeFragment();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lrclist, container, false);
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_lrclist_recyclerview);
+        recyclerView = view.findViewById(R.id.fragment_lrclist_recyclerview);
         //       Log.i("Test", "oncreateView");
         songList = new ArrayList<>();
 //        adapter = new RecyclerAdapter(getActivity(), songList);

@@ -3,4 +3,4 @@
     android:hint="@string/search"
     android:imeOptions="actionSearch"
     android:label="@string/app_name"
-    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"></searchable>
+    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer" />

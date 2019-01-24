@@ -25,6 +25,11 @@ public class LocalFragment extends BaseLazyLoadFragment {
     @BindView(R.id.local_fragment_recycler_view)
     public RecyclerView recyclerView;
 
+
+    public static LocalFragment newInstance() {
+        return new LocalFragment();
+    }
+
     @Override
     void loadData() {
 
@@ -61,6 +66,11 @@ public class LocalFragment extends BaseLazyLoadFragment {
 
                     }
                 });
+
+    }
+
+    @Override
+    public void retry() {
 
     }
 }

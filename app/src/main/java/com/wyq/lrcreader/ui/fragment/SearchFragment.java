@@ -1,14 +1,35 @@
 package com.wyq.lrcreader.ui.fragment;
 
+import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.adapter.RecyclerAdapter;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
+import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
+import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
+import com.wyq.lrcreader.ui.activity.LrcActivity;
+import com.wyq.lrcreader.utils.LogUtil;
+
+import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
 
 /**
  * @author Uni.W
  * @date 2019/1/20 14:40
  */
-public class SearchFragment extends BaseFragment {
+public class SearchFragment extends BaseFragment implements RecyclerAdapter.OnRecyclerItemClickListener {
+
+    @BindView(R.id.search_fragment_recycler_view)
+    public RecyclerView recyclerView;
+
+    private RecyclerAdapter adapter;
 
     public static SearchFragment newInstance() {
 
@@ -28,5 +49,38 @@ public class SearchFragment extends BaseFragment {
     @Override
     void initView(View view) {
 
+        initRecyclerView();
+    }
+
+    private void initRecyclerView() {
+        adapter = new RecyclerAdapter(getContext(), null);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+        adapter.setOnRecyclerItemClickListener(this);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        ViewModelFactory factory = new ViewModelFactory(getActivity().getApplication());
+        SearchResultViewModel searchResultViewModel = ViewModelProviders.of(this, factory)
+                .get(SearchResultViewModel.class);
+
+        searchResultViewModel.getSearchResults().observe(this, new Observer<List<SearchResultEntity>>() {
+            @Override
+            public void onChanged(List<SearchResultEntity> resultEntities) {
+                if (resultEntities != null) {
+                    adapter.refreshData(resultEntities);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        SearchResultEntity entity = adapter.getDataList().get(position);
+        LogUtil.i(entity.getSongName() + " :" + entity.getLrcUri());
+        LrcActivity.newInstance(getContext(), entity.getLrcUri(), entity.getAlbumCoverUri());
     }
 }

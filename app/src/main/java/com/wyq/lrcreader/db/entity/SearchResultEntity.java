@@ -1,16 +1,31 @@
-package com.wyq.lrcreader.model.viewmodel;
+package com.wyq.lrcreader.db.entity;
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 /**
  * @author Uni.W
  * @date 2019/1/12 21:09
  */
-public class SongListModel {
+@Entity(tableName = "search_result")
+public class SearchResultEntity {
 
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String songName;
     private String artist;
     //    private String album;
     private String lrcUri;
     private String albumCoverUri;
+    private String dataSource;//数据源
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getSongName() {
         return songName;
@@ -44,13 +59,11 @@ public class SongListModel {
         this.albumCoverUri = albumCoverUri;
     }
 
-    //    public String getAlbum() {
-//        return album;
-//    }
-//
-//    public void setAlbum(String album) {
-//        this.album = album;
-//    }
+    public String getDataSource() {
+        return dataSource;
+    }
 
-
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
 }

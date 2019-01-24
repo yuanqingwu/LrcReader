@@ -30,10 +30,10 @@ public class LrcParser {
     private static LrcParser lrcParser;
     //用于保存时间点和歌词之间的对应关系
     //private Map<Long,String> maps =new HashMap<Long,String>();
-    private Map<Long, String> maps = new TreeMap<>();
+    private Map<Long, String> maps;
 
     private LrcParser() {
-
+        maps = new TreeMap<>();
     }
 
     public static LrcParser getInstance() {
@@ -72,6 +72,9 @@ public class LrcParser {
         //包装对象
         InputStreamReader inr = new InputStreamReader(inputStream);
         BufferedReader reader = new BufferedReader(inr);
+
+        maps.clear();
+
         //一行一行的读，每读一行解析一行
         String line;
         while ((line = reader.readLine()) != null) {

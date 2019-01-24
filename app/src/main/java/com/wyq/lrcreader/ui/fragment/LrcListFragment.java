@@ -1,21 +1,16 @@
 package com.wyq.lrcreader.ui.fragment;
 
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.RecyclerAdapter;
-import com.wyq.lrcreader.constants.LocalConstans;
-import com.wyq.lrcreader.datasource.DataRepository;
-import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
-import com.wyq.lrcreader.model.viewmodel.SongListModel;
+import com.wyq.lrcreader.base.BasicApp;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
+import com.wyq.lrcreader.ui.activity.SearchActivity;
 import com.wyq.lrcreader.utils.LogUtil;
-import com.wyq.lrcreader.utils.LrcParser;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +42,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
     private static final String ARGUMENTS_SEARCH_TEXT = "SEARCH_TEXT";
 
     private String searchText;
-    private List<SongListModel> songListModels;
+    private List<SearchResultEntity> searchResultEntities;
 
     public static LrcListFragment newInstance(boolean isLocal, String searchText) {
         LrcListFragment lrcListFragment = new LrcListFragment();
@@ -93,20 +88,20 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
 
     @Override
     void initData() {
-        songListModels = new ArrayList<>();
+        searchResultEntities = new ArrayList<>();
 
         assert getArguments() != null;
         isLocal = getArguments().getBoolean(ARGUMENTS_IS_LOCAL);
 
         if (isLocal) {
             //displaySongList(getArguments().<ISong>getParcelableArrayList("songList"));
-            final List<String> songDirList = getArguments().getStringArrayList("localLyricDir");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    expandLocalLyricDir(songDirList);
-                }
-            }).start();
+//            final List<String> songDirList = getArguments().getStringArrayList("localLyricDir");
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    expandLocalLyricDir(songDirList);
+//                }
+//            }).start();
         } else {
             searchText = getArguments().getString(ARGUMENTS_SEARCH_TEXT);
         }
@@ -122,7 +117,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
 
 
     public void initRecyclerView() {
-        adapter = new RecyclerAdapter(getActivity(), songListModels);
+        adapter = new RecyclerAdapter(getActivity(), searchResultEntities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
@@ -152,13 +147,13 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
             return;
         }
         LogUtil.i("start to load data");
-        DataRepository.getInstance().getSearchResult(searchText)
+        ((BasicApp) getActivity().getApplication()).getDataRepository().getSearchResult(searchText)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<SongListModel>>() {
+                .subscribe(new Consumer<List<SearchResultEntity>>() {
                     @Override
-                    public void accept(List<SongListModel> songs) {
-                        songListModels = songs;
+                    public void accept(List<SearchResultEntity> songs) {
+                        searchResultEntities = songs;
                         adapter.refreshData(songs);
                         LogUtil.i("成功" + songs.size());
                         hideRefresh();
@@ -169,6 +164,10 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
                         throwable.printStackTrace();
                         LogUtil.i("出现异常" + throwable.getMessage());
                         hideRefresh();
+
+                        if (getActivity() instanceof SearchActivity) {
+                            ((SearchActivity) getActivity()).fragmentReplace(RetryFragment.newInstance());
+                        }
                     }
                 });
     }
@@ -185,38 +184,38 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
             swipeRefreshLayout.setRefreshing(true);
         }
     }
-
-    public void expandLocalLyricDir(List<String> localLyricDir) {
-        for (String dirStr : localLyricDir) {
-            File file = new File(dirStr);
-            if (file.isDirectory()) {
-                String[] files = file.list();
-                for (String fileNme : files) {
-                    Song song = LrcParser.getInstance().parserAll(fileNme, readLocalFile(LocalConstans.NETEASE_CLOUDMUSIC_DOWNLOAD_LYRIC + fileNme));
-                    if (song != null) {
-                        song.setAlbumCover(BitmapFactory.decodeResource(getResources(), R.drawable.album));
-//                        songsList.add(song);
-//                        Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
-                    }
-                }
-            }
-        }
-    }
-
-    public String readLocalFile(String path) {
-        String lrcText = "";
-        try {
-            FileInputStream fis = new FileInputStream(path);
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            lrcText = new String(buffer);
-            LogUtil.i(lrcText);
-            fis.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return lrcText;
-    }
+//
+//    public void expandLocalLyricDir(List<String> localLyricDir) {
+//        for (String dirStr : localLyricDir) {
+//            File file = new File(dirStr);
+//            if (file.isDirectory()) {
+//                String[] files = file.list();
+//                for (String fileNme : files) {
+//                    Song song = LrcParser.getInstance().parserAll(fileNme, readLocalFile(LocalConstans.NETEASE_CLOUDMUSIC_DOWNLOAD_LYRIC + fileNme));
+//                    if (song != null) {
+//                        song.setAlbumCover(BitmapFactory.decodeResource(getResources(), R.drawable.album));
+////                        songsList.add(song);
+////                        Message.obtain(handler, MESSAGE_LRC, -1, MESSAGE_LRC_SONGLIST, songsList).sendToTarget();
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    public String readLocalFile(String path) {
+//        String lrcText = "";
+//        try {
+//            FileInputStream fis = new FileInputStream(path);
+//            byte[] buffer = new byte[fis.available()];
+//            fis.read(buffer);
+//            lrcText = new String(buffer);
+//            LogUtil.i(lrcText);
+//            fis.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return lrcText;
+//    }
 
     @Override
     public void onRefresh() {
@@ -225,9 +224,14 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerAda
 
     @Override
     public void onItemClick(View view, int position) {
-        if (songListModels == null || songListModels.size() <= position) {
+        if (searchResultEntities == null || searchResultEntities.size() <= position) {
             return;
         }
-        LrcActivity.newInstance(getActivity(), songListModels.get(position).getLrcUri(), songListModels.get(position).getAlbumCoverUri());
+        LrcActivity.newInstance(getActivity(), searchResultEntities.get(position).getLrcUri(), searchResultEntities.get(position).getAlbumCoverUri());
+    }
+
+    @Override
+    public void retry() {
+        loadData();
     }
 }
