@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
-import com.wyq.lrcreader.adapter.RecyclerAdapter;
+import com.wyq.lrcreader.adapter.RecyclerListAdapter;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
@@ -24,12 +24,12 @@ import butterknife.BindView;
  * @author Uni.W
  * @date 2019/1/20 14:40
  */
-public class SearchFragment extends BaseFragment implements RecyclerAdapter.OnRecyclerItemClickListener {
+public class SearchFragment extends BaseFragment implements RecyclerListAdapter.OnRecyclerItemClickListener {
 
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
 
-    private RecyclerAdapter adapter;
+    private RecyclerListAdapter adapter;
 
     public static SearchFragment newInstance() {
 
@@ -53,7 +53,7 @@ public class SearchFragment extends BaseFragment implements RecyclerAdapter.OnRe
     }
 
     private void initRecyclerView() {
-        adapter = new RecyclerAdapter(getContext(), null);
+        adapter = new RecyclerListAdapter(getContext(), null);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 

@@ -20,23 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * Created by Uni.W on 2016/8/18.
  */
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder> {
-
-    public interface OnRecyclerItemClickListener {
-        void onItemClick(View view, int position);
-    }
-
-    public interface OnRecyclerItemLongClickListener {
-        void onItemLongClick(View view, int position);
-    }
-
-    private OnRecyclerItemClickListener onRecyclerItemClickListener;
-    private OnRecyclerItemLongClickListener onRecyclerItemLongClickListener;
-
+public class RecyclerListAdapter extends BaseRecyclerViewAdapter<RecyclerListAdapter.MyViewHolder> {
     private Context context;
     private List<SearchResultEntity> list;
 
-    public RecyclerAdapter(Context context, List<SearchResultEntity> list) {
+    public RecyclerListAdapter(Context context, List<SearchResultEntity> list) {
         this.context = context;
         this.list = list;
     }
@@ -75,14 +63,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
             diffResult.dispatchUpdatesTo(this);
         }
 
-    }
-
-    public void setOnRecyclerItemClickListener(OnRecyclerItemClickListener onRecyclerItemClickListener) {
-        this.onRecyclerItemClickListener = onRecyclerItemClickListener;
-    }
-
-    public void setOnRecyclerItemLongClickListener(OnRecyclerItemLongClickListener onRecyclerItemLongClickListener) {
-        this.onRecyclerItemLongClickListener = onRecyclerItemLongClickListener;
     }
 
     @Override

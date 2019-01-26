@@ -2,8 +2,8 @@
     <!--limpid-->
     <string name="app_name">清水歌词</string>
     <string name="search">search</string>
-    <string name="textSize">textSize</string>
-    <string name="share">share</string>
+    <string name="textSize">字体大小</string>
+    <string name="share">分享</string>
     <string name="local_search_list_text">本地歌词文件夹列表:</string>
     <string name="local_search_progress_text_ing">正在搜索本地歌词…</string>
     <string name="local_search_progress_text_ed">本地歌词搜索完成</string>
@@ -16,5 +16,6 @@
     <string name="search_history">历史记录</string>
     <string name="album_cover">album_cover</string>
     <string name="search_input_text_hint_artist">歌手</string>
-    <string name="click_to_retry">click to retry</string>
+    <string name="click_to_retry">点击重试</string>
+    <string name="back">返回</string>
 </resources>

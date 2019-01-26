@@ -3,34 +3,40 @@ package com.wyq.lrcreader.ui.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.TypedValue;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
+import com.wyq.lrcreader.adapter.RecyclerGridAdapter;
+import com.wyq.lrcreader.adapter.item.ImageTextItemModel;
 import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
+import com.wyq.lrcreader.datasource.DataRepository;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.LrcInfo;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 import com.wyq.lrcreader.share.WeChatShare;
 import com.wyq.lrcreader.utils.BitmapUtil;
+import com.wyq.lrcreader.utils.FireShare;
 import com.wyq.lrcreader.utils.LogUtil;
+import com.wyq.lrcreader.utils.LrcOperationGenerator;
+import com.wyq.lrcreader.utils.ScreenUtils;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Objects;
 
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -40,39 +46,42 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Uni.W on 2016/8/30.
  */
-public class LrcActivity extends BaseActivity implements View.OnTouchListener, View.OnClickListener {
+public class LrcActivity extends BaseActivity implements View.OnClickListener, BaseRecyclerViewAdapter.OnRecyclerItemClickListener {
 
     @BindView(R.id.activity_lrc_view_text)
     public TextView lrcView;
     @BindView(R.id.activity_lrc_view_scrollview)
     public ScrollView scrollView;
-    @BindView(R.id.activity_lrc_view_relativelayout)
-    public RelativeLayout relativeLayout;
-    @BindView(R.id.activity_lrc_view_setmenu)
-    public LinearLayout setMenuLayout;
+//    @BindView(R.id.activity_lrc_view_relativelayout)
+//    public RelativeLayout relativeLayout;
+//    @BindView(R.id.activity_lrc_view_setmenu)
+//    public LinearLayout setMenuLayout;
 
-    @BindView(R.id.menu_lrc_view_back_bt)
-    public Button menuBackBt;
-    @BindView(R.id.menu_lrc_view_hide_bt)
-    public Button menuHideBt;
-    @BindView(R.id.menu_lrc_view_like_bt)
-    public Button menuLikeBt;
-    @BindView(R.id.menu_lrc_view_plain_bt)
-    public Button menuPlainBt;
-    @BindView(R.id.menu_lrc_view_qzone_bt)
-    public Button menuQzoneBt;
-    @BindView(R.id.menu_lrc_view_weibo_bt)
-    public Button menuWeiboBt;
-    @BindView(R.id.menu_lrc_view_wechat_bt)
-    public Button menuWechatBt;
-    @BindView(R.id.menu_lrc_view_moments_bt)
-    public Button menuMomentsBt;
+//    @BindView(R.id.menu_lrc_view_like_bt)
+//    public Button menuLikeBt;
+//    @BindView(R.id.menu_lrc_view_plain_bt)
+//    public Button menuPlainBt;
+//    @BindView(R.id.menu_lrc_view_qzone_bt)
+//    public Button menuQzoneBt;
+//    @BindView(R.id.menu_lrc_view_weibo_bt)
+//    public Button menuWeiboBt;
+//    @BindView(R.id.menu_lrc_view_wechat_bt)
+//    public Button menuWechatBt;
+//    @BindView(R.id.menu_lrc_view_moments_bt)
+//    public Button menuMomentsBt;
 
-    @BindView(R.id.menu_lrc_view_text_size_seek)
-    public SeekBar menuTextSizeSeek;
+//    @BindView(R.id.menu_lrc_view_text_size_seek)
+//    public SeekBar menuTextSizeSeek;
+
+    private BottomSheetDialog bottomSheetDialog;
+    private RecyclerView recyclerView;
 
     private Disposable lrcDisposable;
     private Disposable backgroundDisposable;
+
+    private List<ImageTextItemModel> menuItemList;
+    private String lrcUri;
+    private String albumCoverUri;
 
     private String lrcText, artist, songName;
     private Bitmap albumCover;
@@ -110,42 +119,50 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
 
         initMenu();
 
-        String lrcUri = Objects.requireNonNull(getIntent().getExtras()).getString(ARGUMENTS_LRC_URI);
-        String albumCoverUri = getIntent().getExtras().getString(ARGUMENTS_LRC_COVER_URI);
+        lrcUri = Objects.requireNonNull(getIntent().getExtras()).getString(ARGUMENTS_LRC_URI);
+        albumCoverUri = getIntent().getExtras().getString(ARGUMENTS_LRC_COVER_URI);
 
         loadBackground(albumCoverUri);
         loadLrc(lrcUri);
-        lrcView.setOnTouchListener(this);
     }
 
     private void initMenu() {
-        menuBackBt.setOnClickListener(this);
-        menuHideBt.setOnClickListener(this);
-        menuLikeBt.setOnClickListener(this);
-        menuPlainBt.setOnClickListener(this);
-        menuQzoneBt.setOnClickListener(this);
-        menuWeiboBt.setOnClickListener(this);
-        menuWechatBt.setOnClickListener(this);
-        menuMomentsBt.setOnClickListener(this);
+
+        menuItemList = LrcOperationGenerator.getInstance(this).genMenuList();
+
+        bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setCancelable(true);
+        bottomSheetDialog.setCanceledOnTouchOutside(true);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_layout);
+
+        bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_close_ib).setOnClickListener(this);
+        bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_back_bt).setOnClickListener(this);
+        recyclerView = bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_recycler_view);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
+        RecyclerGridAdapter adapter = new RecyclerGridAdapter(this, menuItemList);
+        recyclerView.setAdapter(adapter);
+
+        adapter.setOnRecyclerItemClickListener(this);
 
         startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
 
-        menuTextSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                lrcView.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (progress / 100f - 0.5f) * 20f);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
+//        menuTextSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                lrcView.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (progress / 100f - 0.5f) * 20f);
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//        });
 
     }
+
 
     private void loadBackground(String albumCoverUri) {
         backgroundDisposable = ((BasicApp) getApplication()).getDataRepository()
@@ -174,6 +191,7 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) {
+                        lrcText = s;
                         lrcView.setText(s);
                     }
                 }, new Consumer<Throwable>() {
@@ -195,13 +213,18 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
         }
     }
 
+
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    public boolean dispatchTouchEvent(MotionEvent event) {
+
         long secondClickTime = 0;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // Toast.makeText(LrcActivity.this,"ckick"+event.getDownTime(),Toast.LENGTH_SHORT).show();
+                startX = event.getRawX();
+                startY = event.getRawY();
+                LogUtil.i("dispatchTouchEvent:ACTION_DOWN:" + startY);
+
                 if (firstClickTime != 0) {
                     secondClickTime = event.getDownTime();
                     if (secondClickTime - firstClickTime < 300) {
@@ -210,17 +233,21 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
                     }
                 }
                 firstClickTime = event.getDownTime();
-
-                startX = event.getRawX();
-                startY = event.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 endX = event.getRawX();
                 endY = event.getRawY();
+                LogUtil.i("dispatchTouchEvent:ACTION_MOVE:" + endY);
                 float distanceX = endX - startX;
-                float distanceY = Math.abs(endY - startY);
-                if (distanceX > 100 && distanceY < 100) {
+                float distanceY = endY - startY;
+                float distanceYabs = Math.abs(endY - startY);
+                if (distanceX > 100 && distanceYabs < 100) {
                     finish();
+                    return true;
+                }
+                if (startY > ScreenUtils.getScreenHeightPX(this) * 5 / 6 && distanceY < -100) {
+                    bottomSheetDialog.show();
+                    return true;
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -232,27 +259,16 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
             default:
                 break;
         }
-        return false;
+
+        return super.dispatchTouchEvent(event);
     }
 
     private void showMenu() {
         if (!isMenuVisiblity) {
-            showAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0f,
-                    Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 1f,
-                    Animation.RELATIVE_TO_SELF, 0f);
-            showAnimation.setDuration(300);
-            setMenuLayout.setAnimation(showAnimation);
-            setMenuLayout.setVisibility(View.VISIBLE);
-            menuHideBt.setBackground(getResources().getDrawable(R.drawable.show_2_white));
+            bottomSheetDialog.show();
             isMenuVisiblity = true;
         } else {
-            hideAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0f,
-                    Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f,
-                    Animation.RELATIVE_TO_SELF, 1f);
-            hideAnimation.setDuration(300);
-            setMenuLayout.setAnimation(hideAnimation);
-            setMenuLayout.setVisibility(View.GONE);
-            menuHideBt.setBackground(getResources().getDrawable(R.drawable.hide_1_white));
+            bottomSheetDialog.cancel();
             isMenuVisiblity = false;
         }
     }
@@ -260,22 +276,12 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.menu_lrc_view_back_bt:
+            case R.id.bottom_sheet_dialog_close_ib:
+                bottomSheetDialog.cancel();
+                break;
+
+            case R.id.bottom_sheet_dialog_back_bt:
                 finish();
-                break;
-            case R.id.menu_lrc_view_hide_bt:
-                menuHideBt.setBackground(getResources().getDrawable(R.drawable.hide_1_white));
-                hideAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0f,
-                        Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f,
-                        Animation.RELATIVE_TO_SELF, 1f);
-                hideAnimation.setDuration(300);
-                setMenuLayout.setAnimation(hideAnimation);
-                setMenuLayout.setVisibility(View.GONE);
-                isMenuVisiblity = false;
-                break;
-
-            case R.id.menu_lrc_view_qzone_bt:
-
                 break;
             case R.id.menu_lrc_view_weibo_bt:
 
@@ -290,7 +296,7 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
                 String filePath = getExternalCacheDir() + "/albumCover";
                 LogUtil.i(filePath);
                 if (!isLike) {
-                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
+//                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
                     isLike = true;
                     diskLruCacheUtil.addToDiskCache(song);
 
@@ -304,7 +310,7 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
                         e.printStackTrace();
                     }
                 } else {
-                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
+//                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
                     isLike = false;
                     diskLruCacheUtil.removeFromDiskCache(song);
                     try {
@@ -321,7 +327,7 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
                     lrcView.setGravity(Gravity.START);
 //                    handler.obtainMessage(0, lrcText).sendToTarget();
 
-                    menuPlainBt.setTextColor(Color.BLACK);
+//                    menuPlainBt.setTextColor(Color.BLACK);
                     isPlain = true;
                 } else {
                     lrcView.setGravity(Gravity.CENTER);
@@ -331,7 +337,7 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
 //                        lrcParserThread = new LrcParserThread();
 //                        lrcParserThread.start();
 //                    }
-                    menuPlainBt.setTextColor(Color.WHITE);
+//                    menuPlainBt.setTextColor(Color.WHITE);
                     isPlain = false;
                 }
                 break;
@@ -349,5 +355,54 @@ public class LrcActivity extends BaseActivity implements View.OnTouchListener, V
         boolean flag = weChatShare.sendImgToWX(BitmapUtil.convertViewToBitmap(scrollView), req);
         LogUtil.i("flag" + (flag ? "true" : "false"));
         return flag;
+    }
+
+    private DataRepository getRepository() {
+        return ((BasicApp) getApplication()).getDataRepository();
+    }
+
+
+    @Override
+    public void onItemClick(View view, int position) {
+        LogUtil.i(menuItemList.get(position).getName());
+        switch (menuItemList.get(position).getAction()) {
+            case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WECHAT:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_MOMENTS:
+                shareToWX(SendMessageToWX.Req.WXSceneTimeline);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WEIBO:
+                Toast.makeText(this, "即将到来~", Toast.LENGTH_SHORT).show();
+
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_NORMAL:
+                FireShare.shareFileWithSys(this, getString(R.string.app_name), Uri.parse(lrcUri));
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_DOWNLOAD:
+//                getRepository().getDbGecimiRepository().
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_TEXT_RESIZE:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_LIKE:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_BACKGROUND_BLUR:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_CHOOSE_LRC_TEXT:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_GEN_BITMAP:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            case LrcOperationGenerator.ACTION_LRC_MENU_GEN_VIDEO:
+                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                break;
+            default:
+                break;
+
+        }
     }
 }

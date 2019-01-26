@@ -48,7 +48,7 @@ public class LocalFragment extends BaseLazyLoadFragment {
 
     @Override
     void initView(View view) {
-//        RecyclerAdapter adapter = new RecyclerAdapter(getContext(),);
+//        RecyclerListAdapter adapter = new RecyclerListAdapter(getContext(),);
 
     }
 

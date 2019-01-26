@@ -1,6 +1,5 @@
 package com.wyq.lrcreader.ui.fragment;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.wyq.lrcreader.R;
-import com.wyq.lrcreader.adapter.RecyclerAdapter;
+import com.wyq.lrcreader.adapter.RecyclerListAdapter;
 import com.wyq.lrcreader.cache.DiskLruCacheUtil;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
@@ -24,16 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Uni.W on 2016/8/31.
  */
-public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyclerItemLongClickListener, RecyclerAdapter.OnRecyclerItemClickListener {
+public class LrcLikeFragment extends Fragment implements RecyclerListAdapter.OnRecyclerItemLongClickListener, RecyclerListAdapter.OnRecyclerItemClickListener {
 
     private RecyclerView recyclerView;
-    private RecyclerAdapter adapter;
+    private RecyclerListAdapter adapter;
     private List<Song> songList;
 
     private long cacheSize = 0;
@@ -72,7 +72,7 @@ public class LrcLikeFragment extends Fragment implements RecyclerAdapter.OnRecyc
         recyclerView = view.findViewById(R.id.fragment_lrclist_recyclerview);
         //       Log.i("Test", "oncreateView");
         songList = new ArrayList<>();
-//        adapter = new RecyclerAdapter(getActivity(), songList);
+//        adapter = new RecyclerListAdapter(getActivity(), songList);
 //        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 //        recyclerView.setItemAnimator(new DefaultItemAnimator());
 //        recyclerView.setAdapter(adapter);
