@@ -93,6 +93,7 @@ public class DataRepository {
                                                                    searchResultEntity.setArtist(artist.getName());
                                                                    searchResultEntity.setLrcUri(lyricResult.getLrc());
                                                                    searchResultEntity.setAlbumCoverUri(albumCover.getThumb());
+                                                                   searchResultEntity.setDataSource(EDataResource.GECIME.name());
 
                                                                    DbGecimiRepository.getInstance(database).insertSearchResult(searchResultEntity);
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:paddingStart="@dimen/margin_normal_middle"
+    android:paddingEnd="@dimen/margin_normal_middle">
+
+    <ProgressBar
+        android:id="@+id/network_state_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/network_state_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_normal_middle"
+        android:layout_toEndOf="@id/network_state_progress_bar"
+        android:gravity="center"
+        android:text="@string/loading" />
+
+    <Button
+        android:id="@+id/network_state_retry_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/network_state_tv"
+        android:gravity="end"
+        android:text="@string/click_to_retry" />
+</RelativeLayout>

@@ -13,7 +13,6 @@ import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 
@@ -58,7 +57,7 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_search, menu);
-        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_action_search));
+        searchView = (SearchView) menu.findItem(R.id.menu_action_search).getActionView();
         searchView.setQueryHint("搜索歌名");
         searchView.onActionViewExpanded();
 

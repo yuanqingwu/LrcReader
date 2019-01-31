@@ -2,10 +2,12 @@ package com.wyq.lrcreader.datasource.local.gecimi;
 
 import com.wyq.lrcreader.db.AppDatabase;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
-
-import java.util.List;
+import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
 
 /**
  * @author Uni.W
@@ -30,12 +32,20 @@ public class DbGecimiRepository {
         return repository;
     }
 
+//    public LiveData<List<SearchResultEntity>> getAllSearchResult() {
+//        return database.getSearchResultDao().getAll();
+//    }
 
-    public LiveData<List<SearchResultEntity>> getAllSearchResult() {
-        return database.getSearchResultDao().getAll();
+    public LiveData<PagedList<SearchResultEntity>> getAllSearchResult() {
+        DataSource.Factory<Integer, SearchResultEntity> lrcSource = database.getSearchResultDao().getAll();
+        LogUtil.i("" + lrcSource == null ? "source is null" : "source is not null");
+        return new LivePagedListBuilder(lrcSource,
+                10)
+                .build();
     }
 
     public void insertSearchResult(SearchResultEntity entity) {
         database.getSearchResultDao().insert(entity);
+        LogUtil.i("insert:" + entity.getSongName() + " " + entity.getDataSource());
     }
 }

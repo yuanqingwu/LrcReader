@@ -26,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class GecimeModel implements IGecimeModel {
 
 
-    private IGecimeRequest buildRequest() {
+    private IGecimeApi buildRequest() {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .callTimeout(10000, TimeUnit.MILLISECONDS)
@@ -40,15 +40,15 @@ public class GecimeModel implements IGecimeModel {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        return gecime.create(IGecimeRequest.class);
+        return gecime.create(IGecimeApi.class);
     }
 
     @Override
     public Flowable<List<LyricResult>> getLrcResultList(String songName) {
 
-        IGecimeRequest gecimeRequest = buildRequest();
+        IGecimeApi gecimeApi = buildRequest();
 
-        Flowable<LyricResponse> lrcResponseObservable = gecimeRequest.requestWithName(songName);
+        Flowable<LyricResponse> lrcResponseObservable = gecimeApi.requestWithName(songName);
 
         return lrcResponseObservable
                 .subscribeOn(Schedulers.io())
@@ -68,7 +68,7 @@ public class GecimeModel implements IGecimeModel {
     @Override
     public Flowable<Artist> getArtist(long artistId) {
 
-        IGecimeRequest artistRequest = buildRequest();
+        IGecimeApi artistRequest = buildRequest();
 
         Flowable<Artist> artistObservable = artistRequest.getArtist(artistId)
                 .map(new Function<ArtistResponse, Artist>() {

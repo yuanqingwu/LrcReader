@@ -2,9 +2,7 @@ package com.wyq.lrcreader.db.dao;
 
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 
-import java.util.List;
-
-import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -28,6 +26,9 @@ public interface SearchResultDao {
     @Update
     void update(SearchResultEntity entity);
 
-    @Query("SELECT * FROM search_result")
-    LiveData<List<SearchResultEntity>> getAll();
+//    @Query("SELECT * FROM search_result")
+//    LiveData<List<SearchResultEntity>> getAll();
+
+    @Query("SELECT * FROM search_result ORDER BY id DESC")
+    DataSource.Factory<Integer, SearchResultEntity> getAll();
 }

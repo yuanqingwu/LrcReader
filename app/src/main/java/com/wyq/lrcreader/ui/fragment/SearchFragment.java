@@ -4,18 +4,18 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.adapter.LrcPagedAdapter;
 import com.wyq.lrcreader.adapter.RecyclerListAdapter;
+import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
-import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.utils.LogUtil;
-
-import java.util.List;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -29,7 +29,8 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
 
-    private RecyclerListAdapter adapter;
+    //private RecyclerListAdapter adapter;
+    private LrcPagedAdapter pagedAdapter;
 
     public static SearchFragment newInstance() {
 
@@ -53,11 +54,19 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
     }
 
     private void initRecyclerView() {
-        adapter = new RecyclerListAdapter(getContext(), null);
+//        adapter = new RecyclerListAdapter(getContext(), null);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
+//        recyclerView.setAdapter(adapter);
+//
+//        adapter.setOnRecyclerItemClickListener(this);
 
-        adapter.setOnRecyclerItemClickListener(this);
+        pagedAdapter = new LrcPagedAdapter(GlideApp.with(this));
+
+
+        recyclerView.setAdapter(pagedAdapter);
+
+
+
     }
 
     @Override
@@ -67,20 +76,29 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
         SearchResultViewModel searchResultViewModel = ViewModelProviders.of(this, factory)
                 .get(SearchResultViewModel.class);
 
-        searchResultViewModel.getSearchResults().observe(this, new Observer<List<SearchResultEntity>>() {
+        LogUtil.i("" + searchResultViewModel == null ? "vm null" : "vm not null");
+
+        searchResultViewModel.getSearchResults().observe(this, new Observer<PagedList<SearchResultEntity>>() {
             @Override
-            public void onChanged(List<SearchResultEntity> resultEntities) {
-                if (resultEntities != null) {
-                    adapter.refreshData(resultEntities);
+            public void onChanged(PagedList<SearchResultEntity> searchResultEntities) {
+                if (searchResultEntities != null) {
+
+                    LogUtil.i("LoadedCount:" + searchResultEntities.getLoadedCount() + searchResultEntities.get(0).getSongName());
+                    pagedAdapter.submitList(searchResultEntities);
+//                    pagedAdapter.setNetworkState(NetworkState.LOADING);
+                } else {
+                    LogUtil.i("searchResultEntities is null");
                 }
             }
         });
+
+
     }
 
     @Override
     public void onItemClick(View view, int position) {
-        SearchResultEntity entity = adapter.getDataList().get(position);
-        LogUtil.i(entity.getSongName() + " :" + entity.getLrcUri());
-        LrcActivity.newInstance(getContext(), entity.getLrcUri(), entity.getAlbumCoverUri());
+//        SearchResultEntity entity = adapter.getDataList().get(position);
+//        LogUtil.i(entity.getSongName() + " :" + entity.getLrcUri());
+//        LrcActivity.newInstance(getContext(), entity.getLrcUri(), entity.getAlbumCoverUri());
     }
 }

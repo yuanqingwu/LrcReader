@@ -14,7 +14,7 @@ import retrofit2.http.Path;
  * @author Uni.W
  * @date 2019/1/12 16:04
  */
-public interface IGecimeRequest {
+public interface IGecimeApi {
 
     @GET("lyric/{songName}")
     Flowable<LyricResponse> requestWithName(@Path("songName") String songName);
