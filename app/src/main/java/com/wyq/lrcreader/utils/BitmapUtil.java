@@ -194,12 +194,13 @@ public class BitmapUtil {
 //        int layoutMargin = (view.getWidth() - view.getMeasuredWidth())/2;
 //        view.layout(layoutMargin, 0,width - layoutMargin, view.getMeasuredHeight());
 
-        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED));
-        view.layout((int) view.getX(), (int) view.getY(), (int) view.getX() + view.getMeasuredWidth(),
-                (int) view.getY() + view.getMeasuredHeight());
-        LogUtil.i("width:" + view.getWidth());
-        LogUtil.i("measurewidth:" + view.getMeasuredWidth());
+//        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
+//                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED));
+//        view.layout((int) view.getX(), (int) view.getY(), (int) view.getX() + view.getMeasuredWidth(),
+//                (int) view.getY() + view.getMeasuredHeight());
+//        LogUtil.i("width:" + view.getWidth());
+//        LogUtil.i("measurewidth:" + view.getMeasuredWidth());
+
 //       // view.setDrawingCacheEnabled(true);
 //        view.buildDrawingCache(true);
 //        //Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache(true));

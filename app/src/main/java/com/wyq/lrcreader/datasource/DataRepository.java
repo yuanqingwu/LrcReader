@@ -7,6 +7,7 @@ import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.datasource.local.gecimi.DbGecimiRepository;
 import com.wyq.lrcreader.datasource.net.gecimi.GecimeModel;
 import com.wyq.lrcreader.db.AppDatabase;
+import com.wyq.lrcreader.db.entity.SearchHistoryEntity;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.AlbumCover;
@@ -87,7 +88,7 @@ public class DataRepository {
                                                                @Override
                                                                public SearchResultEntity apply(Artist artist, AlbumCover albumCover) {
                                                                    SearchResultEntity searchResultEntity = new SearchResultEntity();
-                                                                   searchResultEntity.setId(lyricResult.getAid());
+                                                                   searchResultEntity.setAid(lyricResult.getAid());
                                                                    searchResultEntity.setSongName(lyricResult.getSong());
                                                                    searchResultEntity.setArtist(artist.getName());
                                                                    searchResultEntity.setLrcUri(lyricResult.getLrc());
@@ -162,5 +163,26 @@ public class DataRepository {
     public LiveData<List<SongEntity>> getLocalSongList(AppDatabase appDatabase) {
         LiveData<List<SongEntity>> localSongs = appDatabase.getSongDao().getLocalSongList();
         return localSongs;
+    }
+
+
+    public LiveData<List<SearchHistoryEntity>> getSearchHistoryList() {
+        LiveData<List<SearchHistoryEntity>> searchHistory = database.getSearchHistoryDao().getAll();
+        return searchHistory;
+    }
+
+    public void addSearchHistory(SearchHistoryEntity entity) {
+        database.getExecutors().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                database.getSearchHistoryDao().insert(entity);
+            }
+        });
+    }
+
+    public void deleteAllSearchHistory() {
+        database.getExecutors().diskIO().execute(() -> {
+            database.getSearchHistoryDao().deleteAll();
+        });
     }
 }

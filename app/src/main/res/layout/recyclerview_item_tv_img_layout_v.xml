@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/recyclerview_item_tv_img_img"
         android:layout_centerHorizontal="true"
+        android:textSize="@dimen/text_size_normal"
         android:layout_marginTop="@dimen/margin_normal_small" />
 
 </RelativeLayout>

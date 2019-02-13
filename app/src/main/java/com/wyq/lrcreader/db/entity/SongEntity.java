@@ -5,17 +5,19 @@ import com.wyq.lrcreader.model.ISong;
 import java.util.Date;
 
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 /**
  * @author Uni.W
  * @date 2019/1/16 21:32
  */
-@Entity(tableName = "song")
+@Entity(tableName = "song", indices = {@Index(value = {"aid"}, unique = true)})
 public class SongEntity implements ISong {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
+    private int aid;
     private String songName;
     private String artist;
     private String lrcUri;
@@ -25,13 +27,21 @@ public class SongEntity implements ISong {
     private String dataSource;//数据源
     private Date searchAt;//搜索时间，查看时间
 
-    @Override
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public int getAid() {
+        return aid;
+    }
+
+    public void setAid(int aid) {
+        this.aid = aid;
     }
 
     @Override

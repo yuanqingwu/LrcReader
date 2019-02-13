@@ -5,6 +5,8 @@ package com.wyq.lrcreader.model;
  * @date 2019/1/31 20:28
  */
 public interface IListSong {
+    int getAid();
+
     String getSongName();
 
     String getArtist();

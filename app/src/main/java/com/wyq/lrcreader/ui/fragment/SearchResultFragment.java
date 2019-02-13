@@ -25,7 +25,7 @@ import butterknife.BindView;
  * @author Uni.W
  * @date 2019/1/20 14:40
  */
-public class SearchFragment extends BaseFragment implements RecyclerListAdapter.OnRecyclerItemClickListener {
+public class SearchResultFragment extends BaseFragment implements RecyclerListAdapter.OnRecyclerItemClickListener {
 
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
@@ -33,14 +33,14 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
     //private RecyclerListAdapter adapter;
     private LrcPagedAdapter pagedAdapter;
 
-    public static SearchFragment newInstance() {
+    public static SearchResultFragment newInstance() {
 
-        return new SearchFragment();
+        return new SearchResultFragment();
     }
 
     @Override
     public int attachLayoutRes() {
-        return R.layout.search_fragment;
+        return R.layout.search_result_fragment;
     }
 
     @Override
@@ -60,10 +60,7 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
 //        recyclerView.setAdapter(adapter);
 //
 //        adapter.setOnRecyclerItemClickListener(this);
-
         pagedAdapter = new LrcPagedAdapter(GlideApp.with(this));
-
-
         recyclerView.setAdapter(pagedAdapter);
 
     }

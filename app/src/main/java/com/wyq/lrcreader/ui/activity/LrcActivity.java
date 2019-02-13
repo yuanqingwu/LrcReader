@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -89,7 +88,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
 
     @Override
     protected int attachLayoutRes() {
-        return R.layout.lrc_activity_view;
+        return R.layout.lrc_activity;
     }
 
     @Override
@@ -106,7 +105,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
 
     private void initEntity(SearchResultEntity entity) {
         songEntity = new SongEntity();
-        songEntity.setId(entity.getId());
+        songEntity.setAid(entity.getAid());
         songEntity.setSongName(entity.getSongName());
 //        songEntity.setLrc(lrcText);
         songEntity.setArtist(entity.getArtist());
@@ -126,7 +125,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_layout);
 
         bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_close_ib).setOnClickListener(this);
-        bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_back_bt).setOnClickListener(this);
+        bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_back_ib).setOnClickListener(this);
         recyclerView = bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         RecyclerGridAdapter adapter = new RecyclerGridAdapter(this, menuItemList);
@@ -228,7 +227,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
             case MotionEvent.ACTION_DOWN:
                 startX = event.getRawX();
                 startY = event.getRawY();
-                LogUtil.i("dispatchTouchEvent:ACTION_DOWN:" + startY);
+//                LogUtil.i("dispatchTouchEvent:ACTION_DOWN:" + startY);
 
                 if (firstClickTime != 0) {
                     secondClickTime = event.getDownTime();
@@ -242,7 +241,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
             case MotionEvent.ACTION_MOVE:
                 endX = event.getRawX();
                 endY = event.getRawY();
-                LogUtil.i("dispatchTouchEvent:ACTION_MOVE:" + endY);
+//                LogUtil.i("dispatchTouchEvent:ACTION_MOVE:" + endY);
                 float distanceX = endX - startX;
                 float distanceY = endY - startY;
                 float distanceYabs = Math.abs(endY - startY);
@@ -250,7 +249,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                     finish();
                     return true;
                 }
-                if (startY > ScreenUtils.getScreenHeightPX(this) * 5 / 6 && distanceY < -100) {
+                if ((startY > (ScreenUtils.getScreenHeightPX(this) - 200)) && distanceY < -100) {
                     bottomSheetDialog.show();
                     return true;
                 }
@@ -290,67 +289,9 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 bottomSheetDialog.cancel();
                 break;
 
-            case R.id.bottom_sheet_dialog_back_bt:
+            case R.id.bottom_sheet_dialog_back_ib:
                 closeDialog();
                 finish();
-                break;
-            case R.id.menu_lrc_view_weibo_bt:
-
-                break;
-            case R.id.menu_lrc_view_wechat_bt:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
-                break;
-            case R.id.menu_lrc_view_moments_bt:
-                shareToWX(SendMessageToWX.Req.WXSceneTimeline);
-                break;
-            case R.id.menu_lrc_view_like_bt:
-//                String filePath = getExternalCacheDir() + "/albumCover";
-//                LogUtil.i(filePath);
-//                if (!isLike) {
-////                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
-//                    isLike = true;
-//                    diskLruCacheUtil.addToDiskCache(song);
-//
-//                    //以文件的MD5值为文件名,将封面图片另外存储在文件中
-//                    if (albumCover == null) {
-//                        albumCover = song.getAlbumCoverUri();
-//                    }
-//                    try {
-//                        BitmapUtil.saveBitMapToFile(albumCover, BitmapUtil.getBitmapMD5Hex(albumCover), filePath);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                } else {
-////                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
-//                    isLike = false;
-//                    diskLruCacheUtil.removeFromDiskCache(song);
-//                    try {
-//                        BitmapUtil.deleteBitmapFromFile(filePath, BitmapUtil.getBitmapMD5Hex(albumCover));
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-                break;
-            case R.id.menu_lrc_view_plain_bt:
-                if (!isPlain) {
-                    lrcView.setGravity(Gravity.START);
-//                    handler.obtainMessage(0, lrcText).sendToTarget();
-
-//                    menuPlainBt.setTextColor(Color.BLACK);
-                    isPlain = true;
-                } else {
-                    lrcView.setGravity(Gravity.CENTER);
-//                    if (lrcParserThread != null) {
-//                        lrcParserThread.run();
-//                    } else {
-//                        lrcParserThread = new LrcParserThread();
-//                        lrcParserThread.start();
-//                    }
-//                    menuPlainBt.setTextColor(Color.WHITE);
-                    isPlain = false;
-                }
                 break;
             default:
                 break;

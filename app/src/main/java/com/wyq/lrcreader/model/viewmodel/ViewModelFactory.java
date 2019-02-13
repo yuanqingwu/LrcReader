@@ -33,6 +33,9 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(SearchResultViewModel.class)) {
             return (T) new SearchResultViewModel(repository);
         }
+        if (modelClass.isAssignableFrom(SearchHistoryViewModel.class)) {
+            return (T) new SearchHistoryViewModel(repository);
+        }
         return null;
     }
 }

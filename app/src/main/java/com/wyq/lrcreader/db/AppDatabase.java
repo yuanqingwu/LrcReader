@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.wyq.lrcreader.base.AppExecutors;
 import com.wyq.lrcreader.db.converter.DateConverter;
+import com.wyq.lrcreader.db.dao.SearchHistoryDao;
 import com.wyq.lrcreader.db.dao.SearchResultDao;
 import com.wyq.lrcreader.db.dao.SongDao;
 import com.wyq.lrcreader.db.entity.SearchHistoryEntity;
@@ -35,6 +36,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SongDao getSongDao();
 
     public abstract SearchResultDao getSearchResultDao();
+
+    public abstract SearchHistoryDao getSearchHistoryDao();
 
     private MutableLiveData<Boolean> mIsDatabaseCreated = new MutableLiveData<>();
 

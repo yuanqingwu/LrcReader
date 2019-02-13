@@ -1,5 +1,6 @@
 package com.wyq.lrcreader.db.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -11,17 +12,8 @@ import androidx.room.PrimaryKey;
 public class SearchHistoryEntity {
 
     @PrimaryKey
-    private int id;
-
+    @NonNull
     private String value;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getValue() {
         return value;

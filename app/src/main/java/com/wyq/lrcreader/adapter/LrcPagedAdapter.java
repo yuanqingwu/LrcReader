@@ -30,7 +30,7 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
 
         @Override
         public boolean areItemsTheSame(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
-            return oldItem.getId() == newItem.getId();
+            return oldItem.getAid() == newItem.getAid();
         }
 
         @Override

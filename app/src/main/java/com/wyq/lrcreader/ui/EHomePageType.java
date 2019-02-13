@@ -2,7 +2,7 @@ package com.wyq.lrcreader.ui;
 
 import com.wyq.lrcreader.ui.fragment.LocalFragment;
 import com.wyq.lrcreader.ui.fragment.LrcLikeFragment;
-import com.wyq.lrcreader.ui.fragment.SearchFragment;
+import com.wyq.lrcreader.ui.fragment.SearchResultFragment;
 
 import androidx.fragment.app.Fragment;
 
@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
  */
 public enum EHomePageType {
 
-    SEARCH_PAGE("搜索", 0, SearchFragment.newInstance()),
+    SEARCH_PAGE("搜索", 0, SearchResultFragment.newInstance()),
     LIKE_PAGE("喜欢", 1, LrcLikeFragment.newInstance()),
     LOCAL_PAGE("本地", 2, LocalFragment.newInstance()),
     ;

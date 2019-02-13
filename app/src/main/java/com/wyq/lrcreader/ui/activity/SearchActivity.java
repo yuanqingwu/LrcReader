@@ -6,9 +6,10 @@ import android.view.Menu;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.db.entity.SearchHistoryEntity;
 import com.wyq.lrcreader.ui.IRetryLoadCallback;
 import com.wyq.lrcreader.ui.fragment.LrcListFragment;
-import com.wyq.lrcreader.ui.fragment.SearchFragment;
+import com.wyq.lrcreader.ui.fragment.SearchHistoryFragment;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.appcompat.widget.SearchView;
@@ -39,7 +40,7 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
     @Override
     public void initView() {
         initToolBar();
-        fragmentAdd(R.id.search_activity_content, SearchFragment.newInstance());
+        fragmentAdd(R.id.search_activity_content, SearchHistoryFragment.newInstance());
     }
 
     private void initToolBar() {
@@ -69,8 +70,16 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
     public boolean onQueryTextSubmit(String query) {
         LogUtil.i("query:" + query);
         queryText = query;
+        searchView.setQuery(query, false);
+        addSearchHistory(query);
         fragmentReplace(LrcListFragment.newInstance(false, query));
         return false;
+    }
+
+    private void addSearchHistory(String value) {
+        SearchHistoryEntity searchHistoryEntity = new SearchHistoryEntity();
+        searchHistoryEntity.setValue(value);
+        getRepository().addSearchHistory(searchHistoryEntity);
     }
 
     public void fragmentReplace(Fragment fragment) {

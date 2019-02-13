@@ -9,8 +9,6 @@ import java.util.Date;
  */
 public interface ISong extends IListSong {
 
-    int getId();
-
     int getLike();
 
     Date getSearchAt();
