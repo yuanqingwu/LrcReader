@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.ui.IRetryLoadCallback;
+import com.wyq.lrcreader.ui.fragment.base.BaseFragment;
 
 import androidx.annotation.NonNull;
 import butterknife.BindView;
@@ -37,17 +38,17 @@ public class RetryFragment extends BaseFragment implements View.OnClickListener 
     }
 
     @Override
-    int attachLayoutRes() {
+    public int attachLayoutRes() {
         return R.layout.retry_fragment;
     }
 
     @Override
-    void initData() {
+    public void initData() {
 
     }
 
     @Override
-    void initView(View view) {
+    public void initView(View view) {
         linearLayout.setOnClickListener(this);
     }
 

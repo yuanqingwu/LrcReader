@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "search_history")
 public class SearchHistoryEntity {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     private int id;
 
     private String value;

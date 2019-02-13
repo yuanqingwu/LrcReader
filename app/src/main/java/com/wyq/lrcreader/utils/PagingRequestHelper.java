@@ -49,7 +49,7 @@ import androidx.paging.DataSource;
  *     {@literal @}Override
  *     public void onItemAtFrontLoaded({@literal @}NonNull MyItem itemAtFront) {
  *         helper.runIfNotRunning(PagingRequestHelper.RequestType.BEFORE,
- *                 helperCallback -> api.getTopBefore(itemAtFront.getName(), 10).enqueue(
+ *                 helperCallback -> api.getTopBefore(itemAtFront.getSongName(), 10).enqueue(
  *                         new Callback&lt;ApiResponse>() {
  *                             {@literal @}Override
  *                             public void onResponse(Call&lt;ApiResponse> call,
@@ -68,7 +68,7 @@ import androidx.paging.DataSource;
  *     {@literal @}Override
  *     public void onItemAtEndLoaded({@literal @}NonNull MyItem itemAtEnd) {
  *         helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER,
- *                 helperCallback -> api.getTopBefore(itemAtEnd.getName(), 10).enqueue(
+ *                 helperCallback -> api.getTopBefore(itemAtEnd.getSongName(), 10).enqueue(
  *                         new Callback&lt;ApiResponse>() {
  *                             {@literal @}Override
  *                             public void onResponse(Call&lt;ApiResponse> call,

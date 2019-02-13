@@ -1,6 +1,6 @@
 package com.wyq.lrcreader.model.viewmodel;
 
-import com.wyq.lrcreader.datasource.local.gecimi.DbGecimiRepository;
+import com.wyq.lrcreader.datasource.DataRepository;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.utils.LogUtil;
 
@@ -19,15 +19,15 @@ public class SearchResultViewModel extends ViewModel {
 
     private MediatorLiveData<PagedList<SearchResultEntity>> mObservableSearchResults;
 
-    private DbGecimiRepository repository;
+    private DataRepository repository;
 
-    public SearchResultViewModel(DbGecimiRepository gecimiRepository) {
+    public SearchResultViewModel(DataRepository repository) {
 
         mObservableSearchResults = new MediatorLiveData<>();
         mObservableSearchResults.setValue(null);
 
-        repository = gecimiRepository;
-        LiveData<PagedList<SearchResultEntity>> listLiveData = repository.getAllSearchResult();
+        this.repository = repository;
+        LiveData<PagedList<SearchResultEntity>> listLiveData = repository.getDbGecimiRepository().getAllSearchResult();
         LogUtil.i(listLiveData == null ? "数据源无效" : "数据源有效");
 
         mObservableSearchResults.addSource(listLiveData, new Observer<PagedList<SearchResultEntity>>() {

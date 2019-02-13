@@ -9,6 +9,7 @@ import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.ui.activity.SearchActivity;
+import com.wyq.lrcreader.ui.fragment.base.BaseLazyLoadFragment;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Uni.W on 2016/8/18.
  */
 public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerListAdapter.OnRecyclerItemClickListener, SwipeRefreshLayout.OnRefreshListener {
-
 
     @BindView(R.id.fragment_lrclist_recyclerview)
     public RecyclerView recyclerView;
@@ -76,18 +76,18 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
     }
 
     @Override
-    void loadData() {
+    public void loadData() {
         showRefresh();
         loadData(searchText);
     }
 
     @Override
-    int attachLayoutRes() {
+    public int attachLayoutRes() {
         return R.layout.fragment_lrclist;
     }
 
     @Override
-    void initData() {
+    public void initData() {
         searchResultEntities = new ArrayList<>();
 
         assert getArguments() != null;
@@ -108,7 +108,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
     }
 
     @Override
-    void initView(View view) {
+    public void initView(View view) {
 
         initRecyclerView();
 
@@ -227,7 +227,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
         if (searchResultEntities == null || searchResultEntities.size() <= position) {
             return;
         }
-        LrcActivity.newInstance(getActivity(), searchResultEntities.get(position).getLrcUri(), searchResultEntities.get(position).getAlbumCoverUri());
+        LrcActivity.newInstance(getActivity(), searchResultEntities.get(position));
     }
 
     @Override

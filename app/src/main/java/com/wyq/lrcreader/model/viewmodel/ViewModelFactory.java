@@ -31,7 +31,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             return (T) new LocalSongsViewModel(database, repository);
         }
         if (modelClass.isAssignableFrom(SearchResultViewModel.class)) {
-            return (T) new SearchResultViewModel(repository.getDbGecimiRepository());
+            return (T) new SearchResultViewModel(repository);
         }
         return null;
     }

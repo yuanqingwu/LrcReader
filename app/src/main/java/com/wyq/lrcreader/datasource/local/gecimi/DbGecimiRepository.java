@@ -2,7 +2,10 @@ package com.wyq.lrcreader.datasource.local.gecimi;
 
 import com.wyq.lrcreader.db.AppDatabase;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
+import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.utils.LogUtil;
+
+import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
@@ -45,7 +48,31 @@ public class DbGecimiRepository {
     }
 
     public void insertSearchResult(SearchResultEntity entity) {
-        database.getSearchResultDao().insert(entity);
-        LogUtil.i("insert:" + entity.getSongName() + " " + entity.getDataSource());
+        database.getExecutors().diskIO().execute(() -> {
+            database.runInTransaction(() -> {
+                database.getSearchResultDao().insert(entity);
+                LogUtil.i("insert:" + entity.getSongName() + " " + entity.getDataSource());
+            });
+        });
+    }
+
+    public void insertToSong(SongEntity songEntity) {
+        database.getExecutors().diskIO().execute(() -> {
+            database.runInTransaction(() -> {
+                database.getSongDao().insertSong(songEntity);
+            });
+        });
+    }
+
+    public void deleteSong(SongEntity entity) {
+        database.getExecutors().diskIO().execute(() -> {
+            database.runInTransaction(() -> {
+                database.getSongDao().delete(entity);
+            });
+        });
+    }
+
+    public LiveData<List<SongEntity>> getLikeSongList() {
+        return database.getSongDao().getLikeSongList();
     }
 }

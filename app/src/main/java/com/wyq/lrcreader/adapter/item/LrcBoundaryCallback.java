@@ -1,11 +1,14 @@
 package com.wyq.lrcreader.adapter.item;
 
+import com.wyq.lrcreader.base.NetworkState;
+import com.wyq.lrcreader.base.PagingRequestHelperExt;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.utils.PagingRequestHelper;
 
 import java.util.concurrent.Executor;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
 
 /**
@@ -18,8 +21,11 @@ public class LrcBoundaryCallback extends PagedList.BoundaryCallback<SearchResult
 
     private PagingRequestHelper helper;
 
+    private LiveData<NetworkState> networkStateLiveData;
+
     public LrcBoundaryCallback() {
         helper = new PagingRequestHelper(ioExecutor);
+        networkStateLiveData = new PagingRequestHelperExt().createStatusLiveData(helper);
     }
 
     @Override

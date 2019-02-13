@@ -1,4 +1,4 @@
-package com.wyq.lrcreader.ui.fragment;
+package com.wyq.lrcreader.ui.fragment.base;
 
 import android.os.Bundle;
 
@@ -56,6 +56,6 @@ public abstract class BaseLazyLoadFragment extends BaseFragment implements IRetr
     }
 
 
-    abstract void loadData();
+    protected abstract void loadData();
 
 }

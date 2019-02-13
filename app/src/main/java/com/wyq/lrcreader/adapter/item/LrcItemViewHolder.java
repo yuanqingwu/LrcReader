@@ -56,7 +56,7 @@ public class LrcItemViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LrcActivity.newInstance(itemView.getContext(), entity.getLrcUri(), entity.getAlbumCoverUri());
+                LrcActivity.newInstance(itemView.getContext(), entity);
             }
         });
     }

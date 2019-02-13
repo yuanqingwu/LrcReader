@@ -7,6 +7,7 @@ import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LocalSongsViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
+import com.wyq.lrcreader.ui.fragment.base.BaseLazyLoadFragment;
 
 import java.util.List;
 
@@ -30,27 +31,7 @@ public class LocalFragment extends BaseLazyLoadFragment {
         return new LocalFragment();
     }
 
-    @Override
-    void loadData() {
 
-    }
-
-    @Override
-    int attachLayoutRes() {
-        return R.layout.local_fragment_layout;
-    }
-
-    @Override
-    void initData() {
-
-
-    }
-
-    @Override
-    void initView(View view) {
-//        RecyclerListAdapter adapter = new RecyclerListAdapter(getContext(),);
-
-    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -70,7 +51,27 @@ public class LocalFragment extends BaseLazyLoadFragment {
     }
 
     @Override
+    protected void loadData() {
+
+    }
+
+    @Override
     public void retry() {
+
+    }
+
+    @Override
+    public int attachLayoutRes() {
+        return R.layout.local_fragment_layout;
+    }
+
+    @Override
+    public void initData() {
+
+    }
+
+    @Override
+    public void initView(View view) {
 
     }
 }

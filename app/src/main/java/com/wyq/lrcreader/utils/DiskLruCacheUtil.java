@@ -1,25 +1,19 @@
-package com.wyq.lrcreader.cache;
+package com.wyq.lrcreader.utils;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Environment;
-import android.os.Handler;
 
 import com.squareup.okhttp.internal.DiskLruCache;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -35,15 +29,20 @@ public class DiskLruCacheUtil {
     //缓存个数
     private static final int DISK_CACHE_INDEX = 0;
 
-    private Context context;
+//    private Context context;
 
     private static DiskLruCacheUtil diskLruCacheUtil;
 
     private DiskLruCacheUtil(Context context, String fileName) {
-        this.context = context;
+//        this.context = context;
         init(context, fileName);
     }
 
+    /**
+     * @param context
+     * @param fileName 文件夹名
+     * @return
+     */
     public static DiskLruCacheUtil getInstance(Context context, String fileName) {
         if (diskLruCacheUtil == null) {
             diskLruCacheUtil = new DiskLruCacheUtil(context, fileName);
@@ -226,65 +225,65 @@ public class DiskLruCacheUtil {
     }
 
 
-    public void getAllCacheSong(final Handler handler, final int what) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                File[] files = mDiskCache.getDirectory().listFiles();
-                BufferedReader bufferedReader = null;
-                if (files.length > 0) {
-                    for (File file : files) {
-                        if ("journal".equals(file.getName())) {
-                            continue;
-                        }
-                        try {
-                            bufferedReader = new BufferedReader(new FileReader(file));
-                            String line;
-                            StringBuilder readStr = new StringBuilder();
-                            while ((line = bufferedReader.readLine()) != null) {
-                                readStr.append(line).append("\n");
-                            }
-                            Song song = new Song();
-                            Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
-                            Matcher matcher = pattern.matcher(readStr.toString());
-                            String[] str = new String[5];
-                            int i = 0;
-                            while (matcher.find()) {
-                                str[i] = matcher.group();
-                                i++;
-                            }
-
-                            song.setSongName(str[0]);
-                            song.setArtist(str[1]);
-                            song.setLrc(str[2]);
-                            song.setAlbum(str[3]);
-                            //song.setAlbumCover(BitmapUtil.convertStringToIcon(str[4]));
-                            try {
-                                song.setAlbumCoverMD5(str[4]);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            handler.obtainMessage(what, song).sendToTarget();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            if (bufferedReader != null) {
-                                try {
-                                    bufferedReader.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-            }
-        }).start();
-    }
+//    public void getAllCacheSong(final Handler handler, final int what) {
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                File[] files = mDiskCache.getDirectory().listFiles();
+//                BufferedReader bufferedReader = null;
+//                if (files.length > 0) {
+//                    for (File file : files) {
+//                        if ("journal".equals(file.getSongName())) {
+//                            continue;
+//                        }
+//                        try {
+//                            bufferedReader = new BufferedReader(new FileReader(file));
+//                            String line;
+//                            StringBuilder readStr = new StringBuilder();
+//                            while ((line = bufferedReader.readLine()) != null) {
+//                                readStr.append(line).append("\n");
+//                            }
+//                            Song song = new Song();
+//                            Pattern pattern = Pattern.compile("(?<=\\(%)([\\S\\s]+?)(?=%\\))");
+//                            Matcher matcher = pattern.matcher(readStr.toString());
+//                            String[] str = new String[5];
+//                            int i = 0;
+//                            while (matcher.find()) {
+//                                str[i] = matcher.group();
+//                                i++;
+//                            }
+//
+//                            song.setSongName(str[0]);
+//                            song.setArtist(str[1]);
+//                            song.setLrc(str[2]);
+//                            song.setAlbum(str[3]);
+//                            //song.setAlbumCover(BitmapUtil.convertStringToIcon(str[4]));
+//                            try {
+//                                song.setAlbumCoverMD5(str[4]);
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                            handler.obtainMessage(what, song).sendToTarget();
+//                        } catch (FileNotFoundException e) {
+//                            e.printStackTrace();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        } finally {
+//                            if (bufferedReader != null) {
+//                                try {
+//                                    bufferedReader.close();
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }
+//
+//                    }
+//                }
+//
+//            }
+//        }).start();
+//    }
 
 }

@@ -10,6 +10,7 @@ import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
+import com.wyq.lrcreader.ui.fragment.base.BaseFragment;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.annotation.Nullable;
@@ -38,17 +39,17 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
     }
 
     @Override
-    int attachLayoutRes() {
+    public int attachLayoutRes() {
         return R.layout.search_fragment;
     }
 
     @Override
-    void initData() {
+    public void initData() {
 
     }
 
     @Override
-    void initView(View view) {
+    public void initView(View view) {
 
         initRecyclerView();
     }
@@ -64,8 +65,6 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
 
 
         recyclerView.setAdapter(pagedAdapter);
-
-
 
     }
 
@@ -83,7 +82,7 @@ public class SearchFragment extends BaseFragment implements RecyclerListAdapter.
             public void onChanged(PagedList<SearchResultEntity> searchResultEntities) {
                 if (searchResultEntities != null) {
 
-                    LogUtil.i("LoadedCount:" + searchResultEntities.getLoadedCount() + searchResultEntities.get(0).getSongName());
+                    LogUtil.i("LoadedCount:" + searchResultEntities.getLoadedCount());
                     pagedAdapter.submitList(searchResultEntities);
 //                    pagedAdapter.setNetworkState(NetworkState.LOADING);
                 } else {

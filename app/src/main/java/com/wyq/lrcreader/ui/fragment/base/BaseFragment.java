@@ -1,9 +1,12 @@
-package com.wyq.lrcreader.ui.fragment;
+package com.wyq.lrcreader.ui.fragment.base;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.wyq.lrcreader.base.BasicApp;
+import com.wyq.lrcreader.datasource.DataRepository;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
@@ -30,9 +33,13 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @LayoutRes
-    abstract int attachLayoutRes();
+    public abstract int attachLayoutRes();
 
-    abstract void initData();
+    public abstract void initData();
 
-    abstract void initView(View view);
+    public abstract void initView(View view);
+
+    public DataRepository getRepository() {
+        return ((BasicApp) getActivity().getApplication()).getDataRepository();
+    }
 }

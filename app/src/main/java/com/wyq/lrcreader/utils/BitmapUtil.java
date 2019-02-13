@@ -221,16 +221,11 @@ public class BitmapUtil {
      * 转换bitmap为数组
      *
      * @param bmp
-     * @param needRecycle
      * @return
      */
-    public static byte[] bmpToByteArray(final Bitmap bmp, final boolean needRecycle) {
+    public static byte[] bmpToByteArray(final Bitmap bmp) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
-        if (needRecycle) {
-            bmp.recycle();
-        }
-
         byte[] result = output.toByteArray();
         try {
             output.close();

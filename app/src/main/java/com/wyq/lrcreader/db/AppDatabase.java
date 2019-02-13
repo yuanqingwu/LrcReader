@@ -2,6 +2,7 @@ package com.wyq.lrcreader.db;
 
 import android.content.Context;
 
+import com.wyq.lrcreader.base.AppExecutors;
 import com.wyq.lrcreader.db.converter.DateConverter;
 import com.wyq.lrcreader.db.dao.SearchResultDao;
 import com.wyq.lrcreader.db.dao.SongDao;
@@ -37,12 +38,15 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private MutableLiveData<Boolean> mIsDatabaseCreated = new MutableLiveData<>();
 
-    public static AppDatabase getInstance(Context context) {
+    private AppExecutors executors;
+
+    public static AppDatabase getInstance(Context context, AppExecutors executors) {
         if (database == null) {
             synchronized (AppDatabase.class) {
                 if (database == null) {
                     database = buildDatabase(context);
                     database.updateDatabaseCreated(context);
+                    database.executors = executors;
                 }
             }
         }
@@ -73,5 +77,9 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private void setDatabaseCreated() {
         mIsDatabaseCreated.postValue(true);
+    }
+
+    public AppExecutors getExecutors() {
+        return executors;
     }
 }

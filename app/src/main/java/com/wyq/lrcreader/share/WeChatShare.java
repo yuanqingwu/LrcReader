@@ -3,7 +3,6 @@ package com.wyq.lrcreader.share;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.util.Log;
 
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
@@ -63,7 +62,7 @@ public class WeChatShare {
         //LogUtil.i("bitmap count:" + bitmap.getByteCount());
 
         bitmap.recycle();
-        mediaMessage.thumbData = BitmapUtil.bmpToByteArray(sendBitMap, true);
+        mediaMessage.thumbData = BitmapUtil.bmpToByteArray(sendBitMap);
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
         req.transaction = "img" + System.currentTimeMillis();

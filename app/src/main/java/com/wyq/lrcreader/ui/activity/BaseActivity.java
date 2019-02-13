@@ -2,6 +2,10 @@ package com.wyq.lrcreader.ui.activity;
 
 import android.os.Bundle;
 
+import com.wyq.lrcreader.base.AppExecutors;
+import com.wyq.lrcreader.base.BasicApp;
+import com.wyq.lrcreader.datasource.DataRepository;
+
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -27,14 +31,22 @@ public abstract class BaseActivity extends AppCompatActivity {
         initView();
     }
 
-    protected void fragmentAdd(int id, Fragment fragment) {
+    public AppExecutors getExecutors() {
+        return ((BasicApp) getApplication()).getExecutors();
+    }
+
+    public DataRepository getRepository() {
+        return ((BasicApp) getApplication()).getDataRepository();
+    }
+
+    public void fragmentAdd(int id, Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(id, fragment, null)
                 .commit();
     }
 
-    protected void fragmentReplace(int id, Fragment fragment) {
+    public void fragmentReplace(int id, Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(id, fragment, null)

@@ -13,6 +13,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.tencent.mm.sdk.openapi.SendMessageToWX;
 import com.wyq.lrcreader.R;
@@ -20,20 +21,20 @@ import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
 import com.wyq.lrcreader.adapter.RecyclerGridAdapter;
 import com.wyq.lrcreader.adapter.item.ImageTextItemModel;
 import com.wyq.lrcreader.base.BasicApp;
-import com.wyq.lrcreader.cache.DiskLruCacheUtil;
-import com.wyq.lrcreader.datasource.DataRepository;
-import com.wyq.lrcreader.model.netmodel.gecimemodel.LrcInfo;
-import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
+import com.wyq.lrcreader.base.GlideApp;
+import com.wyq.lrcreader.db.entity.SearchResultEntity;
+import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.share.WeChatShare;
 import com.wyq.lrcreader.utils.BitmapUtil;
+import com.wyq.lrcreader.utils.DiskLruCacheUtil;
 import com.wyq.lrcreader.utils.FireShare;
 import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcOperationGenerator;
 import com.wyq.lrcreader.utils.ScreenUtils;
+import com.wyq.lrcreader.utils.StorageUtil;
 
-import java.io.FileNotFoundException;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,7 +42,9 @@ import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
 /**
  * Created by Uni.W on 2016/8/30.
@@ -52,42 +55,20 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     public TextView lrcView;
     @BindView(R.id.activity_lrc_view_scrollview)
     public ScrollView scrollView;
-//    @BindView(R.id.activity_lrc_view_relativelayout)
-//    public RelativeLayout relativeLayout;
-//    @BindView(R.id.activity_lrc_view_setmenu)
-//    public LinearLayout setMenuLayout;
-
-//    @BindView(R.id.menu_lrc_view_like_bt)
-//    public Button menuLikeBt;
-//    @BindView(R.id.menu_lrc_view_plain_bt)
-//    public Button menuPlainBt;
-//    @BindView(R.id.menu_lrc_view_qzone_bt)
-//    public Button menuQzoneBt;
-//    @BindView(R.id.menu_lrc_view_weibo_bt)
-//    public Button menuWeiboBt;
-//    @BindView(R.id.menu_lrc_view_wechat_bt)
-//    public Button menuWechatBt;
-//    @BindView(R.id.menu_lrc_view_moments_bt)
-//    public Button menuMomentsBt;
-
-//    @BindView(R.id.menu_lrc_view_text_size_seek)
-//    public SeekBar menuTextSizeSeek;
 
     private BottomSheetDialog bottomSheetDialog;
     private RecyclerView recyclerView;
+
+    private static final String ARGUMENTS_LRC_LIST_SONG_ENTITY = "LRC_LIST_SONG_ENTITY";
 
     private Disposable lrcDisposable;
     private Disposable backgroundDisposable;
 
     private List<ImageTextItemModel> menuItemList;
-    private String lrcUri;
-    private String albumCoverUri;
-
-    private String lrcText, artist, songName;
+    private SongEntity songEntity;
     private Bitmap albumCover;
-    private Song song;
-    private LrcInfo lrcInfo;
-    float startTextSize = 0;
+    private String lrcText;
+    private SearchResultEntity songListEntity;
 
     private long firstClickTime = 0;
     private float startX = 0, endX = 0, startY = 0, endY = 0;
@@ -97,14 +78,11 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     private Animation showAnimation, hideAnimation;
 
     private DiskLruCacheUtil diskLruCacheUtil;
+    private float startTextSize = 0;
 
-    private static final String ARGUMENTS_LRC_URI = "LRC_URI";
-    private static final String ARGUMENTS_LRC_COVER_URI = "LRC_COVER_URI";
-
-    public static void newInstance(Context context, String lrcUri, String lrcCoverUri) {
+    public static void newInstance(Context context, SearchResultEntity entity) {
         Intent intent = new Intent();
-        intent.putExtra(ARGUMENTS_LRC_URI, lrcUri);
-        intent.putExtra(ARGUMENTS_LRC_COVER_URI, lrcCoverUri);
+        intent.putExtra(ARGUMENTS_LRC_LIST_SONG_ENTITY, entity);
         intent.setClass(context, LrcActivity.class);
         context.startActivity(intent);
     }
@@ -116,14 +94,26 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
 
     @Override
     public void initView() {
-
         initMenu();
 
-        lrcUri = Objects.requireNonNull(getIntent().getExtras()).getString(ARGUMENTS_LRC_URI);
-        albumCoverUri = getIntent().getExtras().getString(ARGUMENTS_LRC_COVER_URI);
+        songListEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_LIST_SONG_ENTITY);
+        if (songListEntity != null) {
+            initEntity(songListEntity);
+            loadBackground(songListEntity.getAlbumCoverUri());
+            loadLrc(songListEntity.getLrcUri());
+        }
+    }
 
-        loadBackground(albumCoverUri);
-        loadLrc(lrcUri);
+    private void initEntity(SearchResultEntity entity) {
+        songEntity = new SongEntity();
+        songEntity.setId(entity.getId());
+        songEntity.setSongName(entity.getSongName());
+//        songEntity.setLrc(lrcText);
+        songEntity.setArtist(entity.getArtist());
+//        songEntity.setAlbumCover(BitmapUtil.convertIconToString(albumCover));
+        songEntity.setDataSource(entity.getDataSource());
+        songEntity.setLike(0);
+        songEntity.setSearchAt(new Date(System.currentTimeMillis()));
     }
 
     private void initMenu() {
@@ -167,6 +157,18 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     private void loadBackground(String albumCoverUri) {
         backgroundDisposable = ((BasicApp) getApplication()).getDataRepository()
                 .getLrcViewBackground(albumCoverUri, LrcActivity.this)
+                .map(new Function<Bitmap, Bitmap>() {
+                    @Override
+                    public Bitmap apply(Bitmap bitmap) throws Exception {
+                        albumCover = bitmap;
+                        Bitmap blurBitmap = GlideApp.with(LrcActivity.this)
+                                .asBitmap()
+                                .load(bitmap)
+                                .apply(RequestOptions.bitmapTransform(new BlurTransformation()))
+                                .submit().get();
+                        return blurBitmap;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Bitmap>() {
@@ -192,6 +194,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                     @Override
                     public void accept(String s) {
                         lrcText = s;
+                        songEntity.setLrcUri(lrcText);
                         lrcView.setText(s);
                     }
                 }, new Consumer<Throwable>() {
@@ -205,6 +208,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        closeDialog();
+
         if (lrcDisposable != null) {
             lrcDisposable.dispose();
         }
@@ -229,7 +234,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                     secondClickTime = event.getDownTime();
                     if (secondClickTime - firstClickTime < 300) {
                         // Toast.makeText(this, "双击", Toast.LENGTH_SHORT).show();
-                        showMenu();
+                        showHideMenu();
                     }
                 }
                 firstClickTime = event.getDownTime();
@@ -263,13 +268,18 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         return super.dispatchTouchEvent(event);
     }
 
-    private void showMenu() {
-        if (!isMenuVisiblity) {
-            bottomSheetDialog.show();
-            isMenuVisiblity = true;
-        } else {
+    private void showHideMenu() {
+        if (bottomSheetDialog.isShowing()) {
             bottomSheetDialog.cancel();
-            isMenuVisiblity = false;
+        } else {
+            bottomSheetDialog.show();
+        }
+    }
+
+    public void closeDialog() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.cancel();
+            bottomSheetDialog = null;
         }
     }
 
@@ -281,6 +291,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 break;
 
             case R.id.bottom_sheet_dialog_back_bt:
+                closeDialog();
                 finish();
                 break;
             case R.id.menu_lrc_view_weibo_bt:
@@ -293,34 +304,34 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                 break;
             case R.id.menu_lrc_view_like_bt:
-                String filePath = getExternalCacheDir() + "/albumCover";
-                LogUtil.i(filePath);
-                if (!isLike) {
-//                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
-                    isLike = true;
-                    diskLruCacheUtil.addToDiskCache(song);
-
-                    //以文件的MD5值为文件名,将封面图片另外存储在文件中
-                    if (albumCover == null) {
-                        albumCover = song.getAlbumCover();
-                    }
-                    try {
-                        BitmapUtil.saveBitMapToFile(albumCover, BitmapUtil.getBitmapMD5Hex(albumCover), filePath);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-//                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
-                    isLike = false;
-                    diskLruCacheUtil.removeFromDiskCache(song);
-                    try {
-                        BitmapUtil.deleteBitmapFromFile(filePath, BitmapUtil.getBitmapMD5Hex(albumCover));
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+//                String filePath = getExternalCacheDir() + "/albumCover";
+//                LogUtil.i(filePath);
+//                if (!isLike) {
+////                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.like_1_red));
+//                    isLike = true;
+//                    diskLruCacheUtil.addToDiskCache(song);
+//
+//                    //以文件的MD5值为文件名,将封面图片另外存储在文件中
+//                    if (albumCover == null) {
+//                        albumCover = song.getAlbumCoverUri();
+//                    }
+//                    try {
+//                        BitmapUtil.saveBitMapToFile(albumCover, BitmapUtil.getBitmapMD5Hex(albumCover), filePath);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                } else {
+////                    menuLikeBt.setBackground(getResources().getDrawable(R.drawable.unlike_1_white));
+//                    isLike = false;
+//                    diskLruCacheUtil.removeFromDiskCache(song);
+//                    try {
+//                        BitmapUtil.deleteBitmapFromFile(filePath, BitmapUtil.getBitmapMD5Hex(albumCover));
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 break;
             case R.id.menu_lrc_view_plain_bt:
                 if (!isPlain) {
@@ -347,18 +358,15 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     }
 
 
-    public boolean shareToWX(int req) {
-        WeChatShare weChatShare = WeChatShare.getInstance(getApplicationContext());
-        boolean regB = weChatShare.regToWX();
-        LogUtil.i("regB" + (regB ? "true" : "false"));
-        // Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.send_img);
-        boolean flag = weChatShare.sendImgToWX(BitmapUtil.convertViewToBitmap(scrollView), req);
-        LogUtil.i("flag" + (flag ? "true" : "false"));
-        return flag;
-    }
-
-    private DataRepository getRepository() {
-        return ((BasicApp) getApplication()).getDataRepository();
+    public void shareToWX(int req) {
+        getExecutors().networkIO().execute(() -> {
+            WeChatShare weChatShare = WeChatShare.getInstance(getApplicationContext());
+            boolean regB = weChatShare.regToWX();
+            LogUtil.i("regB" + (regB ? "true" : "false"));
+            // Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.send_img);
+            boolean flag = weChatShare.sendImgToWX(BitmapUtil.convertViewToBitmap(scrollView), req);
+            LogUtil.i("flag" + (flag ? "true" : "false"));
+        });
     }
 
 
@@ -373,32 +381,37 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WEIBO:
-                Toast.makeText(this, "即将到来~", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "即将到来~", Toast.LENGTH_SHORT).show();
 
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_NORMAL:
-                FireShare.shareFileWithSys(this, getString(R.string.app_name), Uri.parse(lrcUri));
+                FireShare.shareFileWithSys(this, getString(R.string.app_name), Uri.parse(lrcText));
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_DOWNLOAD:
-//                getRepository().getDbGecimiRepository().
+                //保存到文件
+                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+                getRepository().getDbGecimiRepository().insertToSong(songEntity);
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_TEXT_RESIZE:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_LIKE:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+                songEntity.setLike(1);
+                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+                getRepository().getDbGecimiRepository().insertToSong(songEntity);
+                Toast.makeText(LrcActivity.this, "收藏成功", Toast.LENGTH_SHORT).show();
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_BACKGROUND_BLUR:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_CHOOSE_LRC_TEXT:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_GEN_BITMAP:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_GEN_VIDEO:
-                shareToWX(SendMessageToWX.Req.WXSceneSession);
+
                 break;
             default:
                 break;

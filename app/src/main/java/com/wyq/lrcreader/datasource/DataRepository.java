@@ -3,7 +3,6 @@ package com.wyq.lrcreader.datasource;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.bumptech.glide.request.RequestOptions;
 import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.datasource.local.gecimi.DbGecimiRepository;
 import com.wyq.lrcreader.datasource.net.gecimi.GecimeModel;
@@ -27,7 +26,6 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -89,6 +87,7 @@ public class DataRepository {
                                                                @Override
                                                                public SearchResultEntity apply(Artist artist, AlbumCover albumCover) {
                                                                    SearchResultEntity searchResultEntity = new SearchResultEntity();
+                                                                   searchResultEntity.setId(lyricResult.getAid());
                                                                    searchResultEntity.setSongName(lyricResult.getSong());
                                                                    searchResultEntity.setArtist(artist.getName());
                                                                    searchResultEntity.setLrcUri(lyricResult.getLrc());
@@ -150,7 +149,6 @@ public class DataRepository {
                 Bitmap bitmap = GlideApp.with(context)
                         .asBitmap()
                         .load(coverUri)
-                        .apply(RequestOptions.bitmapTransform(new BlurTransformation()))
                         .submit()
                         .get();
                 emitter.onNext(bitmap);

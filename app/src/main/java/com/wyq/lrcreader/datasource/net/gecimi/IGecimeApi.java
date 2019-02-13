@@ -23,7 +23,7 @@ public interface IGecimeApi {
     Flowable<ArtistResponse> getArtist(@Path("artistId") long artistId);
 
 //    @GET("lrc/{songId}")
-//    Flowable<LyricResponse> getLrc(@Path("songId") int songId);
+//    Flowable<LyricResponse> getLrcUri(@Path("songId") int songId);
 
     @GET("cover/{albumId}")
     Flowable<AlbumCoverResponse> getAlbumCover(@Path("albumId") long albumId);
