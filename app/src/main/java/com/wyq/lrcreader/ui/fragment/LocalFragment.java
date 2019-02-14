@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
+import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
+import com.wyq.lrcreader.adapter.RecyclerListAdapter;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LocalSongsViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
@@ -14,6 +16,8 @@ import java.util.List;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 
@@ -21,11 +25,12 @@ import butterknife.BindView;
  * @author Uni.W
  * @date 2019/1/20 11:58
  */
-public class LocalFragment extends BaseLazyLoadFragment {
+public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerViewAdapter.OnRecyclerItemClickListener {
 
     @BindView(R.id.local_fragment_recycler_view)
     public RecyclerView recyclerView;
-
+    private RecyclerListAdapter adapter;
+    private List<SongEntity> songList;
 
     public static LocalFragment newInstance() {
         return new LocalFragment();
@@ -44,7 +49,8 @@ public class LocalFragment extends BaseLazyLoadFragment {
                 .observe(this, new Observer<List<SongEntity>>() {
                     @Override
                     public void onChanged(List<SongEntity> songs) {
-
+                        songList = songs;
+                        adapter.refreshData(songs);
                     }
                 });
 
@@ -72,6 +78,16 @@ public class LocalFragment extends BaseLazyLoadFragment {
 
     @Override
     public void initView(View view) {
+        adapter = new RecyclerListAdapter(getActivity(), songList);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+        adapter.setOnRecyclerItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
 
     }
 }

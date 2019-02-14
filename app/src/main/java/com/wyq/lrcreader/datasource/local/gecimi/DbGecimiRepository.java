@@ -39,8 +39,10 @@ public class DbGecimiRepository {
 //        return database.getSearchResultDao().getAll();
 //    }
 
-    public LiveData<PagedList<SearchResultEntity>> getAllSearchResult() {
-        DataSource.Factory<Integer, SearchResultEntity> lrcSource = database.getSearchResultDao().getAll();
+    public LiveData<PagedList<SearchResultEntity>> getAllSearchResult(String filter) {
+        DataSource.Factory<Integer, SearchResultEntity> lrcSource = filter == null ?
+                database.getSearchResultDao().getAll() :
+                database.getSearchResultDao().getLocalSearchResult(filter);
         LogUtil.i("" + lrcSource == null ? "source is null" : "source is not null");
         return new LivePagedListBuilder(lrcSource,
                 10)

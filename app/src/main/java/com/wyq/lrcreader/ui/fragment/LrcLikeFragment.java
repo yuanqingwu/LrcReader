@@ -12,6 +12,7 @@ import com.wyq.lrcreader.ui.widget.FirePopupWindow;
 
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -48,6 +49,17 @@ public class LrcLikeFragment extends BaseFragment implements RecyclerListAdapter
     @Override
     public void initView(View view) {
         adapter = new RecyclerListAdapter(getActivity(), songList);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+        adapter.setOnRecyclerItemLongClickListener(this);
+        adapter.setOnRecyclerItemClickListener(this);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         LrcLikeViewModel.Factory factory = new LrcLikeViewModel.Factory(getRepository());
         LrcLikeViewModel lrcLikeViewModel = ViewModelProviders.of(this, factory)
                 .get(LrcLikeViewModel.class);
@@ -59,12 +71,6 @@ public class LrcLikeFragment extends BaseFragment implements RecyclerListAdapter
                 adapter.refreshData(songEntities);
             }
         });
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(adapter);
-        adapter.setOnRecyclerItemLongClickListener(this);
-        adapter.setOnRecyclerItemClickListener(this);
     }
 
     @Override

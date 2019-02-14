@@ -27,7 +27,19 @@ public class SearchResultViewModel extends ViewModel {
         mObservableSearchResults.setValue(null);
 
         this.repository = repository;
-        LiveData<PagedList<SearchResultEntity>> listLiveData = repository.getDbGecimiRepository().getAllSearchResult();
+//        LiveData<PagedList<SearchResultEntity>> listLiveData = repository.getDbGecimiRepository().getAllSearchResult(filter);
+//        LogUtil.i(listLiveData == null ? "数据源无效" : "数据源有效");
+//
+//        mObservableSearchResults.addSource(listLiveData, new Observer<PagedList<SearchResultEntity>>() {
+//            @Override
+//            public void onChanged(PagedList<SearchResultEntity> searchResultEntities) {
+//                mObservableSearchResults.setValue(searchResultEntities);
+//            }
+//        });
+    }
+
+    public LiveData<PagedList<SearchResultEntity>> getSearchResults(String filter) {
+        LiveData<PagedList<SearchResultEntity>> listLiveData = repository.getDbGecimiRepository().getAllSearchResult(filter);
         LogUtil.i(listLiveData == null ? "数据源无效" : "数据源有效");
 
         mObservableSearchResults.addSource(listLiveData, new Observer<PagedList<SearchResultEntity>>() {
@@ -36,11 +48,12 @@ public class SearchResultViewModel extends ViewModel {
                 mObservableSearchResults.setValue(searchResultEntities);
             }
         });
-    }
-
-    public LiveData<PagedList<SearchResultEntity>> getSearchResults() {
         return mObservableSearchResults;
     }
+
+//    public LiveData<PagedList<SearchResultEntity>> getSearchResults() {
+//        return mObservableSearchResults;
+//    }
 
 
     public void setSearchResults(PagedList<SearchResultEntity> results) {

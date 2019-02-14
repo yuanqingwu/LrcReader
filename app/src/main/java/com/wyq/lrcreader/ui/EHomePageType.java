@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
  */
 public enum EHomePageType {
 
-    SEARCH_PAGE("搜索", 0, SearchResultFragment.newInstance()),
+    SEARCH_PAGE("搜索", 0, SearchResultFragment.newInstance(null)),
     LIKE_PAGE("喜欢", 1, LrcLikeFragment.newInstance()),
     LOCAL_PAGE("本地", 2, LocalFragment.newInstance()),
     ;

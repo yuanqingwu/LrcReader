@@ -31,6 +31,6 @@ public interface SongDao {
     @Query("SELECT * FROM song")
     LiveData<List<SongEntity>> getLocalSongList();
 
-    @Query("SELECT * FROM song WHERE `like` > 0 ")
+    @Query("SELECT * FROM song WHERE `like` > 0 ORDER BY id DESC")
     LiveData<List<SongEntity>> getLikeSongList();
 }

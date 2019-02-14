@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.LrcPagedAdapter;
-import com.wyq.lrcreader.adapter.RecyclerListAdapter;
 import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
@@ -25,7 +24,7 @@ import butterknife.BindView;
  * @author Uni.W
  * @date 2019/1/20 14:40
  */
-public class SearchResultFragment extends BaseFragment implements RecyclerListAdapter.OnRecyclerItemClickListener {
+public class SearchResultFragment extends BaseFragment {
 
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
@@ -33,9 +32,15 @@ public class SearchResultFragment extends BaseFragment implements RecyclerListAd
     //private RecyclerListAdapter adapter;
     private LrcPagedAdapter pagedAdapter;
 
-    public static SearchResultFragment newInstance() {
+    private static final String FILTER = "FILTER";
+    private volatile String filter = null;
 
-        return new SearchResultFragment();
+    public static SearchResultFragment newInstance(String filter) {
+        SearchResultFragment fragment = new SearchResultFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(FILTER, filter);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -45,7 +50,7 @@ public class SearchResultFragment extends BaseFragment implements RecyclerListAd
 
     @Override
     public void initData() {
-
+        filter = getArguments().getString(FILTER);
     }
 
     @Override
@@ -72,9 +77,7 @@ public class SearchResultFragment extends BaseFragment implements RecyclerListAd
         SearchResultViewModel searchResultViewModel = ViewModelProviders.of(this, factory)
                 .get(SearchResultViewModel.class);
 
-        LogUtil.i("" + searchResultViewModel == null ? "vm null" : "vm not null");
-
-        searchResultViewModel.getSearchResults().observe(this, new Observer<PagedList<SearchResultEntity>>() {
+        searchResultViewModel.getSearchResults(filter).observe(this, new Observer<PagedList<SearchResultEntity>>() {
             @Override
             public void onChanged(PagedList<SearchResultEntity> searchResultEntities) {
                 if (searchResultEntities != null) {
@@ -89,12 +92,5 @@ public class SearchResultFragment extends BaseFragment implements RecyclerListAd
         });
 
 
-    }
-
-    @Override
-    public void onItemClick(View view, int position) {
-//        SearchResultEntity entity = adapter.getDataList().get(position);
-//        LogUtil.i(entity.getSongName() + " :" + entity.getLrcUri());
-//        LrcActivity.newInstance(getContext(), entity.getLrcUri(), entity.getAlbumCoverUri());
     }
 }

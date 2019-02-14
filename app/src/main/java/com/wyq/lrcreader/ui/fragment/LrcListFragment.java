@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
@@ -43,6 +44,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
 
     private String searchText;
     private List<SearchResultEntity> searchResultEntities;
+    private Disposable loadDisposable;
 
     public static LrcListFragment newInstance(boolean isLocal, String searchText) {
         LrcListFragment lrcListFragment = new LrcListFragment();
@@ -138,6 +140,9 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (loadDisposable != null) {
+            loadDisposable.dispose();
+        }
     }
 
 
@@ -147,7 +152,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
             return;
         }
         LogUtil.i("start to load data");
-        ((BasicApp) getActivity().getApplication()).getDataRepository().getSearchResult(searchText)
+        loadDisposable = ((BasicApp) getActivity().getApplication()).getDataRepository().getSearchResult(searchText)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<SearchResultEntity>>() {

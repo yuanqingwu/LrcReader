@@ -31,4 +31,7 @@ public interface SearchResultDao {
 
     @Query("SELECT * FROM search_result ORDER BY id DESC")
     DataSource.Factory<Integer, SearchResultEntity> getAll();
+
+    @Query("SELECT * FROM search_result WHERE songName LIKE :searchText")
+    DataSource.Factory<Integer, SearchResultEntity> getLocalSearchResult(String searchText);
 }

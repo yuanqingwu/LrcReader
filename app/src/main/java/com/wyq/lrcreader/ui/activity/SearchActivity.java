@@ -10,6 +10,7 @@ import com.wyq.lrcreader.db.entity.SearchHistoryEntity;
 import com.wyq.lrcreader.ui.IRetryLoadCallback;
 import com.wyq.lrcreader.ui.fragment.LrcListFragment;
 import com.wyq.lrcreader.ui.fragment.SearchHistoryFragment;
+import com.wyq.lrcreader.ui.fragment.SearchResultFragment;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.appcompat.widget.SearchView;
@@ -88,6 +89,10 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
 
     @Override
     public boolean onQueryTextChange(String newText) {
+
+        LogUtil.i("" + newText);
+
+        fragmentReplace(SearchResultFragment.newInstance("%" + newText + "%"));
 
         return false;
     }
