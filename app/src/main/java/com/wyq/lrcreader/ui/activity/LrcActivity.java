@@ -123,6 +123,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         bottomSheetDialog.setCancelable(true);
         bottomSheetDialog.setCanceledOnTouchOutside(true);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_layout);
+        bottomSheetDialog.getDelegate().findViewById(R.id.design_bottom_sheet).setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_close_ib).setOnClickListener(this);
         bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_back_ib).setOnClickListener(this);
@@ -237,6 +238,10 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                     }
                 }
                 firstClickTime = event.getDownTime();
+
+                if (isInShowDialogRegion(startY)) {
+                    return true;
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 endX = event.getRawX();
@@ -249,7 +254,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                     finish();
                     return true;
                 }
-                if ((startY > (ScreenUtils.getScreenHeightPX(this) - 200)) && distanceY < -100) {
+                if (isInShowDialogRegion(startY) && distanceY < -100) {
                     bottomSheetDialog.show();
                     return true;
                 }
@@ -265,6 +270,16 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         }
 
         return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * 在此区域拦截时间以显示对话框
+     *
+     * @param value
+     * @return
+     */
+    private boolean isInShowDialogRegion(float value) {
+        return value > (ScreenUtils.getScreenHeightPX(this) - 200);
     }
 
     private void showHideMenu() {
