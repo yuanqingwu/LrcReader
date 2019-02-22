@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.util.Base64;
 import android.view.View;
+import android.widget.ScrollView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -195,7 +196,7 @@ public class BitmapUtil {
 //        view.layout(layoutMargin, 0,width - layoutMargin, view.getMeasuredHeight());
 
 //        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
-//                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.UNSPECIFIED));
+//                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.AT_MOST));
 //        view.layout((int) view.getX(), (int) view.getY(), (int) view.getX() + view.getMeasuredWidth(),
 //                (int) view.getY() + view.getMeasuredHeight());
 //        LogUtil.i("width:" + view.getWidth());
@@ -212,10 +213,20 @@ public class BitmapUtil {
 //        }
 //        LogUtil.i("Byte count:"+bitmap.getByteCount());
 
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        int h = 0;
+        if (view instanceof ScrollView) {
+            for (int i = 0; i < ((ScrollView) view).getChildCount(); i++) {
+                h += ((ScrollView) view).getChildAt(i).getHeight();
+            }
+        } else {
+            h = view.getHeight();
+        }
+
+
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
-        return changeColor(bitmap);
+        return bitmap;
     }
 
     /**

@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.tencent.mm.sdk.openapi.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
 import com.wyq.lrcreader.adapter.RecyclerGridAdapter;
@@ -329,6 +329,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     @Override
     public void onItemClick(View view, int position) {
         LogUtil.i(menuItemList.get(position).getName());
+        bottomSheetDialog.cancel();
+
         switch (menuItemList.get(position).getAction()) {
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WECHAT:
                 shareToWX(SendMessageToWX.Req.WXSceneSession);

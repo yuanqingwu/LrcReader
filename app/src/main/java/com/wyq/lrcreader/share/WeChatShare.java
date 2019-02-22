@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.SendMessageToWX;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
-import com.tencent.mm.sdk.openapi.WXImageObject;
-import com.tencent.mm.sdk.openapi.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXImageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.wyq.lrcreader.constants.ShareConstants;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.LogUtil;
@@ -42,7 +42,7 @@ public class WeChatShare {
 
     public boolean sendImgToWX(Bitmap bitmap, int scene) {
 
-        if (bitmap == null || bitmap.isRecycled()) {
+        if (bitmap == null) {
             LogUtil.i("send img is null");
             return false;
         }
@@ -52,16 +52,18 @@ public class WeChatShare {
 
         //Bitmap sendBitMap = Bitmap.createScaledBitmap(bitmap, 100, 300, true);
         Bitmap sendBitMap = bitmap;
-        //bitmap.recycle();
-        while (sendBitMap.getByteCount() > (200 * 1024)) {
+
+        //检查发送时的缩略图大小是否超过32k
+        while (sendBitMap.getByteCount() > (32 * 1024)) {
             Matrix matrix = new Matrix();
-            matrix.setScale(0.9f, 0.9f);
+            matrix.setScale(0.8f, 0.8f);
             LogUtil.i("send bitmap count:" + sendBitMap.getByteCount());
             sendBitMap = Bitmap.createBitmap(sendBitMap, 0, 0, sendBitMap.getWidth(), sendBitMap.getHeight(), matrix, true);
         }
+
         //LogUtil.i("bitmap count:" + bitmap.getByteCount());
 
-        bitmap.recycle();
+
         mediaMessage.thumbData = BitmapUtil.bmpToByteArray(sendBitMap);
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
