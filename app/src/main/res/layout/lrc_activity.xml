@@ -7,6 +7,7 @@
         android:id="@+id/activity_lrc_view_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:overScrollMode="never"
         android:fillViewport="true">
 
         <TextView
@@ -17,7 +18,7 @@
             android:gravity="center"
             android:paddingTop="30dp"
             android:paddingBottom="20dp"
-            android:text="lrc"
+            android:text="@string/loading"
             android:textIsSelectable="true"
             android:textSize="15sp" />
     </ScrollView>

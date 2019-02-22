@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/white" />
+    <item android:bottom="60dp">
+        <bitmap
+            android:antialias="true"
+            android:gravity="bottom|center_horizontal"
+            android:src="@drawable/songlist_72px" />
+    </item>
+</layer-list>
