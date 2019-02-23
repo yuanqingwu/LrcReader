@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -27,11 +28,12 @@ import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.db.entity.SongEntity;
+import com.wyq.lrcreader.share.FireShare;
 import com.wyq.lrcreader.share.WeChatShare;
+import com.wyq.lrcreader.ui.widget.FireToast;
+import com.wyq.lrcreader.ui.widget.ProgressPopupWindow;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.DiskLruCacheUtil;
-import com.wyq.lrcreader.utils.FireShare;
-import com.wyq.lrcreader.utils.FireToast;
 import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcOperationGenerator;
 import com.wyq.lrcreader.utils.ScreenUtils;
@@ -89,6 +91,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
     private DiskLruCacheUtil diskLruCacheUtil;
     private float startTextSize = 0;
+    private int textSizeProgress = 50;
 
     public static void newInstance(Context context, SearchResultEntity entity) {
         Intent intent = new Intent();
@@ -395,7 +398,15 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_TEXT_RESIZE:
-
+//                ProgressDialogFragment.newInstance("调整字体大小").show(getSupportFragmentManager(),"progressDialog");
+                ProgressPopupWindow.getInstance().progress(textSizeProgress).setOnSeekBarChangeListener(new ProgressPopupWindow.ProgressChangeListenser() {
+                    @Override
+                    public void onProgressChange(int progress) {
+                        LogUtil.i("progress:" + progress);
+                        textSizeProgress = progress;
+                        lrcView.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (progress / 100f - 0.5f) * 20f);
+                    }
+                }).show(lrcView, "调整字体大小");
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_LIKE:
                 songEntity.setLike(1);

@@ -16,9 +16,11 @@
         android:id="@+id/home_activity_appbar_tablayout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:tabGravity="fill"
-        app:tabMode="scrollable"
         android:background="@color/lightgray"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/green"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="@color/green"
         app:tabTextColor="@color/darkgray" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
@@ -27,9 +29,9 @@
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="bottom"
         app:fabAlignmentMode="end"
+        app:fabAnimationMode="slide"
         app:fabCradleRoundedCornerRadius="@dimen/activity_horizontal_margin"
         app:fabCradleVerticalOffset="@dimen/activity_horizontal_margin"
-        app:fabAnimationMode="slide"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -39,6 +41,6 @@
         android:id="@+id/home_activity_float_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_search_black_24dp"
-        app:layout_anchor="@id/home_activity_bottom_appbar" />
+        app:layout_anchor="@id/home_activity_bottom_appbar"
+        app:srcCompat="@drawable/ic_search_black_24dp" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

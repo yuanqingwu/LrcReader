@@ -1,4 +1,4 @@
-package com.wyq.lrcreader.utils;
+package com.wyq.lrcreader.share;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
+
+import com.wyq.lrcreader.utils.LogUtil;
 
 import java.io.File;
 import java.lang.annotation.Retention;

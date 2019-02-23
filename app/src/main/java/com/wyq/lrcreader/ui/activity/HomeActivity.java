@@ -30,7 +30,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     @BindView(R.id.home_activity_viewpager)
     public ViewPager viewPager;
     @BindView(R.id.home_activity_float_action_button)
-    public FloatingActionButton fractionBt;
+    public FloatingActionButton floatingActionButton;
 
 //    private String[] tabName = {"喜欢", "本地", "搜索"};
 
@@ -48,7 +48,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void initView() {
 
-        fractionBt.setOnClickListener(this);
+        floatingActionButton.setOnClickListener(this);
 
         setSupportActionBar(bottomAppBar);
         bottomAppBar.replaceMenu(R.menu.home_appbar);
@@ -57,8 +57,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
             tabLayout.addTab(tabLayout.newTab().setText(type.getPageName()));
         }
 
-//        ArrayList tabNameList = new ArrayList();
-//        Collections.addAll(tabNameList, tabName);
         HomeViewPagerAdapter pagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(3);
@@ -99,7 +97,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.home_activity_float_action_button:
                 SearchActivity.newInstance(HomeActivity.this);
-//                viewPager.setCurrentItem(2,true);
                 break;
             default:
                 break;

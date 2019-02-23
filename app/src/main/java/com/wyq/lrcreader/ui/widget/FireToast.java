@@ -1,4 +1,4 @@
-package com.wyq.lrcreader.utils;
+package com.wyq.lrcreader.ui.widget;
 
 import android.content.Context;
 import android.graphics.Color;

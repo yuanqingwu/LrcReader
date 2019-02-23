@@ -31,6 +31,7 @@ public class SearchActivity extends BaseActivity implements SearchView.OnQueryTe
         Intent intent = new Intent();
         intent.setClass(context, SearchActivity.class);
         context.startActivity(intent);
+//        context.startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(context, Pair.create(searchBt,"search")).toBundle());
     }
 
     @Override
