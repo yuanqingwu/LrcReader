@@ -2,8 +2,11 @@ package com.wyq.lrcreader.base;
 
 import android.app.Application;
 
+import com.sina.weibo.sdk.WbSdk;
+import com.sina.weibo.sdk.auth.AuthInfo;
 import com.wyq.lrcreader.datasource.DataRepository;
 import com.wyq.lrcreader.db.AppDatabase;
+import com.wyq.lrcreader.share.WeiboConstants;
 
 /**
  * @author Uni.W
@@ -17,6 +20,7 @@ public class BasicApp extends Application {
     public void onCreate() {
         super.onCreate();
         executors = new AppExecutors();
+        WbSdk.install(this, new AuthInfo(this, WeiboConstants.APP_KEY, WeiboConstants.REDIRECT_URL, WeiboConstants.SCOPE));
     }
 
     public AppDatabase getDatabase() {

@@ -14,6 +14,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.sina.weibo.sdk.api.ImageObject;
+import com.sina.weibo.sdk.api.WeiboMultiMessage;
+import com.sina.weibo.sdk.share.WbShareCallback;
+import com.sina.weibo.sdk.share.WbShareHandler;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
@@ -27,14 +31,17 @@ import com.wyq.lrcreader.share.WeChatShare;
 import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.DiskLruCacheUtil;
 import com.wyq.lrcreader.utils.FireShare;
+import com.wyq.lrcreader.utils.FireToast;
 import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcOperationGenerator;
 import com.wyq.lrcreader.utils.ScreenUtils;
 import com.wyq.lrcreader.utils.StorageUtil;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -48,7 +55,9 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 /**
  * Created by Uni.W on 2016/8/30.
  */
-public class LrcActivity extends BaseActivity implements View.OnClickListener, BaseRecyclerViewAdapter.OnRecyclerItemClickListener {
+public class LrcActivity extends BaseActivity implements View.OnClickListener,
+        BaseRecyclerViewAdapter.OnRecyclerItemClickListener,
+        WbShareCallback {
 
     @BindView(R.id.activity_lrc_view_text)
     public TextView lrcView;
@@ -68,6 +77,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
     private Bitmap albumCover;
     private String lrcText;
     private SearchResultEntity songListEntity;
+
+    private WbShareHandler wbShareHandler;
 
     private long firstClickTime = 0;
     private float startX = 0, endX = 0, startY = 0, endY = 0;
@@ -91,6 +102,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         return R.layout.lrc_activity;
     }
 
+    private WeakReference<Bitmap> shareBitmap;
+
     @Override
     public void initView() {
         initMenu();
@@ -101,6 +114,10 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
             loadBackground(songListEntity.getAlbumCoverUri());
             loadLrc(songListEntity.getLrcUri());
         }
+
+        wbShareHandler = new WbShareHandler(this);
+        wbShareHandler.registerApp();
+        wbShareHandler.setProgressColor(0xff33b5e5);
     }
 
     private void initEntity(SearchResultEntity entity) {
@@ -313,6 +330,11 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        wbShareHandler.doResultIntent(data, this);
+    }
 
     public void shareToWX(int req) {
         getExecutors().networkIO().execute(() -> {
@@ -322,9 +344,29 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
             // Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.send_img);
             boolean flag = weChatShare.sendImgToWX(BitmapUtil.convertViewToBitmap(scrollView), req);
             LogUtil.i("flag" + (flag ? "true" : "false"));
+            if (!flag) {
+                FireToast.instance(LrcActivity.this).setText("分享失败！").show();
+            }
         });
     }
 
+    public Bitmap getShareBitmap() {
+        if (shareBitmap == null || shareBitmap.get() == null) {
+            shareBitmap = new WeakReference<Bitmap>(BitmapUtil.convertViewToBitmap(scrollView));
+        }
+        return shareBitmap.get();
+    }
+
+    public void shareToWeibo() {
+
+        WeiboMultiMessage multiMessage = new WeiboMultiMessage();
+        ImageObject imageObject = new ImageObject();
+        imageObject.setImageObject(getShareBitmap());
+        multiMessage.imageObject = imageObject;
+
+
+        wbShareHandler.shareMessage(multiMessage, false);
+    }
 
     @Override
     public void onItemClick(View view, int position) {
@@ -340,15 +382,17 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WEIBO:
 //                Toast.makeText(this, "即将到来~", Toast.LENGTH_SHORT).show();
-
+                shareToWeibo();
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_NORMAL:
                 FireShare.shareFileWithSys(this, getString(R.string.app_name), Uri.parse(lrcText));
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_DOWNLOAD:
                 //保存到文件
-                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
-                getRepository().getDbGecimiRepository().insertToSong(songEntity);
+//                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+//                getRepository().getDbGecimiRepository().insertToSong(songEntity);
+
+
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_TEXT_RESIZE:
 
@@ -375,5 +419,20 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener, B
                 break;
 
         }
+    }
+
+    @Override
+    public void onWbShareSuccess() {
+//        FireToast.instance(LrcActivity.this).setText("分享成功！").show();
+    }
+
+    @Override
+    public void onWbShareCancel() {
+        FireToast.instance(LrcActivity.this).setText("分享取消！").show();
+    }
+
+    @Override
+    public void onWbShareFail() {
+        FireToast.instance(LrcActivity.this).setText("分享失败！").show();
     }
 }

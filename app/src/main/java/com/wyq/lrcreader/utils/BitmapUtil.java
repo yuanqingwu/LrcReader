@@ -191,28 +191,6 @@ public class BitmapUtil {
      */
 
     public static Bitmap convertViewToBitmap(View view) {
-//        view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-//        int layoutMargin = (view.getWidth() - view.getMeasuredWidth())/2;
-//        view.layout(layoutMargin, 0,width - layoutMargin, view.getMeasuredHeight());
-
-//        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
-//                View.MeasureSpec.makeMeasureSpec(view.getHeight(), View.MeasureSpec.AT_MOST));
-//        view.layout((int) view.getX(), (int) view.getY(), (int) view.getX() + view.getMeasuredWidth(),
-//                (int) view.getY() + view.getMeasuredHeight());
-//        LogUtil.i("width:" + view.getWidth());
-//        LogUtil.i("measurewidth:" + view.getMeasuredWidth());
-
-//       // view.setDrawingCacheEnabled(true);
-//        view.buildDrawingCache(true);
-//        //Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache(true));
-//        Bitmap bitmap = view.getDrawingCache();
-        //view.destroyDrawingCache();
-        // view.setDrawingCacheEnabled(false);
-//        if(bitmap.isRecycled()){
-//            LogUtil.i("bitmap has been recycled");
-//        }
-//        LogUtil.i("Byte count:"+bitmap.getByteCount());
-
         int h = 0;
         if (view instanceof ScrollView) {
             for (int i = 0; i < ((ScrollView) view).getChildCount(); i++) {
