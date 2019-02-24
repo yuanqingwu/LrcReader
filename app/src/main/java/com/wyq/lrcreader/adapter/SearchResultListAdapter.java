@@ -20,11 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * Created by Uni.W on 2016/8/18.
  */
-public class RecyclerListAdapter extends BaseRecyclerViewAdapter<RecyclerListAdapter.SongListViewHolder> {
+public class SearchResultListAdapter extends BaseRecyclerViewAdapter<SearchResultListAdapter.SongListViewHolder> {
     private Context context;
     private List<? extends IListSong> list;
 
-    public RecyclerListAdapter(Context context, List<? extends IListSong> list) {
+    public SearchResultListAdapter(Context context, List<? extends IListSong> list) {
         this.context = context;
         this.list = list;
     }

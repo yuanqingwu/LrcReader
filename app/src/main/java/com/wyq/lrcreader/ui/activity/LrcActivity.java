@@ -70,6 +70,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     private RecyclerView recyclerView;
 
     private static final String ARGUMENTS_LRC_LIST_SONG_ENTITY = "LRC_LIST_SONG_ENTITY";
+    private static final String ARGUMENTS_LRC_SONG_ENTITY = "LRC_SONG_ENTITY";
 
     private Disposable lrcDisposable;
     private Disposable backgroundDisposable;
@@ -78,6 +79,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     private SongEntity songEntity;
     private Bitmap albumCover;
     private String lrcText;
+    private String albumCoverUri;
     private SearchResultEntity songListEntity;
 
     private WbShareHandler wbShareHandler;
@@ -103,6 +105,13 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
         context.startActivity(intent);
     }
 
+    public static void newInstance(Context context, SongEntity songEntity) {
+        Intent intent = new Intent();
+        intent.putExtra(ARGUMENTS_LRC_SONG_ENTITY, songEntity);
+        intent.setClass(context, LrcActivity.class);
+        context.startActivity(intent);
+    }
+
     @Override
     protected int attachLayoutRes() {
         return R.layout.lrc_activity;
@@ -112,11 +121,22 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     public void initView() {
         initMenu();
 
-        songListEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_LIST_SONG_ENTITY);
-        if (songListEntity != null) {
-            initEntity(songListEntity);
-            loadBackground(songListEntity.getAlbumCoverUri());
-            loadLrc(songListEntity.getLrcUri());
+        songEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_SONG_ENTITY);
+        if (songEntity == null) {
+            songListEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_LIST_SONG_ENTITY);
+            if (songListEntity != null) {
+                initEntity(songListEntity);
+                albumCoverUri = songListEntity.getAlbumCoverUri();
+                loadBackground(albumCoverUri);
+                loadLrc(songListEntity.getLrcUri());
+            }
+        } else {
+            lrcText = songEntity.getLrc();
+            albumCoverUri = songEntity.getAlbumCover();
+            lrcView.setText(lrcText);
+//            Bitmap bitmap = StorageUtil.getInstance(this).getImageFromCacheFile(songEntity.getAlbumCover());
+//            lrcView.setBackground(new BitmapDrawable(getResources(), bitmap));
+            loadBackground(albumCoverUri);
         }
 
         wbShareHandler = new WbShareHandler(this);
@@ -199,7 +219,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                     @Override
                     public void accept(String s) {
                         lrcText = s;
-                        songEntity.setLrcUri(lrcText);
+                        songEntity.setLrc(lrcText);
                         lrcView.setText(s);
                     }
                 }, new Consumer<Throwable>() {
@@ -375,7 +395,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_DOWNLOAD:
                 //保存到文件
-//                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+//                songEntity.setAlbumCover(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
 //                getRepository().getDbGecimiRepository().insertToSong(songEntity);
 
 
@@ -393,7 +413,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_LIKE:
                 songEntity.setLike(1);
-                songEntity.setAlbumCoverUri(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+                songEntity.setAlbumCover(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
                 getRepository().getDbGecimiRepository().insertToSong(songEntity);
                 Toast.makeText(LrcActivity.this, "收藏成功", Toast.LENGTH_SHORT).show();
                 break;
@@ -403,7 +423,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                     @Override
                     public void onProgressChange(int progress) {
                         backgroundBlurRadius = progress;
-                        loadBackground(songListEntity.getAlbumCoverUri());
+                        loadBackground(albumCoverUri);
                     }
                 }).show(lrcView, "调整背景模糊程度");
                 break;

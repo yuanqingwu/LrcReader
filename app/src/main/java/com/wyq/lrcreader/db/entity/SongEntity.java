@@ -1,5 +1,8 @@
 package com.wyq.lrcreader.db.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.wyq.lrcreader.model.ISong;
 
 import java.util.Date;
@@ -13,16 +16,26 @@ import androidx.room.PrimaryKey;
  * @date 2019/1/16 21:32
  */
 @Entity(tableName = "song", indices = {@Index(value = {"aid"}, unique = true)})
-public class SongEntity implements ISong {
+public class SongEntity implements ISong, Parcelable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
     private int aid;
     private String songName;
     private String artist;
-    private String lrcUri;
+    public static final Creator<SongEntity> CREATOR = new Creator<SongEntity>() {
+        @Override
+        public SongEntity createFromParcel(Parcel source) {
+            return new SongEntity(source);
+        }
+
+        @Override
+        public SongEntity[] newArray(int size) {
+            return new SongEntity[0];
+        }
+    };
     private String album;//专辑
-    private String albumCoverUri;//专辑封面地址
+    private String lrc;
     private int like;//是否收藏
     private String dataSource;//数据源
     private Date searchAt;//搜索时间，查看时间
@@ -62,13 +75,10 @@ public class SongEntity implements ISong {
         this.artist = artist;
     }
 
-    @Override
-    public String getLrcUri() {
-        return lrcUri;
-    }
+    private String albumCover;//专辑封面地址
 
-    public void setLrcUri(String lrcUri) {
-        this.lrcUri = lrcUri;
+    public SongEntity() {
+
     }
 
     @Override
@@ -80,13 +90,21 @@ public class SongEntity implements ISong {
         this.album = album;
     }
 
-    @Override
-    public String getAlbumCoverUri() {
-        return albumCoverUri;
+    private SongEntity(Parcel parcel) {
+        this.setAid(parcel.readInt());
+        this.setSongName(parcel.readString());
+        this.setArtist(parcel.readString());
+        this.setLrc(parcel.readString());
+        this.setAlbum(parcel.readString());
+        this.setAlbumCover(parcel.readString());
+        this.setLike(parcel.readInt());
+        this.setDataSource(parcel.readString());
+        this.setSearchAt(new Date(parcel.readLong()));
     }
 
-    public void setAlbumCoverUri(String albumCoverUri) {
-        this.albumCoverUri = albumCoverUri;
+    @Override
+    public String getLrc() {
+        return lrc;
     }
 
     @Override
@@ -115,4 +133,46 @@ public class SongEntity implements ISong {
     public void setSearchAt(Date searchAt) {
         this.searchAt = searchAt;
     }
+
+    public void setLrc(String lrc) {
+        this.lrc = lrc;
+    }
+
+    @Override
+    public String getAlbumCover() {
+        return albumCover;
+    }
+
+    public void setAlbumCover(String albumCover) {
+        this.albumCover = albumCover;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(getAid());
+        dest.writeString(getSongName());
+        dest.writeString(getArtist());
+        dest.writeString(getLrc());
+        dest.writeString(getAlbum());
+        dest.writeString(getAlbumCover());
+        dest.writeInt(getLike());
+        dest.writeString(getDataSource());
+        dest.writeLong(getSearchAt().getTime());
+    }
+
+//    public SearchResultEntity toSearchResultEntity(){
+//        SearchResultEntity entity = new SearchResultEntity();
+//        entity.setAid(getAid());
+//        entity.setDataSource(getDataSource());
+//        entity.setAlbumCover(getAlbumCover());
+//        entity.setLrc(getLrc());
+//        entity.setArtist(getArtist());
+//        entity.setSongName(getSongName());
+//        return entity;
+//    }
 }

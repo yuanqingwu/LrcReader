@@ -29,7 +29,7 @@ public class SearchResultFragment extends BaseFragment {
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
 
-    //private RecyclerListAdapter adapter;
+    //private SearchResultListAdapter adapter;
     private LrcPagedAdapter pagedAdapter;
 
     private static final String FILTER = "FILTER";
@@ -60,7 +60,7 @@ public class SearchResultFragment extends BaseFragment {
     }
 
     private void initRecyclerView() {
-//        adapter = new RecyclerListAdapter(getContext(), null);
+//        adapter = new SearchResultListAdapter(getContext(), null);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 //        recyclerView.setAdapter(adapter);
 //

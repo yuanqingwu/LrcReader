@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
-import com.wyq.lrcreader.adapter.RecyclerListAdapter;
+import com.wyq.lrcreader.adapter.SearchResultListAdapter;
+import com.wyq.lrcreader.adapter.SongEntityListAdapter;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LrcLikeViewModel;
+import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.ui.fragment.base.BaseFragment;
 import com.wyq.lrcreader.ui.widget.FirePopupWindow;
 
@@ -23,12 +25,12 @@ import butterknife.BindView;
 /**
  * Created by Uni.W on 2016/8/31.
  */
-public class LrcLikeFragment extends BaseFragment implements RecyclerListAdapter.OnRecyclerItemLongClickListener, RecyclerListAdapter.OnRecyclerItemClickListener {
+public class LrcLikeFragment extends BaseFragment implements SearchResultListAdapter.OnRecyclerItemLongClickListener, SearchResultListAdapter.OnRecyclerItemClickListener {
 
     @BindView(R.id.fragment_lrc_like_list_recyclerview)
     public RecyclerView recyclerView;
 
-    private RecyclerListAdapter adapter;
+    private SongEntityListAdapter adapter;
     private List<SongEntity> songList;
 
     public static LrcLikeFragment newInstance() {
@@ -48,7 +50,7 @@ public class LrcLikeFragment extends BaseFragment implements RecyclerListAdapter
 
     @Override
     public void initView(View view) {
-        adapter = new RecyclerListAdapter(getActivity(), songList);
+        adapter = new SongEntityListAdapter(getActivity(), songList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -100,9 +102,7 @@ public class LrcLikeFragment extends BaseFragment implements RecyclerListAdapter
 
     @Override
     public void onItemClick(View view, int position) {
-
-//        LrcActivity.newInstance(getContext(),songList.get(position));
-
+        LrcActivity.newInstance(getContext(), songList.get(position));
     }
 
     @Override

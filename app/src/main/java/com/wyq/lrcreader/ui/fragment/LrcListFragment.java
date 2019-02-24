@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.wyq.lrcreader.R;
-import com.wyq.lrcreader.adapter.RecyclerListAdapter;
+import com.wyq.lrcreader.adapter.SearchResultListAdapter;
 import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
@@ -29,14 +29,14 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Uni.W on 2016/8/18.
  */
-public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerListAdapter.OnRecyclerItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class LrcListFragment extends BaseLazyLoadFragment implements SearchResultListAdapter.OnRecyclerItemClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     @BindView(R.id.fragment_lrclist_recyclerview)
     public RecyclerView recyclerView;
     @BindView(R.id.fragment_lrclist_swiprefresh_layout)
     public SwipeRefreshLayout swipeRefreshLayout;
 
-    private RecyclerListAdapter adapter;
+    private SearchResultListAdapter adapter;
     private static final String ARGUMENTS_IS_LOCAL = "IS_LOCAL";
 
     private boolean isLocal = false;
@@ -119,7 +119,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements RecyclerLis
 
 
     public void initRecyclerView() {
-        adapter = new RecyclerListAdapter(getActivity(), searchResultEntities);
+        adapter = new SearchResultListAdapter(getActivity(), searchResultEntities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);

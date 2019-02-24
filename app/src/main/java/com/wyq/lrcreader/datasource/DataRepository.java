@@ -143,7 +143,7 @@ public class DataRepository {
 
     public Flowable<Bitmap> getLrcViewBackground(String albumCoverUri, Context context) {
         //todo:暂时修复API的问题
-        String coverUri = albumCoverUri.replace("/cover/", "/album-cover/");
+        String coverUri = albumCoverUri.startsWith("http") ? albumCoverUri.replace("/cover/", "/album-cover/") : albumCoverUri;
         return Flowable.create(new FlowableOnSubscribe<Bitmap>() {
             @Override
             public void subscribe(FlowableEmitter<Bitmap> emitter) throws Exception {

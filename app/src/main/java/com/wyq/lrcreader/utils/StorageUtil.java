@@ -2,6 +2,7 @@ package com.wyq.lrcreader.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -98,6 +99,20 @@ public class StorageUtil {
         } finally {
             CloseUtils.closeIO(ops);
         }
+        return null;
+    }
+
+    public Bitmap getImageFromCacheFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists() && file.canRead()) {
+            byte[] res = FileUtils.read(file);
+
+            if (res != null && res.length > 0) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(res, 0, res.length);
+                return bitmap;
+            }
+        }
+
         return null;
     }
 

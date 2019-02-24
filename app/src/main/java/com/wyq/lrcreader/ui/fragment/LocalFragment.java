@@ -5,10 +5,11 @@ import android.view.View;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
-import com.wyq.lrcreader.adapter.RecyclerListAdapter;
+import com.wyq.lrcreader.adapter.SongEntityListAdapter;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LocalSongsViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
+import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.ui.fragment.base.BaseLazyLoadFragment;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
 
     @BindView(R.id.local_fragment_recycler_view)
     public RecyclerView recyclerView;
-    private RecyclerListAdapter adapter;
+    private SongEntityListAdapter adapter;
     private List<SongEntity> songList;
 
     public static LocalFragment newInstance() {
@@ -78,7 +79,7 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
 
     @Override
     public void initView(View view) {
-        adapter = new RecyclerListAdapter(getActivity(), songList);
+        adapter = new SongEntityListAdapter(getActivity(), songList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -88,6 +89,6 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
 
     @Override
     public void onItemClick(View view, int position) {
-
+        LrcActivity.newInstance(getActivity(), songList.get(position));
     }
 }
