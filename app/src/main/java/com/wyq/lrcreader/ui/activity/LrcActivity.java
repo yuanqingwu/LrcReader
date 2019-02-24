@@ -92,6 +92,9 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     private DiskLruCacheUtil diskLruCacheUtil;
     private float startTextSize = 0;
     private int textSizeProgress = 50;
+    private int backgroundBlurRadius = 20;
+
+    private WeakReference<Bitmap> shareBitmap;
 
     public static void newInstance(Context context, SearchResultEntity entity) {
         Intent intent = new Intent();
@@ -104,8 +107,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     protected int attachLayoutRes() {
         return R.layout.lrc_activity;
     }
-
-    private WeakReference<Bitmap> shareBitmap;
 
     @Override
     public void initView() {
@@ -155,22 +156,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
         adapter.setOnRecyclerItemClickListener(this);
 
         startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
-
-//        menuTextSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                lrcView.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (progress / 100f - 0.5f) * 20f);
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//            }
-//        });
-
     }
 
 
@@ -184,7 +169,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                         Bitmap blurBitmap = GlideApp.with(LrcActivity.this)
                                 .asBitmap()
                                 .load(bitmap)
-                                .apply(RequestOptions.bitmapTransform(new BlurTransformation()))
+                                .apply(RequestOptions.bitmapTransform(new BlurTransformation(backgroundBlurRadius)))
                                 .submit().get();
                         return blurBitmap;
                     }
@@ -361,12 +346,10 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     }
 
     public void shareToWeibo() {
-
         WeiboMultiMessage multiMessage = new WeiboMultiMessage();
         ImageObject imageObject = new ImageObject();
         imageObject.setImageObject(getShareBitmap());
         multiMessage.imageObject = imageObject;
-
 
         wbShareHandler.shareMessage(multiMessage, false);
     }
@@ -416,6 +399,13 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_BACKGROUND_BLUR:
 
+                ProgressPopupWindow.getInstance().progress(backgroundBlurRadius).setOnSeekBarChangeListener(new ProgressPopupWindow.ProgressChangeListenser() {
+                    @Override
+                    public void onProgressChange(int progress) {
+                        backgroundBlurRadius = progress;
+                        loadBackground(songListEntity.getAlbumCoverUri());
+                    }
+                }).show(lrcView, "调整背景模糊程度");
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_CHOOSE_LRC_TEXT:
 
