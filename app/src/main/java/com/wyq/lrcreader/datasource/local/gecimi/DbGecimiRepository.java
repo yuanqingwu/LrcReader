@@ -49,11 +49,29 @@ public class DbGecimiRepository {
                 .build();
     }
 
+    /**
+     * 获取所有的歌名
+     *
+     * @return
+     */
+    public List<String> getAllSearchResultName() {
+        LogUtil.i(database.getSearchResultDao().getAllName() == null ? "db null" : "db not  null");
+        return database.getSearchResultDao().getAllName();
+    }
+
     public void insertSearchResult(SearchResultEntity entity) {
         database.getExecutors().diskIO().execute(() -> {
             database.runInTransaction(() -> {
                 database.getSearchResultDao().insert(entity);
                 LogUtil.i("insert:" + entity.getSongName() + " " + entity.getDataSource());
+            });
+        });
+    }
+
+    public void deleteAllSearchResults() {
+        database.getExecutors().diskIO().execute(() -> {
+            database.runInTransaction(() -> {
+                database.getSearchResultDao().deleteAll();
             });
         });
     }

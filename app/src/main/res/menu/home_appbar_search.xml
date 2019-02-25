@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home_appbar_search_list"
+        android:checked="true"
+        android:icon="@drawable/ic_format_line_spacing_black_24dp"
+        android:title="列表"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_appbar_search_name"
+        android:icon="@drawable/ic_view_headline_black_24dp"
+        android:title="歌名"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_appbar_search_source"
+        android:icon="@drawable/ic_domain_black_24dp"
+        android:title="来源"
+        app:showAsAction="always" />
+</menu>

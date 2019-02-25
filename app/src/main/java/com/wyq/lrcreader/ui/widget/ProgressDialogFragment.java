@@ -1,4 +1,4 @@
-package com.wyq.lrcreader.ui.fragment;
+package com.wyq.lrcreader.ui.widget;
 
 import android.app.Dialog;
 import android.os.Bundle;

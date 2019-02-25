@@ -10,7 +10,7 @@
     <string name="local_expand_progress_text_ing">正在加载本地歌词…</string>
     <string name="local_expand_progress_text_ed">本地歌词加载完成</string>
     <string name="local_search_expand_text">本地歌词列表</string>
-    <string name="favourite">favourite</string>
+    <string name="like">like</string>
     <string name="local">local</string>
     <string name="search_input_text_hint_song_name">歌名</string>
     <string name="search_history">历史记录</string>

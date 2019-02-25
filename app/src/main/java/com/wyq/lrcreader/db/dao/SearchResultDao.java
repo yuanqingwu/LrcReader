@@ -2,6 +2,8 @@ package com.wyq.lrcreader.db.dao;
 
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 
+import java.util.List;
+
 import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -26,11 +28,17 @@ public interface SearchResultDao {
     @Update
     void update(SearchResultEntity entity);
 
+    @Query("DELETE FROM search_result")
+    void deleteAll();
+
 //    @Query("SELECT * FROM search_result")
 //    LiveData<List<SearchResultEntity>> getAll();
 
     @Query("SELECT * FROM search_result ORDER BY id DESC")
     DataSource.Factory<Integer, SearchResultEntity> getAll();
+
+    @Query("SELECT distinct songName FROM search_result")
+    List<String> getAllName();
 
     @Query("SELECT * FROM search_result WHERE songName LIKE :searchText")
     DataSource.Factory<Integer, SearchResultEntity> getLocalSearchResult(String searchText);

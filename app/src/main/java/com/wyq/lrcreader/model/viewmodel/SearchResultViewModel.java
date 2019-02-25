@@ -51,13 +51,24 @@ public class SearchResultViewModel extends ViewModel {
         return mObservableSearchResults;
     }
 
-//    public LiveData<PagedList<SearchResultEntity>> getSearchResults() {
-//        return mObservableSearchResults;
-//    }
 
+    public void clearAllSearchResults() {
+        repository.getDbGecimiRepository().deleteAllSearchResults();
+    }
 
-    public void setSearchResults(PagedList<SearchResultEntity> results) {
-        mObservableSearchResults.setValue(results);
+    public void setSearchResults(LiveData<PagedList<SearchResultEntity>> results) {
+        LogUtil.i(results == null ? "results is null" : "results is not null");
+//        mObservableSearchResults.setValue(results);
+        if (mObservableSearchResults.hasObservers()) {
+            LogUtil.d("hasObservers");
+        }
+
+        mObservableSearchResults.addSource(results, new Observer<PagedList<SearchResultEntity>>() {
+            @Override
+            public void onChanged(PagedList<SearchResultEntity> searchResultEntities) {
+                mObservableSearchResults.setValue(searchResultEntities);
+            }
+        });
     }
 
 }

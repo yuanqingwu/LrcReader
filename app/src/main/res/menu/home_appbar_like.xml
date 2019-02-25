@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home_appbar_like_little"
+        android:icon="@drawable/ic_favorite_pink_24dp"
+        android:title="有点喜欢"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_appbar_like_normal"
+        android:checked="true"
+        android:icon="@drawable/ic_favorite_orange_24dp"
+        android:title="喜欢"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/home_appbar_like_most"
+        android:icon="@drawable/ic_favorite_read_24dp"
+        android:title="最喜欢"
+        app:showAsAction="always" />
+</menu>
