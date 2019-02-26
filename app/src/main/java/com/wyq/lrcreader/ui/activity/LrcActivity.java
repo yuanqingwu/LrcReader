@@ -54,6 +54,8 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+import static com.wyq.lrcreader.utils.LrcOperationGenerator.ACTION_LRC_MENU_LIKE;
+
 /**
  * Created by Uni.W on 2016/8/30.
  */
@@ -79,8 +81,11 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     private SongEntity songEntity;
     private Bitmap albumCover;
     private String lrcText;
+    private int likeGrade;
     private String albumCoverUri;
     private SearchResultEntity songListEntity;
+
+    private RecyclerGridAdapter adapter;
 
     private WbShareHandler wbShareHandler;
 
@@ -119,7 +124,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void initView() {
-        initMenu();
 
         songEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_SONG_ENTITY);
         if (songEntity == null) {
@@ -134,14 +138,14 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
             lrcText = songEntity.getLrc();
             albumCoverUri = songEntity.getAlbumCover();
             lrcView.setText(lrcText);
-//            Bitmap bitmap = StorageUtil.getInstance(this).getImageFromCacheFile(songEntity.getAlbumCover());
-//            lrcView.setBackground(new BitmapDrawable(getResources(), bitmap));
+            likeGrade = songEntity.getLike();
             loadBackground(albumCoverUri);
         }
-
         wbShareHandler = new WbShareHandler(this);
         wbShareHandler.registerApp();
         wbShareHandler.setProgressColor(0xff33b5e5);
+
+        initMenu();
     }
 
     private void initEntity(SearchResultEntity entity) {
@@ -158,7 +162,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
     private void initMenu() {
 
-        menuItemList = LrcOperationGenerator.getInstance(this).genMenuList();
+        menuItemList = LrcOperationGenerator.getInstance(this).genMenuList(likeGrade);
 
         bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setCancelable(true);
@@ -170,7 +174,7 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
         bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_back_ib).setOnClickListener(this);
         recyclerView = bottomSheetDialog.findViewById(R.id.bottom_sheet_dialog_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
-        RecyclerGridAdapter adapter = new RecyclerGridAdapter(this, menuItemList);
+        adapter = new RecyclerGridAdapter(this, menuItemList);
         recyclerView.setAdapter(adapter);
 
         adapter.setOnRecyclerItemClickListener(this);
@@ -377,9 +381,12 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onItemClick(View view, int position) {
         LogUtil.i(menuItemList.get(position).getName());
-        bottomSheetDialog.cancel();
+        String action = menuItemList.get(position).getAction();
+        if (!action.equals(ACTION_LRC_MENU_LIKE)) {
+            bottomSheetDialog.cancel();
+        }
 
-        switch (menuItemList.get(position).getAction()) {
+        switch (action) {
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WECHAT:
                 shareToWX(SendMessageToWX.Req.WXSceneSession);
                 break;
@@ -387,7 +394,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                 shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_WEIBO:
-//                Toast.makeText(this, "即将到来~", Toast.LENGTH_SHORT).show();
                 shareToWeibo();
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_SHARE_NORMAL:
@@ -395,10 +401,9 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_DOWNLOAD:
                 //保存到文件
-//                songEntity.setAlbumCover(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
-//                getRepository().getDbGecimiRepository().insertToSong(songEntity);
-
-
+                songEntity.setAlbumCover(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
+                getRepository().getDbGecimiRepository().insertToSong(songEntity);
+                Toast.makeText(LrcActivity.this, "下载成功", Toast.LENGTH_SHORT).show();
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_TEXT_RESIZE:
 //                ProgressDialogFragment.newInstance("调整字体大小").show(getSupportFragmentManager(),"progressDialog");
@@ -411,14 +416,18 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                     }
                 }).show(lrcView, "调整字体大小");
                 break;
-            case LrcOperationGenerator.ACTION_LRC_MENU_LIKE:
-                songEntity.setLike(1);
+            case ACTION_LRC_MENU_LIKE:
+                ImageTextItemModel model = LrcOperationGenerator.getInstance(this).addLikeGrade();
+                menuItemList.set(6, model);
+                adapter.notifyItemChanged(6);
+
+                LogUtil.i("喜欢程度：" + model.getName());
+                songEntity.setLike(LrcOperationGenerator.getInstance(this).getLikeGradeWithName(model.getName()).getValue());
                 songEntity.setAlbumCover(StorageUtil.getInstance(getApplicationContext()).saveImageToCacheFile(albumCover));
                 getRepository().getDbGecimiRepository().insertToSong(songEntity);
-                Toast.makeText(LrcActivity.this, "收藏成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LrcActivity.this, model.getName(), Toast.LENGTH_SHORT).show();
                 break;
             case LrcOperationGenerator.ACTION_LRC_MENU_BACKGROUND_BLUR:
-
                 ProgressPopupWindow.getInstance().progress(backgroundBlurRadius).setOnSeekBarChangeListener(new ProgressPopupWindow.ProgressChangeListenser() {
                     @Override
                     public void onProgressChange(int progress) {

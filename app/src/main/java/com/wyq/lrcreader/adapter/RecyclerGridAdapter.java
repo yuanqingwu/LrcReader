@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.item.ImageTextItemModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -21,7 +20,7 @@ public class RecyclerGridAdapter extends BaseRecyclerViewAdapter<RecyclerGridAda
 
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
-    private List<ImageTextItemModel> list = new ArrayList<>();
+    private List<ImageTextItemModel> list;
     private Context context;
     private int orientation = VERTICAL;
 
@@ -31,12 +30,11 @@ public class RecyclerGridAdapter extends BaseRecyclerViewAdapter<RecyclerGridAda
         list = oriList;
     }
 
-    public void refreshData(List oriList) {
+    public void refreshData(List<ImageTextItemModel> oriList) {
         if (list == null) {
             list = oriList;
-            notifyDataSetChanged();
+            notifyItemRangeInserted(0, oriList.size());
         } else {
-
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
                 public int getOldListSize() {
@@ -50,15 +48,14 @@ public class RecyclerGridAdapter extends BaseRecyclerViewAdapter<RecyclerGridAda
 
                 @Override
                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return list.get(oldItemPosition).getClass().equals(oriList.get(newItemPosition).getClass());
+                    return list.get(oldItemPosition).getName().equals(oriList.get(newItemPosition).getName());
                 }
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    return list.get(oldItemPosition).equals(oriList.get(newItemPosition));
+                    return list.get(oldItemPosition).getName().equals(oriList.get(newItemPosition).getName());
                 }
-            }, true);
-
+            });
             list = oriList;
             diffResult.dispatchUpdatesTo(this);
         }

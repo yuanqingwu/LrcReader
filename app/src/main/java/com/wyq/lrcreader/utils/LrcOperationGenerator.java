@@ -5,11 +5,15 @@ import android.graphics.drawable.Drawable;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.item.ImageTextItemModel;
+import com.wyq.lrcreader.ui.LikeGrade;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.core.content.res.ResourcesCompat;
+
+import static com.wyq.lrcreader.ui.LikeGrade.LIKE_GRADE_MOST;
+import static com.wyq.lrcreader.ui.LikeGrade.LIKE_GRADE_NOT;
 
 /**
  * @author Uni.W
@@ -49,10 +53,11 @@ public class LrcOperationGenerator {
     }
 
 
-    public List<ImageTextItemModel> genMenuList() {
+    public List<ImageTextItemModel> genMenuList(int likeGrade) {
         if (itemList != null) {
             return itemList;
         }
+        LikeGrade grade = getLikeGradeWithValue(likeGrade);
         itemList = new ArrayList<>();
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.wechat), "微信", ACTION_LRC_MENU_SHARE_WECHAT));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.moments), "朋友圈", ACTION_LRC_MENU_SHARE_MOMENTS));
@@ -60,7 +65,7 @@ public class LrcOperationGenerator {
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_share_black_24dp), "分享", ACTION_LRC_MENU_SHARE_NORMAL));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_file_download_black_24dp), "下载", ACTION_LRC_MENU_DOWNLOAD));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_format_size_black_24dp), "调整字体", ACTION_LRC_MENU_TEXT_RESIZE));
-        itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_favorite_border_black_24dp), "收藏", ACTION_LRC_MENU_LIKE));
+        itemList.add(new ImageTextItemModel(getDrawable(grade.getDrawableId()), grade.getName(), ACTION_LRC_MENU_LIKE));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_blur_on_black_24dp), "背景模糊", ACTION_LRC_MENU_BACKGROUND_BLUR));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_content_copy_black_24dp), "选择歌词", ACTION_LRC_MENU_CHOOSE_LRC_TEXT));
         itemList.add(new ImageTextItemModel(getDrawable(R.drawable.ic_photo_library_black_24dp), "生成图片", ACTION_LRC_MENU_GEN_BITMAP));
@@ -70,5 +75,40 @@ public class LrcOperationGenerator {
 
     private Drawable getDrawable(int id) {
         return ResourcesCompat.getDrawable(context.getResources(), id, null);
+    }
+
+    public ImageTextItemModel addLikeGrade() {
+        ImageTextItemModel model = itemList.get(6);
+
+        LikeGrade grade = next(getLikeGradeWithName(model.getName()));
+
+        model.setName(grade.getName());
+        model.setImage(getDrawable(grade.getDrawableId()));
+        return model;
+    }
+
+    public LikeGrade getLikeGradeWithValue(int value) {
+        for (LikeGrade grade : LikeGrade.values()) {
+            if (grade.getValue() == value) {
+                return grade;
+            }
+        }
+        return null;
+    }
+
+    public LikeGrade getLikeGradeWithName(String name) {
+        for (LikeGrade grade : LikeGrade.values()) {
+            if (grade.getName().equals(name)) {
+                return grade;
+            }
+        }
+        return null;
+    }
+
+    public LikeGrade next(LikeGrade likeGrade) {
+        if (likeGrade.equals(LIKE_GRADE_MOST)) {
+            return LIKE_GRADE_NOT;
+        }
+        return getLikeGradeWithValue(likeGrade.getValue() + 1);
     }
 }
