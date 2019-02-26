@@ -114,12 +114,15 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.home_appbar_like_little:
                 LogUtil.i("like_little");
+                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_LITTLE);
                 break;
             case R.id.home_appbar_like_normal:
                 LogUtil.i("like_normal");
+                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_NORMAL);
                 break;
             case R.id.home_appbar_like_most:
                 LogUtil.i("like_most");
+                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_MOST);
                 break;
             case R.id.home_appbar_local_list:
                 LogUtil.i("local_list");

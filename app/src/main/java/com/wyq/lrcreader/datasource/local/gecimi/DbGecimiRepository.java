@@ -92,7 +92,7 @@ public class DbGecimiRepository {
         });
     }
 
-    public LiveData<List<SongEntity>> getLikeSongList() {
-        return database.getSongDao().getLikeSongList();
+    public LiveData<List<SongEntity>> getLikeSongList(int likeGrade) {
+        return database.getSongDao().getLikeSongList(likeGrade);
     }
 }

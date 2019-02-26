@@ -2,6 +2,7 @@ package com.wyq.lrcreader.model.viewmodel;
 
 import com.wyq.lrcreader.datasource.DataRepository;
 import com.wyq.lrcreader.db.entity.SongEntity;
+import com.wyq.lrcreader.ui.LikeGrade;
 
 import java.util.List;
 
@@ -19,13 +20,16 @@ import androidx.lifecycle.ViewModelProvider;
 public class LrcLikeViewModel extends ViewModel {
 
     private MediatorLiveData<List<SongEntity>> songEntityMediatorLiveData;
+    private DataRepository repository;
 
     public LrcLikeViewModel(DataRepository repository) {
+
+        this.repository = repository;
 
         songEntityMediatorLiveData = new MediatorLiveData<>();
         songEntityMediatorLiveData.setValue(null);
 
-        LiveData<List<SongEntity>> listLiveData = repository.getDbGecimiRepository().getLikeSongList();
+        LiveData<List<SongEntity>> listLiveData = repository.getDbGecimiRepository().getLikeSongList(LikeGrade.LIKE_GRADE_LITTER.getValue());
 
         songEntityMediatorLiveData.addSource(listLiveData, new Observer<List<SongEntity>>() {
             @Override
@@ -39,6 +43,16 @@ public class LrcLikeViewModel extends ViewModel {
         return songEntityMediatorLiveData;
     }
 
+    public void setLikeGrade(int likeGrade) {
+        LiveData<List<SongEntity>> listLiveData = repository.getDbGecimiRepository().getLikeSongList(likeGrade);
+
+        songEntityMediatorLiveData.addSource(listLiveData, new Observer<List<SongEntity>>() {
+            @Override
+            public void onChanged(List<SongEntity> songEntities) {
+                songEntityMediatorLiveData.setValue(songEntities);
+            }
+        });
+    }
 
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
 

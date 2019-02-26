@@ -145,6 +145,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
         wbShareHandler.registerApp();
         wbShareHandler.setProgressColor(0xff33b5e5);
 
+        startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
+
         initMenu();
     }
 
@@ -179,7 +181,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
         adapter.setOnRecyclerItemClickListener(this);
 
-        startTextSize = lrcView.getTextSize();//the size (in pixels) of the default text size in this TextView
     }
 
 

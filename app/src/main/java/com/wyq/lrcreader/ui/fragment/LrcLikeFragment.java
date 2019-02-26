@@ -3,11 +3,14 @@ package com.wyq.lrcreader.ui.fragment;
 import android.os.Bundle;
 import android.view.View;
 
+import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.SearchResultListAdapter;
 import com.wyq.lrcreader.adapter.SongEntityListAdapter;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LrcLikeViewModel;
+import com.wyq.lrcreader.ui.HomeAction;
+import com.wyq.lrcreader.ui.LikeGrade;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.ui.fragment.base.BaseFragment;
 import com.wyq.lrcreader.ui.widget.FirePopupWindow;
@@ -71,6 +74,22 @@ public class LrcLikeFragment extends BaseFragment implements SearchResultListAda
             public void onChanged(List<SongEntity> songEntities) {
                 songList = songEntities;
                 adapter.refreshData(songEntities);
+            }
+        });
+
+        LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if (lrcLikeViewModel == null) {
+                    return;
+                }
+                if (s.equals(HomeAction.ACTION_LIKE_LITTLE)) {
+                    lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_LITTER.getValue());
+                } else if (s.equals(HomeAction.ACTION_LIKE_NORMAL)) {
+                    lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_NORMAL.getValue());
+                } else if (s.equals(HomeAction.ACTION_LIKE_MOST)) {
+                    lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_MOST.getValue());
+                }
             }
         });
     }
