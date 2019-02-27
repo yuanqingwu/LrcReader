@@ -4,20 +4,23 @@
 
     <item
         android:id="@+id/home_appbar_search_list"
+        android:checkable="true"
+        android:icon="@drawable/search_expand"
         android:checked="true"
-        android:icon="@drawable/ic_format_line_spacing_black_24dp"
-        android:title="列表"
-        app:showAsAction="always" />
+        android:title="全部列表"
+        app:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@+id/home_appbar_search_name"
         android:icon="@drawable/ic_view_headline_black_24dp"
-        android:title="歌名"
-        app:showAsAction="always" />
+        android:checkable="true"
+        android:title="歌名过滤"
+        app:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@+id/home_appbar_search_source"
         android:icon="@drawable/ic_domain_black_24dp"
-        android:title="来源"
-        app:showAsAction="always" />
+        android:checkable="true"
+        android:title="来源过滤"
+        app:showAsAction="ifRoom|withText" />
 </menu>

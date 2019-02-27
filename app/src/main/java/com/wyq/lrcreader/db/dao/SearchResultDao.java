@@ -40,6 +40,9 @@ public interface SearchResultDao {
     @Query("SELECT distinct songName FROM search_result")
     List<String> getAllName();
 
-    @Query("SELECT * FROM search_result WHERE songName LIKE :searchText")
+    @Query("SELECT distinct dataSource FROM search_result")
+    List<String> getAllSource();
+
+    @Query("SELECT * FROM search_result WHERE songName LIKE :searchText or dataSource LIKE :searchText")
     DataSource.Factory<Integer, SearchResultEntity> getLocalSearchResult(String searchText);
 }

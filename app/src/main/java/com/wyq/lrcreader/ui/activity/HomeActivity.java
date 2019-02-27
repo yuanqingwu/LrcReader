@@ -2,11 +2,10 @@ package com.wyq.lrcreader.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.material.bottomappbar.BottomAppBar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.jeremyliao.liveeventbus.LiveEventBus;
@@ -23,10 +22,12 @@ import butterknife.BindView;
 /**
  * @author Uni.W
  */
-public class HomeActivity extends BaseActivity implements View.OnClickListener {
+public class HomeActivity extends BaseActivity implements View.OnClickListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
-    @BindView(R.id.home_activity_bottom_appbar)
-    public BottomAppBar bottomAppBar;
+    //    @BindView(R.id.home_activity_bottom_appbar)
+//    public BottomAppBar bottomAppBar;
+    @BindView(R.id.home_activity_bottom_navigation_view)
+    public BottomNavigationView navigationView;
     @BindView(R.id.home_activity_appbar_tablayout)
     public TabLayout tabLayout;
     @BindView(R.id.home_activity_viewpager)
@@ -53,8 +54,21 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
 
         floatingActionButton.setOnClickListener(this);
 
-        setSupportActionBar(bottomAppBar);
-        bottomAppBar.replaceMenu(homePageType.getMenuId());
+
+        navigationView.setOnNavigationItemSelectedListener(this);
+//        setSupportActionBar(bottomAppBar);
+//        bottomAppBar.replaceMenu(homePageType.getMenuId());
+//
+//        bottomAppBar.setTitle("title");
+//        bottomAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                item.setCheckable(true);
+//                item.setChecked(true);
+//                LogUtil.i("item title:"+item.getTitle().toString());
+//                return false;
+//            }
+//        });
 
         for (EHomePageType type : EHomePageType.values()) {
             tabLayout.addTab(tabLayout.newTab().setText(type.getPageName()));
@@ -68,20 +82,24 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//                LogUtil.i("onPageScrolled:"+position);
             }
 
             @Override
             public void onPageSelected(int position) {
-
+//                tabLayout.removeAllTabs();
                 LogUtil.i("onPageSelected:" + position);
                 for (EHomePageType type : EHomePageType.values()) {
                     if (type.getPosition() == position) {
                         homePageType = type;
+//                        tabLayout.addTab(tabLayout.newTab().setText(type.getPageName()));
                     }
                 }
 
-                invalidateOptionsMenu();
+
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(homePageType.getMenuId());
+
+//                invalidateOptionsMenu();
 //                bottomAppBar.replaceMenu(homePageType.getMenuId());
             }
 
@@ -92,14 +110,81 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         });
     }
 
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(homePageType.getMenuId(), menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//
+//        String title = menu.getItem(1).getTitle().toString();
+//        LogUtil.d("title:"+title);
+//        return super.onPrepareOptionsMenu(menu);
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.home_appbar_search_list:
+//                LogUtil.i("search_list");
+////                item.setIcon(R.drawable.ic_format_line_spacing_green_24dp);
+//                LiveEventBus.get().with(HomeAction.ACTION_SEARCH).postValue(HomeAction.ACTION_SEARCH_EXPAND_LIST);
+//                break;
+//            case R.id.home_appbar_search_name:
+//                LogUtil.i("search_name");
+////                item.setIcon(R.drawable.ic_view_headline_green_24dp);
+//                LiveEventBus.get().with(HomeAction.ACTION_SEARCH).postValue(HomeAction.ACTION_SEARCH_TITLE_LIST);
+//                break;
+//            case R.id.home_appbar_search_source:
+//                LogUtil.i("search_source");
+//                break;
+//            case R.id.home_appbar_like_little:
+//                LogUtil.i("like_little");
+//                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_LITTLE);
+//                break;
+//            case R.id.home_appbar_like_normal:
+//                LogUtil.i("like_normal");
+//                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_NORMAL);
+//                break;
+//            case R.id.home_appbar_like_most:
+//                LogUtil.i("like_most");
+//                LiveEventBus.get().with(HomeAction.ACTION_LIKE, String.class).postValue(HomeAction.ACTION_LIKE_MOST);
+//                break;
+//            case R.id.home_appbar_local_list:
+//                LogUtil.i("local_list");
+//                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_LIST);
+//                break;
+//            case R.id.home_appbar_local_folder:
+//                LogUtil.i("local_folder");
+//
+//                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_FOLDER);
+//                break;
+//            case R.id.home_appbar_local_refresh:
+//                LogUtil.i("local_refresh");
+//                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_REFRESH);
+//                break;
+//            default:
+//                break;
+//        }
+//
+//        return true;
+//    }
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(homePageType.getMenuId(), menu);
-        return true;
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.home_activity_float_action_button:
+                SearchActivity.newInstance(HomeActivity.this);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.home_appbar_search_list:
                 LogUtil.i("search_list");
@@ -111,6 +196,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.home_appbar_search_source:
                 LogUtil.i("search_source");
+                LiveEventBus.get().with(HomeAction.ACTION_SEARCH).postValue(HomeAction.ACTION_SEARCH_SOURCE);
                 break;
             case R.id.home_appbar_like_little:
                 LogUtil.i("like_little");
@@ -126,28 +212,21 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.home_appbar_local_list:
                 LogUtil.i("local_list");
+                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_LIST);
                 break;
             case R.id.home_appbar_local_folder:
                 LogUtil.i("local_folder");
+
+                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_FOLDER);
                 break;
             case R.id.home_appbar_local_refresh:
                 LogUtil.i("local_refresh");
+                LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).postValue(HomeAction.ACTION_LOCAL_REFRESH);
                 break;
             default:
                 break;
         }
 
         return true;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.home_activity_float_action_button:
-                SearchActivity.newInstance(HomeActivity.this);
-                break;
-            default:
-                break;
-        }
     }
 }

@@ -84,6 +84,9 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == R.layout.fragment_lrclist_item) {
+            if (getItem(position) == null) {
+                return;
+            }
             LogUtil.i("getItem(position):" + getItem(position).getSongName());
             ((LrcItemViewHolder) holder).bind(getItem(position));
         } else if (getItemViewType(position) == R.layout.network_state_item) {

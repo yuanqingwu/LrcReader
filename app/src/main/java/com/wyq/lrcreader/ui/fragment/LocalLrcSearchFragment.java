@@ -26,7 +26,7 @@ import androidx.fragment.app.Fragment;
  * Created by Uni.W on 2016/12/19.
  */
 
-public class LocalLrcFragment extends Fragment implements View.OnClickListener {
+public class LocalLrcSearchFragment extends Fragment implements View.OnClickListener {
 
     private Button confirmBt;
     private ListView listView;
@@ -70,6 +70,10 @@ public class LocalLrcFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
+
+    public static LocalLrcSearchFragment newInstance() {
+        return new LocalLrcSearchFragment();
+    }
 
     @Nullable
     @Override

@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.jeremyliao.liveeventbus.LiveEventBus;
@@ -45,14 +46,17 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
 
     @BindView(R.id.search_fragment_recycler_view)
     public RecyclerView recyclerView;
+    @BindView(R.id.search_fragment_delete_iv)
+    public ImageView deleteIv;
     /**
      * null 则显示全部数据
      */
-    private static final String FILTER = "FILTER";
-    @BindView(R.id.search_fragment_delete_iv)
-    public ImageView deleteIv;
+    private static final String ARGUMENT_FILTER = "ARGUMENT_FILTER";
+
     private BottomSheetDialog bottomSheetDialog;
     private RecyclerView bottomRecyclerView;
+    @BindView(R.id.search_fragment_history_filter_tv)
+    public TextView filterTv;
 
     //private SearchResultListAdapter adapter;
     private LrcPagedAdapter pagedAdapter;
@@ -60,12 +64,12 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
     private SearchResultViewModel searchResultViewModel;
     private List<String> nameList;
     private Disposable disposable;
-    private volatile String filter = null;
+    private volatile String filter;
 
     public static SearchResultFragment newInstance(String filter) {
         SearchResultFragment fragment = new SearchResultFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(FILTER, filter);
+        bundle.putString(ARGUMENT_FILTER, filter);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -77,7 +81,8 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
 
     @Override
     public void initData() {
-        filter = getArguments().getString(FILTER);
+        filter = getArguments().getString(ARGUMENT_FILTER);
+        filterTv.setText(filter);
     }
 
     @Override
@@ -126,6 +131,7 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
                 if (searchResultEntities != null) {
                     LogUtil.i("LoadedCount:" + searchResultEntities.getLoadedCount());
                     pagedAdapter.submitList(searchResultEntities);
+                    recyclerView.scrollToPosition(0);
 //                    pagedAdapter.setNetworkState(NetworkState.LOADING);
                 } else {
                     LogUtil.i("searchResultEntities is null");
@@ -140,20 +146,27 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
                 LogUtil.i("ACTION_SEARCH:" + (s == null ? "null" : s));
 
                 if (s.equals(HomeAction.ACTION_SEARCH_EXPAND_LIST)) {
-                    searchResultViewModel.setSearchResults(getRepository().getDbGecimiRepository().getAllSearchResult(null));
+                    searchResultViewModel.setSearchResults(getRepository().getDbGecimiRepository().getAllSearchResult(filter));
+                    filterTv.setText(filter);
                 } else if (s.equals(HomeAction.ACTION_SEARCH_TITLE_LIST)) {
-                    showBottomSheetDialog();
+                    showBottomSheetDialog(s);
+                } else if (s.equals(HomeAction.ACTION_SEARCH_SOURCE)) {
+                    showBottomSheetDialog(s);
                 }
 
             }
         });
     }
 
-    private void showBottomSheetDialog() {
+    private void showBottomSheetDialog(String filterType) {
         disposable = Flowable.create(new FlowableOnSubscribe<List<String>>() {
             @Override
             public void subscribe(FlowableEmitter<List<String>> emitter) {
-                nameList = getRepository().getDbGecimiRepository().getAllSearchResultName();
+                if (filterType.equals(HomeAction.ACTION_SEARCH_TITLE_LIST)) {
+                    nameList = getRepository().getDbGecimiRepository().getAllSearchResultName();
+                } else if (filterType.equals(HomeAction.ACTION_SEARCH_SOURCE)) {
+                    nameList = getRepository().getDbGecimiRepository().getAllSearchResultSource();
+                }
                 if (nameList != null) {
                     emitter.onNext(nameList);
                     LogUtil.i("nameList" + nameList.get(0));
@@ -178,7 +191,7 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (disposable != null && !disposable.isDisposed()) {
+        if (disposable != null && disposable.isDisposed()) {
             disposable.dispose();
         }
     }
@@ -209,8 +222,9 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onItemClick(View view, int position) {
         if (nameList != null) {
-            String songName = nameList.get(position);
-            searchResultViewModel.setSearchResults(getRepository().getDbGecimiRepository().getAllSearchResult(songName));
+            String filterName = nameList.get(position);
+            filterTv.setText(filterName);
+            searchResultViewModel.setSearchResults(getRepository().getDbGecimiRepository().getAllSearchResult(filterName));
             bottomSheetDialog.cancel();
         }
     }

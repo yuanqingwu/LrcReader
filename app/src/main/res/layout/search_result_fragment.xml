@@ -4,42 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<com.google.android.material.textfield.TextInputLayout-->
-    <!--android:id="@+id/search_fragment_song_text_input_layout"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_margin="@dimen/activity_horizontal_margin"-->
-    <!--app:layout_constraintBottom_toTopOf="@id/search_fragment_artist_text_input_layout"-->
-    <!--app:layout_constraintTop_toTopOf="parent">-->
-
-    <!--<com.google.android.material.textfield.TextInputEditText-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:hint="@string/search_input_text_hint_song_name"-->
-    <!--android:textSize="@dimen/text_size_normal" />-->
-    <!--</com.google.android.material.textfield.TextInputLayout>-->
-
-    <!--<com.google.android.material.textfield.TextInputLayout-->
-    <!--android:id="@+id/search_fragment_artist_text_input_layout"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_margin="@dimen/activity_horizontal_margin"-->
-    <!--app:layout_constraintBottom_toTopOf="@id/search_fragment_guide_line_v"-->
-    <!--app:layout_constraintTop_toBottomOf="@id/search_fragment_song_text_input_layout">-->
-
-    <!--<com.google.android.material.textfield.TextInputEditText-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:hint="@string/search_input_text_hint_artist" />-->
-    <!--</com.google.android.material.textfield.TextInputLayout>-->
-
-    <!--<androidx.constraintlayout.widget.Guideline-->
-    <!--android:id="@+id/search_fragment_guide_line_v"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:orientation="horizontal"-->
-    <!--app:layout_constraintGuide_percent="0.4" />-->
-
     <TextView
         android:id="@+id/search_fragment_history_tv"
         android:layout_width="wrap_content"
@@ -49,6 +13,17 @@
         android:text="@string/search_history"
         android:textSize="@dimen/text_size_normal"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/search_fragment_history_filter_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:textColor="@color/darkgreen"
+        android:textSize="@dimen/text_size_normal"
+        app:layout_constraintStart_toEndOf="@id/search_fragment_history_tv"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView

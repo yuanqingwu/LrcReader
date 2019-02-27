@@ -3,12 +3,14 @@ package com.wyq.lrcreader.ui.fragment;
 import android.os.Bundle;
 import android.view.View;
 
+import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.BaseRecyclerViewAdapter;
 import com.wyq.lrcreader.adapter.SongEntityListAdapter;
 import com.wyq.lrcreader.db.entity.SongEntity;
 import com.wyq.lrcreader.model.viewmodel.LocalSongsViewModel;
 import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
+import com.wyq.lrcreader.ui.HomeAction;
 import com.wyq.lrcreader.ui.activity.LrcActivity;
 import com.wyq.lrcreader.ui.fragment.base.BaseLazyLoadFragment;
 
@@ -55,6 +57,18 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
                     }
                 });
 
+        LiveEventBus.get().with(HomeAction.ACTION_LOCAL, String.class).observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if (s.equals(HomeAction.ACTION_LOCAL_LIST)) {
+
+                } else if (s.equals(HomeAction.ACTION_LOCAL_FOLDER)) {
+
+                } else if (s.equals(HomeAction.ACTION_LOCAL_REFRESH)) {
+
+                }
+            }
+        });
     }
 
     @Override

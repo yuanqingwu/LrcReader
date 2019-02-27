@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home_navigation_search"
+        android:icon="@drawable/navigation_search_bg"
+        android:title="搜索记录" />
+
+    <item
+        android:id="@+id/home_navigation_like"
+        android:icon="@drawable/navigation_like_bg"
+        android:title="喜欢" />
+
+    <item
+        android:id="@+id/home_navigation_local"
+        android:icon="@drawable/navigation_local_bg"
+        android:title="本地" />
+</menu>

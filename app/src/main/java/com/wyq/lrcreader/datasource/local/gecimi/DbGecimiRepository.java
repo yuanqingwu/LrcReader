@@ -55,8 +55,17 @@ public class DbGecimiRepository {
      * @return
      */
     public List<String> getAllSearchResultName() {
-        LogUtil.i(database.getSearchResultDao().getAllName() == null ? "db null" : "db not  null");
+//        LogUtil.i(database.getSearchResultDao().getAllName() == null ? "db null" : "db not  null");
         return database.getSearchResultDao().getAllName();
+    }
+
+    /**
+     * 获取所有的来源名称
+     *
+     * @return
+     */
+    public List<String> getAllSearchResultSource() {
+        return database.getSearchResultDao().getAllSource();
     }
 
     public void insertSearchResult(SearchResultEntity entity) {
