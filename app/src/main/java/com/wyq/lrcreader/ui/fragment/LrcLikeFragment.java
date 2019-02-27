@@ -2,6 +2,7 @@ package com.wyq.lrcreader.ui.fragment;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.wyq.lrcreader.R;
@@ -32,6 +33,8 @@ public class LrcLikeFragment extends BaseFragment implements SearchResultListAda
 
     @BindView(R.id.fragment_lrc_like_list_recyclerview)
     public RecyclerView recyclerView;
+    @BindView(R.id.fragment_lrc_like_title_tv)
+    public TextView titleTv;
 
     private SongEntityListAdapter adapter;
     private List<SongEntity> songList;
@@ -47,7 +50,6 @@ public class LrcLikeFragment extends BaseFragment implements SearchResultListAda
 
     @Override
     public void initData() {
-//        songList = getRepository().getDbGecimiRepository().getLikeSongList();
 
     }
 
@@ -85,10 +87,13 @@ public class LrcLikeFragment extends BaseFragment implements SearchResultListAda
                 }
                 if (s.equals(HomeAction.ACTION_LIKE_LITTLE)) {
                     lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_LITTER.getValue());
+                    titleTv.setText(getString(R.string.like_little) + ":");
                 } else if (s.equals(HomeAction.ACTION_LIKE_NORMAL)) {
                     lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_NORMAL.getValue());
+                    titleTv.setText(getString(R.string.like) + ":");
                 } else if (s.equals(HomeAction.ACTION_LIKE_MOST)) {
                     lrcLikeViewModel.setLikeGrade(LikeGrade.LIKE_GRADE_MOST.getValue());
+                    titleTv.setText(getString(R.string.like_most) + ":");
                 }
             }
         });

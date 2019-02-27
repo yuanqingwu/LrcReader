@@ -53,5 +53,6 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_more_vert_gray_24dp" />
 </RelativeLayout>
