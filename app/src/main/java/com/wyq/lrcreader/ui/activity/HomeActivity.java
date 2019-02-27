@@ -121,7 +121,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
                 SearchActivity.newInstance(HomeActivity.this);
                 break;
             case R.id.home_activity_setting_ibt:
-                SearchActivity.newInstance(HomeActivity.this);
+                SettingActivity.newInstance(HomeActivity.this);
                 break;
             default:
                 break;

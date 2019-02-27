@@ -19,7 +19,11 @@ public class BasicApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        AppInitIntentService.start(this);
+
         executors = new AppExecutors();
+
         WbSdk.install(this, new AuthInfo(this, WeiboConstants.APP_KEY, WeiboConstants.REDIRECT_URL, WeiboConstants.SCOPE));
     }
 

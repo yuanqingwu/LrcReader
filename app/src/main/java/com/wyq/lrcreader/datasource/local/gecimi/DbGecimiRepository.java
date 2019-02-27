@@ -1,5 +1,7 @@
 package com.wyq.lrcreader.datasource.local.gecimi;
 
+import com.tencent.mmkv.MMKV;
+import com.wyq.lrcreader.constants.ParamsConstants;
 import com.wyq.lrcreader.db.AppDatabase;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.db.entity.SongEntity;
@@ -41,7 +43,7 @@ public class DbGecimiRepository {
 
     public LiveData<PagedList<SearchResultEntity>> getAllSearchResult(String filter) {
         DataSource.Factory<Integer, SearchResultEntity> lrcSource = filter == null ?
-                database.getSearchResultDao().getAll() :
+                database.getSearchResultDao().getAll(MMKV.defaultMMKV().decodeInt(ParamsConstants.SEARCH_HISTORY_CACHE_MAX_NUMBER, 0)) :
                 database.getSearchResultDao().getLocalSearchResult(filter);
         LogUtil.i("" + lrcSource == null ? "source is null" : "source is not null");
         return new LivePagedListBuilder(lrcSource,

@@ -34,8 +34,8 @@ public interface SearchResultDao {
 //    @Query("SELECT * FROM search_result")
 //    LiveData<List<SearchResultEntity>> getAll();
 
-    @Query("SELECT * FROM search_result ORDER BY id DESC")
-    DataSource.Factory<Integer, SearchResultEntity> getAll();
+    @Query("SELECT * FROM search_result ORDER BY id DESC LIMIT :limit")
+    DataSource.Factory<Integer, SearchResultEntity> getAll(int limit);
 
     @Query("SELECT distinct songName FROM search_result")
     List<String> getAllName();

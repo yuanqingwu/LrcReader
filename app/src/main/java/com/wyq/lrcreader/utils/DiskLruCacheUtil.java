@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 
 import com.squareup.okhttp.internal.DiskLruCache;
+import com.tencent.mmkv.MMKV;
+import com.wyq.lrcreader.constants.ParamsConstants;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 
 import java.io.File;
@@ -23,7 +25,7 @@ public class DiskLruCacheUtil {
 
     private DiskLruCache mDiskCache;
     //指定磁盘缓存大小
-    private static final long DISK_CACHE_SIZE = 1024 * 1024 * 10;//10MB
+    private long DISK_CACHE_SIZE;//20MB
     //IO缓存流大小
     private static final int IO_BUFFER_SIZE = 8 * 1024;
     //缓存个数
@@ -52,6 +54,8 @@ public class DiskLruCacheUtil {
 
 
     private void init(Context context, String fileName) {
+        int size = MMKV.defaultMMKV().decodeInt(ParamsConstants.APP_CACHE_MAX_SIZE, 0);
+        DISK_CACHE_SIZE = 1024 * 1024 * size;
         try {
             File cacheDir = getDiskCacheDir(context, fileName);
             if (!cacheDir.exists()) {
