@@ -114,6 +114,7 @@ public class LrcListFragment extends BaseLazyLoadFragment implements SearchResul
 
         initRecyclerView();
 
+        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.forestgreen));
         swipeRefreshLayout.setOnRefreshListener(this);
     }
 

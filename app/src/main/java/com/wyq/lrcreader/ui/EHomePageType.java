@@ -46,4 +46,5 @@ public enum EHomePageType {
     public int getMenuId() {
         return menuId;
     }
+
 }

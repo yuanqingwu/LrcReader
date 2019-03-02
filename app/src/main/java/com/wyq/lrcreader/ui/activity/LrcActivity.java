@@ -35,6 +35,7 @@ import com.wyq.lrcreader.utils.BitmapUtil;
 import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcOperationGenerator;
 import com.wyq.lrcreader.utils.ScreenUtils;
+import com.wyq.lrcreader.utils.StatusBarUtils;
 import com.wyq.lrcreader.utils.StorageUtil;
 
 import java.lang.ref.WeakReference;
@@ -111,6 +112,8 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     protected int attachLayoutRes() {
+        //todo 设置是否全屏
+        StatusBarUtils.setFullScreen(this);
         return R.layout.lrc_activity;
     }
 

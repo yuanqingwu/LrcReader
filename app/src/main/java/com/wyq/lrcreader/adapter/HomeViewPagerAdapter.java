@@ -2,7 +2,6 @@ package com.wyq.lrcreader.adapter;
 
 import com.wyq.lrcreader.ui.EHomePageType;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -32,9 +31,9 @@ public class HomeViewPagerAdapter extends FragmentStatePagerAdapter {
         return EHomePageType.values().length;
     }
 
-    @Nullable
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return EHomePageType.values()[position].getPageName();
-    }
+//    @Nullable
+//    @Override
+//    public CharSequence getPageTitle(int position) {
+//        return EHomePageType.values()[position].getPageName();
+//    }
 }

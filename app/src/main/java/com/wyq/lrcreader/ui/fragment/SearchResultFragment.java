@@ -185,6 +185,11 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
                         bottomRecyclerViewAdapter.refreshData(nameList);
                         bottomSheetDialog.show();
                     }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        LogUtil.e(throwable.getMessage());
+                    }
                 });
     }
 

@@ -2,9 +2,11 @@ package com.wyq.lrcreader.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -70,14 +72,39 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
 
         navigationView.setOnNavigationItemSelectedListener(this);
 
-        for (EHomePageType type : EHomePageType.values()) {
-            tabLayout.addTab(tabLayout.newTab().setText(type.getPageName()));
-        }
 
         HomeViewPagerAdapter pagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(3);
         tabLayout.setupWithViewPager(viewPager);
+
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            tab.setCustomView(R.layout.recyclerview_item_tv_layout);
+            TextView textView = tab.getCustomView().findViewById(R.id.recyclerview_item_tv);
+            textView.setTextColor(Color.WHITE);
+            textView.setText(EHomePageType.values()[i].getPageName());
+            if (i == 0) {
+                textView.setTextSize(18);
+            }
+        }
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                ((TextView) tab.getCustomView().findViewById(R.id.recyclerview_item_tv)).setTextSize(18);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                ((TextView) tab.getCustomView().findViewById(R.id.recyclerview_item_tv)).setTextSize(14);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
