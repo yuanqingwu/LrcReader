@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +32,6 @@ import com.wyq.lrcreader.share.WeChatShare;
 import com.wyq.lrcreader.ui.widget.FireToast;
 import com.wyq.lrcreader.ui.widget.ProgressPopupWindow;
 import com.wyq.lrcreader.utils.BitmapUtil;
-import com.wyq.lrcreader.utils.DiskLruCacheUtil;
 import com.wyq.lrcreader.utils.LogUtil;
 import com.wyq.lrcreader.utils.LrcOperationGenerator;
 import com.wyq.lrcreader.utils.ScreenUtils;
@@ -91,12 +89,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 
     private long firstClickTime = 0;
     private float startX = 0, endX = 0, startY = 0, endY = 0;
-    private boolean isMenuVisiblity = false;
-    private boolean isLike = false;
-    private boolean isPlain = false;
-    private Animation showAnimation, hideAnimation;
-
-    private DiskLruCacheUtil diskLruCacheUtil;
     private float startTextSize = 0;
     private int textSizeProgress = 50;
     private int backgroundBlurRadius = 20;
@@ -159,12 +151,13 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
 //        songEntity.setAlbumCover(BitmapUtil.convertIconToString(albumCover));
         songEntity.setDataSource(entity.getDataSource());
         songEntity.setLike(0);
+        likeGrade = 0;
         songEntity.setSearchAt(new Date(System.currentTimeMillis()));
     }
 
     private void initMenu() {
 
-        menuItemList = LrcOperationGenerator.getInstance(this).genMenuList(likeGrade);
+        menuItemList = LrcOperationGenerator.getInstance(this).invalidate().genMenuList(likeGrade);
 
         bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setCancelable(true);

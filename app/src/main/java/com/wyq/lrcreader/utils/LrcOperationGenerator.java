@@ -53,6 +53,11 @@ public class LrcOperationGenerator {
     }
 
 
+    public LrcOperationGenerator invalidate() {
+        itemList = null;
+        return this;
+    }
+
     public List<ImageTextItemModel> genMenuList(int likeGrade) {
         if (itemList != null) {
             return itemList;
