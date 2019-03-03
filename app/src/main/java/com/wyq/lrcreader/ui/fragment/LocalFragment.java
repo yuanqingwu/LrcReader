@@ -40,7 +40,6 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
     }
 
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -61,8 +60,11 @@ public class LocalFragment extends BaseLazyLoadFragment implements BaseRecyclerV
             @Override
             public void onChanged(String s) {
                 if (s.equals(HomeAction.ACTION_LOCAL_LIST)) {
-
+                    recyclerView.setVisibility(View.VISIBLE);
+                    getChildFragmentManager().popBackStackImmediate();
                 } else if (s.equals(HomeAction.ACTION_LOCAL_FOLDER)) {
+                    recyclerView.setVisibility(View.GONE);
+                    getChildFragmentManager().beginTransaction().add(R.id.local_fragment_holder_view, LocalLrcSearchFragment.newInstance()).addToBackStack("folder").commit();
 
                 } else if (s.equals(HomeAction.ACTION_LOCAL_REFRESH)) {
 

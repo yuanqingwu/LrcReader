@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.ListSelectAdapter;
+import com.wyq.lrcreader.utils.LogUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -132,11 +133,13 @@ public class LocalLrcSearchFragment extends Fragment implements View.OnClickList
     }
 
     public ArrayList<File> sortFilesByType(String rootPath, String typeName) {
+        LogUtil.i("sortFilesByType: rootPath:" + rootPath);
         ArrayList<File> filelist = new ArrayList<>();
         File dir = new File(rootPath);
         File[] files = dir.listFiles();
 
         if (files == null) {
+            LogUtil.i("sortFilesByType: files is null");
             return null;
         }
         for (File file : files) {
