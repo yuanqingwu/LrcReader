@@ -1,5 +1,7 @@
 package com.wyq.lrcreader.ui.activity;
 
+import android.animation.FloatEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -92,12 +94,15 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                ((TextView) tab.getCustomView().findViewById(R.id.recyclerview_item_tv)).setTextSize(18);
+//                ((TextView) tab.getCustomView().findViewById(R.id.recyclerview_item_tv)).setTextSize(18);
+                TextView textView = tab.getCustomView().findViewById(R.id.recyclerview_item_tv);
+                textSizeAnimation(textView, 14, 18);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                ((TextView) tab.getCustomView().findViewById(R.id.recyclerview_item_tv)).setTextSize(14);
+                TextView textView = tab.getCustomView().findViewById(R.id.recyclerview_item_tv);
+                textSizeAnimation(textView, 18, 14);
             }
 
             @Override
@@ -139,6 +144,20 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
 
             }
         });
+    }
+
+    /**
+     * 字体大小变化动画
+     *
+     * @param textView
+     * @param start
+     * @param end
+     */
+    public void textSizeAnimation(TextView textView, float start, float end) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "textSize", start, end);
+        animator.setEvaluator(new FloatEvaluator());
+        animator.setDuration(160);
+        animator.start();
     }
 
     @Override

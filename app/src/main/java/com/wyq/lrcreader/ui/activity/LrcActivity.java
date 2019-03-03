@@ -113,12 +113,14 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected int attachLayoutRes() {
         //todo 设置是否全屏
-        StatusBarUtils.setFullScreen(this);
+//        StatusBarUtils.setFullScreen(this);
         return R.layout.lrc_activity;
     }
 
     @Override
     public void initView() {
+        //设置状态栏透明
+        StatusBarUtils.setTranslucentStatus(this);
 
         songEntity = getIntent().getParcelableExtra(ARGUMENTS_LRC_SONG_ENTITY);
         if (songEntity == null) {
