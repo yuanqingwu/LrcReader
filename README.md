@@ -23,18 +23,27 @@
  4. (未来支持短视频编辑，图片编辑分享等新形式，使分享更自由更好看。)
 
 
-#### 首页三大模块
+- 资源聚合：
+
+音乐资源经过版权之争之后，不同的音乐版权都掌握在不同的厂家手里，经常会为了一首歌去下载一个新的APP，体验非常不好，所以我们通过技术手段达到一个资源聚合的目的，当然仅当学习使用**不以商业为目的**！
+
+目前只支持歌词迷的后台API。
+
+## 首页三大模块
 
 ###### 搜索
 搜索页面显示之前的搜索记录
 
-![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search.gif)
+![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search_list.jpg)
 
 ###### 喜欢
 
 喜欢可以有多个等级或者场景，默认分为3个等级：有点喜欢，喜欢，很喜欢。
 在首页的喜欢页面顶部可以根据喜欢等级进行列表筛选。
+
+![like](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/like.mp4)
+
 ###### 本地
 
-显示本地搜索到的歌词列表
-
+支持本地文件的扫描，支持指定文件夹。缓存所有搜索到的歌词文件。
+对不同的歌词文件进行不同的解析。
