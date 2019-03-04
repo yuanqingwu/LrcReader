@@ -28,7 +28,7 @@
 ###### 搜索
 搜索页面显示之前的搜索记录
 
-![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search.mp4)
+![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search.gif)
 
 ###### 喜欢
 
