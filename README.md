@@ -34,7 +34,9 @@
 ###### 搜索
 搜索页面显示之前的搜索记录
 
-![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search_list.jpg)
+![](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search_list.jpg)
+
+![search](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/search.gif)
 
 ###### 喜欢
 
@@ -47,3 +49,15 @@
 
 支持本地文件的扫描，支持指定文件夹。缓存所有搜索到的歌词文件。
 对不同的歌词文件进行不同的解析。
+
+## 歌词界面
+
+歌词界面以专辑图片加以高斯模糊的效果为背景，通过沉浸式状态栏以及操作界面的隐藏达到界面只有歌词的纯净效果，给人以赏心悦目的观感。
+
+操作界面可以通过双击界面或者底部上滑呼出,下滑或者点击X可以关闭。
+
+- 支持微信，朋友圈，微博的分享
+- 支持下载到本地，歌词文字大小调整，背景模糊程度调整，喜欢程度设置
+- （后面会支持图片的编辑，文字的选择分享，短视频的生成与分享）
+
+![operation](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/operate.gif)
