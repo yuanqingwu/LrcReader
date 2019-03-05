@@ -79,6 +79,19 @@ public class DbGecimiRepository {
         });
     }
 
+    public SearchResultEntity getEntityByAid(int aid) {
+        return database.getSearchResultDao().getEntityByAid(aid);
+    }
+
+    public void updateSearchResult(SearchResultEntity entity) {
+        database.getExecutors().diskIO().execute(() -> {
+            database.runInTransaction(() -> {
+                int rows = database.getSearchResultDao().update(entity);
+                LogUtil.i("update:" + rows + entity.getSongName() + " " + entity.getAlbumCoverUri());
+            });
+        });
+    }
+
     public void deleteAllSearchResults() {
         database.getExecutors().diskIO().execute(() -> {
             database.runInTransaction(() -> {

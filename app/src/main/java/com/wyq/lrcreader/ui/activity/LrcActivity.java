@@ -210,8 +210,6 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
                         throwable.printStackTrace();
                     }
                 });
-
-
     }
 
     private void loadLrc(String lrcUri) {

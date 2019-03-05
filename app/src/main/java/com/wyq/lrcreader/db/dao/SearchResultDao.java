@@ -25,11 +25,14 @@ public interface SearchResultDao {
     @Delete
     void delete(SearchResultEntity entity);
 
-    @Update
-    void update(SearchResultEntity entity);
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    int update(SearchResultEntity entity);
 
     @Query("DELETE FROM search_result")
     void deleteAll();
+
+    @Query("SELECT * FROM search_result WHERE aid = :aid")
+    SearchResultEntity getEntityByAid(int aid);
 
 //    @Query("SELECT * FROM search_result")
 //    LiveData<List<SearchResultEntity>> getAll();

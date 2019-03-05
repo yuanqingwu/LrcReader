@@ -14,6 +14,7 @@ import com.wyq.lrcreader.utils.LogUtil;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,7 +27,7 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
 
     public static final DiffUtil.ItemCallback<SearchResultEntity> DIFF_ITEM_CALLBACK = new DiffUtil.ItemCallback<SearchResultEntity>() {
 
-//        private Object PAYLOAD_SOURCE;
+        private Object PAYLOAD_SOURCE;
 
         @Override
         public boolean areItemsTheSame(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
@@ -35,26 +36,53 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
 
         @Override
         public boolean areContentsTheSame(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
-            return oldItem.equals(newItem);
+            return oldItem.getAid() == newItem.getAid() &&
+                    oldItem.getSongName().equals(newItem.getSongName()) &&
+                    oldItem.getDataSource().equals(newItem.getDataSource()) &&
+                    oldItem.getArtist().equals(newItem.getArtist()) &&
+                    oldItem.getLrcUri().equals(newItem.getLrcUri()) &&
+                    oldItem.getAlbumCoverUri().equals(newItem.getAlbumCoverUri());
         }
 
-//        @Nullable
-//        @Override
-//        public Object getChangePayload(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
-//            if (oldItem != null && newItem != null && sameExceptSource(oldItem, newItem)) {
-//                return PAYLOAD_SOURCE;
-//            }
-//            return null;
-//        }
-//
-//        public boolean sameExceptSource(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
-//            if (oldItem.getLrcUri().equals(newItem.getLrcUri()) && oldItem.getArtist().equals(newItem.getArtist())) {
-//                if (!oldItem.getDataSource().equals(newItem.getDataSource())) {
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }
+        @Nullable
+        @Override
+        public Object getChangePayload(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
+            if (oldItem != null && newItem != null && sameExceptImage(oldItem, newItem) && sameExceptArtist(oldItem, newItem)) {
+                return PAYLOAD_SOURCE;
+            }
+            return null;
+        }
+
+        public boolean sameExceptSource(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
+            if (oldItem.getLrcUri().equals(newItem.getLrcUri()) && oldItem.getArtist().equals(newItem.getArtist())) {
+                return !oldItem.getDataSource().equals(newItem.getDataSource());
+            }
+            return false;
+        }
+
+        public boolean sameExceptImage(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
+            if (oldItem.getAid() == newItem.getAid() &&
+                    oldItem.getSongName().equals(newItem.getSongName()) &&
+                    oldItem.getDataSource().equals(newItem.getDataSource()) &&
+                    oldItem.getArtist().equals(newItem.getArtist()) &&
+                    oldItem.getLrcUri().equals(newItem.getLrcUri())
+            ) {
+                return !oldItem.getAlbumCoverUri().equals(newItem.getAlbumCoverUri());
+            }
+            return false;
+        }
+
+        public boolean sameExceptArtist(@NonNull SearchResultEntity oldItem, @NonNull SearchResultEntity newItem) {
+            if (oldItem.getAid() == newItem.getAid() &&
+                    oldItem.getSongName().equals(newItem.getSongName()) &&
+                    oldItem.getDataSource().equals(newItem.getDataSource()) &&
+                    oldItem.getLrcUri().equals(newItem.getLrcUri()) &&
+                    oldItem.getAlbumCoverUri().equals(newItem.getAlbumCoverUri())) {
+                return !oldItem.getArtist().equals(newItem.getArtist());
+            }
+            return false;
+        }
+
     };
     private Context context;
     private NetworkState networkState;
@@ -84,7 +112,7 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == R.layout.fragment_lrclist_item) {
-            if (getItem(position) == null) {
+            if (getItemCount() == 0 || getItem(position) == null) {
                 return;
             }
             LogUtil.i("getItem(position):" + getItem(position).getSongName());
@@ -103,11 +131,23 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
         super.onBindViewHolder(holder, position, payloads);
         if (!payloads.isEmpty()) {
             SearchResultEntity entity = getItem(position);
-            ((LrcItemViewHolder) holder).updateLrc(entity);
+            ((LrcItemViewHolder) holder).updateAlbumCover(entity);
+            ((LrcItemViewHolder) holder).updateArtist(entity);
         } else {
             onBindViewHolder(holder, position);
         }
     }
+
+    @Override
+    public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+//        ((LrcItemViewHolder) holder).pauseRequests();
+    }
+
+//    @Override
+//    public long getItemId(int position) {
+//        return position;
+//    }
 
     private boolean hasExtraRow() {
         return networkState != null && networkState != NetworkState.LOADED;
@@ -126,7 +166,8 @@ public class LrcPagedAdapter extends PagedListAdapter<SearchResultEntity, Recycl
 
     @Override
     public int getItemCount() {
-        return super.getItemCount() + (hasExtraRow() ? 1 : 0);
+//        return super.getItemCount() + (hasExtraRow() ? 1 : 0);//第一行显示loading
+        return super.getItemCount();
     }
 
     public void setNetworkState(NetworkState newNetworkState) {

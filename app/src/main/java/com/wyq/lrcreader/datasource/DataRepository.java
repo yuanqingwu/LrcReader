@@ -25,6 +25,7 @@ import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
 import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Call;
@@ -63,15 +64,30 @@ public class DataRepository {
         return DbGecimiRepository.getInstance(database);
     }
 
-
     /**
-     * todo: 只加载可见的条数
      *
-     * @param searchtext
+     * 先显示第一次请求成功的数据，再一条一条加载详细数据
+     *
+     * @param searchText
      * @return
      */
-    public Flowable<List<SearchResultEntity>> getSearchResult(String searchtext) {
-        return gecimeModel.getLrcResultList(searchtext)
+    public Flowable<List<SearchResultEntity>> getSearchResult(String searchText) {
+        return gecimeModel.getLrcResultList(searchText)
+                .doOnNext(new Consumer<List<LyricResult>>() {
+                    @Override
+                    public void accept(List<LyricResult> lyricResults) {
+                        for (LyricResult result : lyricResults) {
+                            SearchResultEntity entity = new SearchResultEntity();
+                            entity.setSongName(result.getSong());
+                            entity.setAid(result.getAid());
+                            entity.setLrcUri(result.getLrc());
+                            entity.setDataSource(EDataResource.GECIME.name());
+                            entity.setArtist("");
+                            entity.setAlbumCoverUri("");
+                            DbGecimiRepository.getInstance(database).insertSearchResult(entity);
+                        }
+                    }
+                })
                 .concatMap(new Function<List<LyricResult>, Publisher<List<SearchResultEntity>>>() {
                                @Override
                                public Publisher<List<SearchResultEntity>> apply(List<LyricResult> lyricResults) {
@@ -87,15 +103,15 @@ public class DataRepository {
                                                            new BiFunction<Artist, AlbumCover, SearchResultEntity>() {
                                                                @Override
                                                                public SearchResultEntity apply(Artist artist, AlbumCover albumCover) {
-                                                                   SearchResultEntity searchResultEntity = new SearchResultEntity();
-                                                                   searchResultEntity.setAid(lyricResult.getAid());
-                                                                   searchResultEntity.setSongName(lyricResult.getSong());
+                                                                   SearchResultEntity searchResultEntity = DbGecimiRepository.getInstance(database).getEntityByAid(lyricResult.getAid());
+//                                                                   searchResultEntity.setAid(lyricResult.getAid());
+//                                                                   searchResultEntity.setSongName(lyricResult.getSong());
                                                                    searchResultEntity.setArtist(artist.getName());
-                                                                   searchResultEntity.setLrcUri(lyricResult.getLrc());
+//                                                                   searchResultEntity.setLrcUri(lyricResult.getLrc());
                                                                    searchResultEntity.setAlbumCoverUri(albumCover.getThumb());
-                                                                   searchResultEntity.setDataSource(EDataResource.GECIME.name());
+//                                                                   searchResultEntity.setDataSource(EDataResource.GECIME.name());
 
-                                                                   DbGecimiRepository.getInstance(database).insertSearchResult(searchResultEntity);
+                                                                   DbGecimiRepository.getInstance(database).updateSearchResult(searchResultEntity);
 
                                                                    return searchResultEntity;
                                                                }
@@ -104,12 +120,11 @@ public class DataRepository {
                                                }
                                            })
                                            .toList()
-                                           .toFlowable();
+                                           .toFlowable()
+                                           ;
                                }
                            }
-
                 );
-
     }
 
     public Flowable<String> getLrc(String lrcUri) {
@@ -143,6 +158,9 @@ public class DataRepository {
 
     public Flowable<Bitmap> getLrcViewBackground(String albumCoverUri, Context context) {
         //todo:暂时修复API的问题
+        if (albumCoverUri == null) {
+            return null;
+        }
         String coverUri = albumCoverUri.startsWith("http") ? albumCoverUri.replace("/cover/", "/album-cover/") : albumCoverUri;
         return Flowable.create(new FlowableOnSubscribe<Bitmap>() {
             @Override
