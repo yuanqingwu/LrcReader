@@ -43,7 +43,7 @@
 喜欢可以有多个等级或者场景，默认分为3个等级：有点喜欢，喜欢，很喜欢。
 在首页的喜欢页面顶部可以根据喜欢等级进行列表筛选。
 
-![like](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/like.mp4)
+![like](https://github.com/wuyuanqing527/LrcReader/blob/master/screenCapture/like.gif)
 
 ###### 本地
 
