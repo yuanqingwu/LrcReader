@@ -195,11 +195,11 @@ public class BitmapUtil {
         if (view instanceof ScrollView) {
             for (int i = 0; i < ((ScrollView) view).getChildCount(); i++) {
                 h += ((ScrollView) view).getChildAt(i).getHeight();
+                LogUtil.i("scrollview child view height:" + h + " scrollview :" + view.getHeight());
             }
         } else {
             h = view.getHeight();
         }
-
 
         Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

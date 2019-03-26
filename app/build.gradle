@@ -14,6 +14,12 @@ android {
             useSupportLibrary = true
         }
 
+        resConfigs('zh-rCN','en')
+
+        ndk{
+            abiFilters('armeabi','armeabi-v7a')
+        }
+
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -30,7 +36,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
