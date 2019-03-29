@@ -48,7 +48,7 @@ public class ScreenUtils {
      * @param context
      * @return
      */
-    public static int getScreenWidthPX(Activity context) {
+    public static int getScreenWidthPX(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = windowManager.getDefaultDisplay();
         DisplayMetrics dm = new DisplayMetrics();

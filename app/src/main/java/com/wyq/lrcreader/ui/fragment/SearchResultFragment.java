@@ -11,6 +11,7 @@ import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.wyq.lrcreader.R;
 import com.wyq.lrcreader.adapter.LrcPagedAdapter;
 import com.wyq.lrcreader.adapter.TvRecyclerViewAdapter;
+import com.wyq.lrcreader.base.BasicApp;
 import com.wyq.lrcreader.base.GlideApp;
 import com.wyq.lrcreader.db.entity.SearchResultEntity;
 import com.wyq.lrcreader.model.viewmodel.SearchResultViewModel;
@@ -18,8 +19,10 @@ import com.wyq.lrcreader.model.viewmodel.ViewModelFactory;
 import com.wyq.lrcreader.ui.HomeAction;
 import com.wyq.lrcreader.ui.fragment.base.BaseFragment;
 import com.wyq.lrcreader.ui.widget.CheckDialogFragment;
+import com.wyq.lrcreader.ui.widget.SideSelectLayout;
 import com.wyq.lrcreader.utils.LogUtil;
 
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -48,6 +51,10 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
     public RecyclerView recyclerView;
     @BindView(R.id.search_fragment_delete_iv)
     public ImageView deleteIv;
+    @BindView(R.id.search_fragment_history_filter_tv)
+    public TextView filterTv;
+    @BindView(R.id.search_fragment_side_select_layout)
+    public SideSelectLayout selectLayout;
     /**
      * null 则显示全部数据
      */
@@ -55,8 +62,6 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
 
     private BottomSheetDialog bottomSheetDialog;
     private RecyclerView bottomRecyclerView;
-    @BindView(R.id.search_fragment_history_filter_tv)
-    public TextView filterTv;
 
     //private SearchResultListAdapter adapter;
     private LrcPagedAdapter pagedAdapter;
@@ -91,6 +96,52 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
         deleteIv.setOnClickListener(this);
         initRecyclerView();
         initBottomSheetDialog();
+        initSideSelectLayout();
+    }
+
+    public void initSideSelectLayout() {
+        ((BasicApp) (getActivity().getApplication())).getExecutors().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                List<String> nameList = getRepository().getDbGecimiRepository().getAllSearchResultName();
+                Collections.reverse(nameList);
+                selectLayout.setNameList(nameList);
+                selectLayout.setOnItemSelectListenser(new SideSelectLayout.OnItemSelectListenser() {
+                    @Override
+                    public void onSelect(String item) {
+                        //todo 待优化
+                        LogUtil.i("onSelect:" + item);
+                        LogUtil.i("getCurrentList:" + pagedAdapter.getCurrentList().get(2) == null ? "null" : "not null");
+                        int pos = findPosition(pagedAdapter.getCurrentList().snapshot(), item);
+                        LogUtil.i("pos" + pos);
+                        if (pos >= 0) {
+                            recyclerView.scrollToPosition(pos);
+                            ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(pos, 0);
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+
+    private int findPosition(List<SearchResultEntity> resultEntities, String name) {
+        if (resultEntities == null || resultEntities.size() == 0) {
+            return -1;
+        }
+        LogUtil.i("Size:" + resultEntities.size());
+        for (int i = 0; i < resultEntities.size(); i++) {
+            if (resultEntities.get(i) == null) {
+                LogUtil.i(i + " null");
+                continue;
+            }
+            LogUtil.i(i + " " + resultEntities.get(i).getSongName());
+            if (resultEntities.get(i).getSongName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void initRecyclerView() {
@@ -131,7 +182,6 @@ public class SearchResultFragment extends BaseFragment implements View.OnClickLi
                 if (searchResultEntities != null) {
                     LogUtil.i("LoadedCount:" + searchResultEntities.getLoadedCount());
                     pagedAdapter.submitList(searchResultEntities);
-                    recyclerView.scrollToPosition(0);
 //                    pagedAdapter.setNetworkState(NetworkState.LOADING);
                 } else {
                     LogUtil.i("searchResultEntities is null");

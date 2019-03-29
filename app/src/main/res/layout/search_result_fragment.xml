@@ -36,12 +36,19 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_delete_gray_24dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_fragment_recycler_view"
+
+    <com.wyq.lrcreader.ui.widget.SideSelectLayout
+        android:id="@+id/search_fragment_side_select_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_fragment_history_tv" />
+        app:layout_constraintTop_toBottomOf="@id/search_fragment_history_tv">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_fragment_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.wyq.lrcreader.ui.widget.SideSelectLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
