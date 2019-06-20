@@ -1,6 +1,7 @@
 package com.wyq.lrcreader.base;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.sina.weibo.sdk.WbSdk;
 import com.sina.weibo.sdk.auth.AuthInfo;
@@ -16,9 +17,13 @@ public class BasicApp extends Application {
 
     private AppExecutors executors;
 
+    private static Context appContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        appContext = this;
 
         AppInitIntentService.start(this);
 
@@ -37,5 +42,9 @@ public class BasicApp extends Application {
 
     public AppExecutors getExecutors() {
         return executors;
+    }
+
+    public static Context getAppContext(){
+        return appContext;
     }
 }

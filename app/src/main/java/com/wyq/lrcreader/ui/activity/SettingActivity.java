@@ -9,7 +9,8 @@ import android.widget.TextView;
 
 import com.tencent.mmkv.MMKV;
 import com.wyq.lrcreader.R;
-import com.wyq.lrcreader.constants.ParamsConstants;
+import com.wyq.lrcreader.datasource.local.cache.MMKVContracts;
+import com.wyq.lrcreader.datasource.local.cache.MMKVManager;
 import com.wyq.lrcreader.ui.widget.FireToast;
 import com.wyq.lrcreader.ui.widget.ParamsSetDialogFragment;
 import com.wyq.lrcreader.utils.LogUtil;
@@ -54,11 +55,11 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     }
 
     public void initValue() {
-        searchCacheMaxnum = MMKV.defaultMMKV().decodeInt(ParamsConstants.SEARCH_HISTORY_CACHE_MAX_NUMBER, 0);
+        searchCacheMaxnum = MMKVManager.getSearchHistoryCacheNumberMax();
         searchMaxCacheTv.setText(searchCacheMaxnum + "条");
         searchMaxCacheTv.setOnClickListener(this);
 
-        cacheSize = MMKV.defaultMMKV().decodeInt(ParamsConstants.APP_CACHE_MAX_SIZE, 0);
+        cacheSize = MMKVManager.getAppCacheMaxSize();
         cacheMaxSizeTv.setText(cacheSize + "M");
         cacheMaxSizeTv.setOnClickListener(this);
 
@@ -96,7 +97,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                                 int number = Integer.parseInt(value);
                                 if (number > 0 && number < 1000) {
                                     LogUtil.i("number:" + number);
-                                    boolean res = MMKV.defaultMMKV().encode(ParamsConstants.SEARCH_HISTORY_CACHE_MAX_NUMBER, number);
+                                    boolean res = MMKVManager.setSearchHistoryCacheNumberMax(number);
                                     if (res) {
                                         searchMaxCacheTv.setText(number + "条");
                                     }
@@ -123,7 +124,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                                 }
                                 int number = Integer.parseInt(value);
                                 if (number > 0 && number < 1000) {
-                                    boolean res = MMKV.defaultMMKV().encode(ParamsConstants.APP_CACHE_MAX_SIZE, number);
+                                    boolean res = MMKVManager.setAppCacheMaxSize(number);
                                     if (res) {
                                         cacheMaxSizeTv.setText(number + "M");
                                     }

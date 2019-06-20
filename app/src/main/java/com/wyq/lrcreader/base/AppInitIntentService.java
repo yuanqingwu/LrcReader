@@ -6,7 +6,8 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.tencent.mmkv.MMKV;
-import com.wyq.lrcreader.constants.ParamsConstants;
+import com.wyq.lrcreader.datasource.local.cache.MMKVContracts;
+import com.wyq.lrcreader.datasource.local.cache.MMKVManager;
 import com.wyq.lrcreader.utils.LogUtil;
 
 import androidx.annotation.Nullable;
@@ -38,7 +39,7 @@ public class AppInitIntentService extends IntentService {
         Log.i("Test", "AppInitIntentService is working");
         String rootDir = MMKV.initialize(this);
         LogUtil.i("mmkv root: " + rootDir);
-        MMKV.defaultMMKV().encode(ParamsConstants.SEARCH_HISTORY_CACHE_MAX_NUMBER, ParamsConstants.DEFAULT_SEARCH_HISTORY_CACHE_MAX_NUMBER);
-        MMKV.defaultMMKV().encode(ParamsConstants.APP_CACHE_MAX_SIZE, ParamsConstants.DEFAULT_APP_CACHE_MAX_SIZE);
+        MMKVManager.setSearchHistoryCacheNumberMax(MMKVContracts.DEFAULT_SEARCH_HISTORY_CACHE_MAX_NUMBER);
+        MMKVManager.setAppCacheMaxSize(MMKVContracts.DEFAULT_APP_CACHE_MAX_SIZE);
     }
 }

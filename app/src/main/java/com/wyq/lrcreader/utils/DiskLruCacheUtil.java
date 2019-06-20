@@ -8,7 +8,8 @@ import android.os.Environment;
 
 import com.squareup.okhttp.internal.DiskLruCache;
 import com.tencent.mmkv.MMKV;
-import com.wyq.lrcreader.constants.ParamsConstants;
+import com.wyq.lrcreader.datasource.local.cache.MMKVContracts;
+import com.wyq.lrcreader.datasource.local.cache.MMKVManager;
 import com.wyq.lrcreader.model.netmodel.gecimemodel.Song;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class DiskLruCacheUtil {
 
 
     private void init(Context context, String fileName) {
-        int size = MMKV.defaultMMKV().decodeInt(ParamsConstants.APP_CACHE_MAX_SIZE, 0);
+        int size = MMKVManager.getAppCacheMaxSize();
         DISK_CACHE_SIZE = 1024 * 1024 * size;
         try {
             File cacheDir = getDiskCacheDir(context, fileName);

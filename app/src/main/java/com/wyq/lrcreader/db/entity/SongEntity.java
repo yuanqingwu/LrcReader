@@ -23,17 +23,6 @@ public class SongEntity implements ISong, Parcelable {
     private int aid;
     private String songName;
     private String artist;
-    public static final Creator<SongEntity> CREATOR = new Creator<SongEntity>() {
-        @Override
-        public SongEntity createFromParcel(Parcel source) {
-            return new SongEntity(source);
-        }
-
-        @Override
-        public SongEntity[] newArray(int size) {
-            return new SongEntity[0];
-        }
-    };
     private String album;//专辑
     private String lrc;
     private int like;//是否收藏
@@ -146,6 +135,19 @@ public class SongEntity implements ISong, Parcelable {
     public void setAlbumCover(String albumCover) {
         this.albumCover = albumCover;
     }
+
+
+    public static final Creator<SongEntity> CREATOR = new Creator<SongEntity>() {
+        @Override
+        public SongEntity createFromParcel(Parcel source) {
+            return new SongEntity(source);
+        }
+
+        @Override
+        public SongEntity[] newArray(int size) {
+            return new SongEntity[0];
+        }
+    };
 
     @Override
     public int describeContents() {

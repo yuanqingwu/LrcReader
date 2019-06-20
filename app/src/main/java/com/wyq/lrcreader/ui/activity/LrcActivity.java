@@ -378,6 +378,9 @@ public class LrcActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onItemClick(View view, int position) {
         LogUtil.i(menuItemList.get(position).getName());
+        if(menuItemList == null){
+            return;
+        }
         String action = menuItemList.get(position).getAction();
         if (!action.equals(ACTION_LRC_MENU_LIKE)) {
             bottomSheetDialog.cancel();

@@ -1,10 +1,10 @@
-package com.wyq.lrcreader.constants;
+package com.wyq.lrcreader.datasource.local.cache;
 
 /**
  * @author Uni.W
  * @date 2019/2/27 20:05
  */
-public class ParamsConstants {
+public class MMKVContracts {
 
     public static final String SEARCH_HISTORY_CACHE_MAX_NUMBER = "SEARCH_HISTORY_CACHE_MAX_NUMBER";
     public static final int DEFAULT_SEARCH_HISTORY_CACHE_MAX_NUMBER = 100;
